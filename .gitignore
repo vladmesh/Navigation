@@ -15,3 +15,6 @@ CLASS_DIAGRAM.md
 aqtinstall.log
 .qtcreator/
 *.user.*
+# docs/ (pipeline artifacts) must stay tracked even with core.ignorecase on Windows
+!/docs/
+!/docs/**
