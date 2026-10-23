@@ -37,7 +37,13 @@ Issue [#11](https://github.com/vladmesh/Navigation/issues/11), PR в `release/ep
   - каждая подпись стоит на своей линии и равна её координате, без экспоненты; у всех подписей
     `ItemIgnoresTransformations`; линии косметические и под объектами. Итог: `FAILURES: 0`.
   - скриншоты сохранены локально, в репо не коммитятся.
-- PR-CI: run 1 на этом PR (см. STATUS.md).
+- PR-CI run 1 (`0510c24`): MSVC и Linux ASan упали на линковке `tst_critical`: `Test/unit/critical/critical.pro`
+  берёт исходники из `Test/app_sources.pri`, где был `uberpainter.cpp`, но не было `gridmath.cpp`
+  (`LNK2019 GridMath::niceStep`). MinGW smoke и lint прошли.
+- Исправление: `Drawing/gridmath.cpp/.h` добавлены в `Test/app_sources.pri`. Файл вне буквального scope
+  Task 02 («только UberPainter»), но его шапка требует повторять в нём `Ship.pro`; `.pri` пришёл из `main`
+  уже после Task 01, поэтому Task 01 его не обновил. Логики не меняет. Локально `tst_critical` 9/9,
+  стенд FAILURES 0. PR-CI run 2.
 - Не проверено: сборка на Windows и визуальная проверка на Windows-хосте (это у CI и тестера).
 
 ## Ревью
