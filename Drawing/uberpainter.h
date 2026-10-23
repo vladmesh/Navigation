@@ -11,8 +11,11 @@
 #include <QTimer>
 #include <QPointF>
 #include <QWheelEvent>
+#include <QGraphicsItemGroup>
 #include <QGraphicsLineItem>
+#include <QGraphicsSimpleTextItem>
 #include <QGraphicsTextItem>
+#include <QResizeEvent>
 #include <cmath>
 #include <QQueue>
 
@@ -59,13 +62,13 @@ public:
 
 private:
     /**
-     * @brief Рисует сетку координат на сцене.
-     * @param minX Минимальное значение X.
-     * @param minY Минимальное значение Y.
-     * @param maxX Максимальное значение X.
-     * @param maxY Максимальное значение Y.
+     * @brief Перестраивает координатную сетку и подписи по видимой области (ADR 0001).
+     *
+     * Шаг — GridMath::niceStep по короткой стороне видимой области, линии — GridMath::gridLines.
+     * Удаляет и создаёт заново только элементы gridGroup. Мьютекс sceneMutex не берёт:
+     * вызывающий код должен его держать.
      */
-    void drawCoordinatesNet(double minX, double minY, double maxX, double maxY);
+    void drawGrid();
 
     void centerView();
 
@@ -78,11 +81,6 @@ private:
      * @brief Собирает положения объектов в набор очередей (queue), удаляет слишком старые точки
      */
     void collectItems();
-
-    /**
-     * @brief Обновляет отображаемые координаты при панорамировании или масштабировании.
-     */
-    void updateCoordinates();
 
     /**
      * @brief Возвращает координаты для элемента типа FixedItem.
@@ -106,6 +104,7 @@ private:
     ItemsStorage* MyVault = nullptr; ///< Указатель на хранилище элементов.
     QGraphicsScene* graphicsScene = nullptr; ///< Сцена для визуализации элементов.
     QMutex sceneMutex; ///< Мьютекс для защиты доступа к сцене.
+    QGraphicsItemGroup* gridGroup = nullptr; ///< Линии и подписи сетки; принадлежит сцене.
 
     QMap<FixedItem*, QQueue<QPointF>> recentPositions; ///< набор пар объект (ключ) и последних позиций(значение).
 
@@ -132,6 +131,19 @@ private:
      * @param event Указатель на событие отпускания кнопки мыши.
      */
     void mouseReleaseEvent(QMouseEvent *event) override;
+
+    /**
+     * @brief Перестраивает сетку под новый размер вьюпорта.
+     * @param event Указатель на событие изменения размера.
+     */
+    void resizeEvent(QResizeEvent* event) override;
+
+    /**
+     * @brief Перестраивает сетку при любом сдвиге вида (пан, полосы прокрутки, клавиши).
+     * @param dx Сдвиг по X в пикселях.
+     * @param dy Сдвиг по Y в пикселях.
+     */
+    void scrollContentsBy(int dx, int dy) override;
 
     bool isPanning = false; ///< Флаг, указывающий на режим панорамирования.
     QPoint lastMousePos; ///< Последняя позиция мыши.

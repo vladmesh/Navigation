@@ -99,12 +99,18 @@ int labelDecimals(double step);
   (`clear()` удаляет элементы сам — двойного удаления быть не должно).
 - Когда вызывается `drawGrid()`:
   - из `updateView()` после `clear()` (раз в секунду), на месте старого `drawCoordinatesNet`;
-  - при панорамировании в `mouseMoveEvent` (на месте `updateCoordinates()`);
+  - при любом сдвиге вида в `scrollContentsBy` (пан мышью, полосы прокрутки, клавиши,
+    `centerOn`); заменяет вызов в `mouseMoveEvent` (ревью Task 02, раунд 1);
   - после масштабирования в `wheelEvent`;
   - в `resizeEvent` (переопределить).
 - Блокировка: `updateView()` держит `sceneMutex` (нерекурсивный `QMutex`). `drawGrid()`
   сам мьютекс не берёт; вызовы из обработчиков событий берут `QMutexLocker(&sceneMutex)`
-  вокруг вызова. Повторного захвата внутри `updateView()` быть не должно.
+  вокруг вызова. Повторного захвата внутри `updateView()` быть не должно. Обработчики, которые
+  Qt может вызвать синхронно изнутри `updateView()` (`scrollContentsBy`, `resizeEvent` из
+  `setSceneRect`), берут мьютекс через `try_lock` и при неудаче пропускают перерисовку:
+  `updateView()` рисует сетку сам после `setSceneRect`.
+- Деструктор сначала отвязывает сцену (`setScene(nullptr)`) и обнуляет `gridGroup`, затем удаляет
+  сцену; `drawGrid()` ничего не делает без привязанной сцены.
 - Сетка рисуется всегда, в том числе пока нет ни одного объекта (видимая область есть всегда).
 
 ## Alternatives considered
@@ -134,6 +140,7 @@ int labelDecimals(double step);
 - В `main` нет `Test/unit/` и PR-CI (они в `ci/minimal`). Митигация: таск 01 создаёт
   свой тестовый `.pro`, не конфликтующий с `Test/unit/unit.pro`; когда `ci/minimal`
   будет влита в `main`, `architect-revision` подтягивает `main` в `release/epic-01`.
+  Закрыт 2026-10-23: `main` влит в `release/epic-01` через PR #10, `tst_gridmath` добавлен в PR-CI.
 
 ## Tasks
 
@@ -141,7 +148,7 @@ Each task = one issue, one branch `epic-01/task-MM-<slug>`, one PR into the rele
 
 ### Task 01: Чистая функция расчёта шага сетки + unit-тест
 
-- Status: todo
+- Status: done (PR #5, merged into release/epic-01 by architect-revision 2026-10-23)
 - Scope: новые `Drawing/gridmath.h`, `Drawing/gridmath.cpp` (добавить в `SOURCES`/`HEADERS`
   `Ship.pro`); новый тестовый проект `Test/unit/gridmath/tst_gridmath.pro` +
   `tst_gridmath.cpp` (QtTest, `QT = core testlib`, без `gui`/`widgets`, компилирует
@@ -150,61 +157,79 @@ Each task = one issue, one branch `epic-01/task-MM-<slug>`, one PR into the rele
   запуска `tst_gridmath` (по образцу существующих unit-шагов); иначе `.github/` не трогать.
   `UberPainter` не меняется.
 - Acceptance criteria:
-  - [ ] `gridmath.h/.cpp` не включают ни одного заголовка Qt; API ровно как в Decision §1.
-  - [ ] `niceStep`: 1000→100, 999→100, 1001→200, 50→5, 12345→2000, 2.5→0.5, 7→1,
+  - [x] `gridmath.h/.cpp` не включают ни одного заголовка Qt; API ровно как в Decision §1.
+  - [x] `niceStep`: 1000→100, 999→100, 1001→200, 50→5, 12345→2000, 2.5→0.5, 7→1,
         0.07→0.01, 1e7→1e6; результат всегда вида {1,2,5}×10ⁿ без float-хвостов.
-  - [ ] `niceStep` для 0, отрицательного, NaN, ±inf, `maxLines<1` возвращает 0.
-  - [ ] Свойство: для ≥1000 значений span в диапазоне 1e-2..1e8 (логарифмическая
+  - [x] `niceStep` для 0, отрицательного, NaN, ±inf, `maxLines<1` возвращает 0.
+  - [x] Свойство: для ≥1000 значений span в диапазоне 1e-2..1e8 (логарифмическая
         развёртка) `span/step` ∈ (4, 10].
-  - [ ] `gridLines(5123401.3, 5124399.0, 200)` = {5123600, 5123800, 5124000, 5124200}
+  - [x] `gridLines(5123401.3, 5124399.0, 200)` = {5123600, 5123800, 5124000, 5124200}
         точно (сравнение `==` после округления, без хвостов); `gridLines` на границах
         включает кратные min/max; некорректный ввод и превышение `maxCount` → пусто.
-  - [ ] `labelDecimals`: 100→0, 1→0, 0.5→1, 0.01→2.
-  - [ ] `Ship.pro` собирается (qmake + make) с новыми файлами; `tst_gridmath` собирается и
+  - [x] `labelDecimals`: 100→0, 1→0, 0.5→1, 0.01→2.
+  - [x] `Ship.pro` собирается (qmake + make) с новыми файлами; `tst_gridmath` собирается и
         проходит под `QT_QPA_PLATFORM=offscreen`.
 - Verification: `tst_gridmath` (PR-CI шаг, если workflow есть; иначе локально
   `qmake Test/unit/gridmath/tst_gridmath.pro && make && ./tst_gridmath` и в отчёте
   «no workflow yet»); ревьюер — по коду и тестам.
-- Issue / PR: —, —
+- Issue / PR: #4, #5
+- Leftovers: GCC `-fsanitize=undefined` в PR-CI не включает `float-cast-overflow`; ветка
+  субнормального span закрыта явными тестами (ревью раунд 2, Not reviewed). Точность `niceStep`
+  вне ~1e-21..1e23 (fallback на `std::pow`) не проверена, вне диапазона UTM.
 
 ### Task 02: Адаптивная сетка и подписи в UberPainter
 
-- Status: todo
+- Status: done (PR #12, merged into release/epic-01 by architect-revision 2026-10-23)
 - Depends on: Task 01 (смёржен в release/epic-01).
 - Scope: `Drawing/uberpainter.h`, `Drawing/uberpainter.cpp`. Удаляются
   `drawCoordinatesNet`, `updateCoordinates`; добавляются `drawGrid()`, член `gridGroup`
   (или список элементов сетки), переопределение `resizeEvent`. Ничего вне `UberPainter`.
 - Acceptance criteria:
-  - [ ] В коде нет `drawCoordinatesNet`, `updateCoordinates`, строк `maxX -= 50`; нет
+  - [x] В коде нет `drawCoordinatesNet`, `updateCoordinates`, строк `maxX -= 50`; нет
         подписей, рассчитанных как доли видимой области (`/8`).
-  - [ ] Шаг берётся только из `GridMath::niceStep(min(w, h), 10)`, линии — из
+  - [x] Шаг берётся только из `GridMath::niceStep(min(w, h), 10)`, линии — из
         `GridMath::gridLines`; своей арифметики шага в `UberPainter` нет.
-  - [ ] Сетка покрывает всю видимую область у всех четырёх краёв (нет пустых полос), в том
+  - [x] Сетка покрывает всю видимую область у всех четырёх краёв (нет пустых полос), в том
         числе когда объектов нет и когда объект один.
-  - [ ] По короткой стороне окна видно 5–10 линий при любом зуме (1 м … 10 км на экран);
+  - [x] По короткой стороне окна `span/step` ∈ (4, 10] (Decision §1), то есть видно 4–11 линий,
+        при любом зуме (1 м … 10 км на экран);
         шаг меняется скачком по ряду 1–2–5 при зуме колесом сразу, без ожидания таймера.
-  - [ ] Каждая подпись стоит у своей линии и равна её координате: X (easting) у нижнего
+  - [x] Каждая подпись стоит у своей линии и равна её координате: X (easting) у нижнего
         края, Y (northing) у левого края; формат `'f'` с `labelDecimals(step)`, без экспоненты
         (например, `512400`, `5123600`).
-  - [ ] Подписи не зеркальные и одного экранного размера при любом зуме
+  - [x] Подписи не зеркальные и одного экранного размера при любом зуме
         (`ItemIgnoresTransformations`); для сетки не используются `mirrorTransform` и
         `transform().m11()`.
-  - [ ] Пан мышью и ресайз окна сразу перестраивают сетку и подписи; подписи линейки
+  - [x] Пан мышью и ресайз окна сразу перестраивают сетку и подписи; подписи линейки
         расстояния/азимута (правая кнопка) при пане не пропадают.
-  - [ ] Перерисовка сетки удаляет только элементы сетки; нет двойного удаления после
+  - [x] Перерисовка сетки удаляет только элементы сетки; нет двойного удаления после
         `graphicsScene->clear()`; `sceneMutex` не захватывается повторно (ревьюер).
-  - [ ] Линии сетки лежат под треками/объектами (`zValue`), перо косметическое.
-  - [ ] `Ship.pro` собирается на Windows без новых предупреждений в `uberpainter.cpp`.
+  - [x] Линии сетки лежат под треками/объектами (`zValue`), перо косметическое.
+  - [x] `Ship.pro` собирается на Windows без новых предупреждений в `uberpainter.cpp`.
 - Verification: ревьюер — по коду; тестер — вручную на Windows-сборке: зум колесом от
   максимального приближения до отдаления, пан, ресайз, режим линейки, запуск без
   подключённых источников; скриншоты в отчёт тестера.
-- Issue / PR: —, —
+- Issue / PR: #11, #12
+- Scope note: в PR также `Test/app_sources.pri` (+`gridmath.cpp/.h`): зеркало `Ship.pro` для
+  `tst_critical`, без него PR-CI не линкуется. Логики не меняет; принято ревьюером.
+- Leftovers (приняты как риск, не новые таски этого эпика):
+  - Пустая сцена: без объектов `updateView()` передаёт в `setSceneRect` `±DBL_MAX`/`-inf` (было до
+    эпика; Decision §2 запрещает менять `setSceneRect`). Сетка рисуется по видимой области, но
+    область задана этим состоянием. Тестер проверяет запуск без источников на Windows. Кандидат в
+    задачу следующего эпика.
+  - Производительность: `scrollContentsBy` перестраивает сетку на каждое изменение полосы прокрутки,
+    до ~4 перестроений на одно движение мыши при пане. Тестер оценивает лаг при пане; при лаге —
+    схлопывание через отложенный вызов (ревью раунд 2, finding 1).
+  - Существующие до эпика: висячие указатели линейки после `clear()`, двойной сдвиг при пане
+    (ручной + `ScrollHandDrag`), подписи X могут налезать в очень узком окне.
 
 ## Documentation impact
 
 - README: раздел про карту — сетка в метрах UTM (easting/northing), шаг адаптивный 1–2–5×10ⁿ,
-  всегда включена, подписи X внизу, Y слева.
+  всегда включена, подписи X внизу, Y слева. Сделано: `README.md` §«Карта» (documentator, 2026-10-23).
 - Build docs: новый тестовый проект `Test/unit/gridmath/tst_gridmath.pro` и как его запустить.
+  Сделано: `README.md` §CI (команда запуска, `tst_gridmath` в списке PR-CI); описание
+  `release-build.yml` приведено к фактическому workflow (имя `Ship-<version>`, триггеры, smoke-старт).
 
 ## Decisions log
 
@@ -214,3 +239,10 @@ Each task = one issue, one branch `epic-01/task-MM-<slug>`, one PR into the rele
 - 2026-10-23 architect-plan: шаг по короткой стороне видимой области, квадратные ячейки;
   подписи через `ItemIgnoresTransformations`; сетка по видимой области, а не по bbox объектов;
   2 таска.
+- 2026-10-23 architect-revision: Task 01 принят (ревью раунд 2 GREEN-WITH-NITS, ниты исправлены,
+  PR-CI run 3 зелёный 4/4), PR #5 влит в release/epic-01; следующий — Task 02.
+- 2026-10-23 architect-revision: Task 02 принят (ревью раунд 2 GREEN-WITH-NITS, PR-CI run 3 зелёный
+  4/4), PR #12 влит в release/epic-01. Decision §2 дополнен: `scrollContentsBy` вместо
+  `mouseMoveEvent`, правило `try_lock`, порядок в деструкторе. Критерий «5–10 линий» уточнён до
+  `span/step ∈ (4, 10]` по Decision §1 (не новое решение, а согласование с ним). Leftovers в Task 02.
+  Все таски done → builder.
