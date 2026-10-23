@@ -75,3 +75,18 @@ Issue [#4](https://github.com/vladmesh/Navigation/issues/4), PR [#5](https://git
 - Локально после синка: `tst_gridmath` 27/27, `Ship.pro` собирается (Qt 6.8.3 gcc_64),
   clang-format-diff по изменённым строкам чистый. Шимы include больше не нужны (починено в main).
 - PR-CI прогоны по таску: см. `ci_runs` в STATUS.md и checks в PR #5.
+
+## Исправления по ревью, раунд 1
+
+Отчёт ревьюера: `docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-1.md` (RED).
+
+- [blocker] UB в `niceStep` при субнормальном `span / maxLines` (`log10(0) = -inf`, каст к int):
+  ранний возврат 0, если `span / maxLines < DBL_MIN`; контракт в `gridmath.h` дополнен.
+  Тесты: `denorm_min()`, `1e-320` при `maxLines = 2^30`, `DBL_MIN`, `DBL_MIN * 10`.
+- [major] `gridLines` округлял по `labelDecimals(step)`, для шага 0.25 давал 0.3/0.8: теперь
+  округление до числа знаков самого шага (`stepDecimals`, допуск 8 ulp), за 2^53 не округляем.
+  Тесты: шаги 0.25, 0.025 и 0.25 на UTM-значении.
+- [nit] `gridLines(0, 1e300, 1e-300)` перенесён в `gridLines_invalidInput`; в `maxCount`
+  вместо него `gridLines(0, 1e12, 1)`.
+- Локально: `tst_gridmath` под ASan+UBSan с `-fsanitize=float-cast-overflow` и
+  `-fno-sanitize-recover=all` — 27/27, без диагностик; clang-format-diff чистый.

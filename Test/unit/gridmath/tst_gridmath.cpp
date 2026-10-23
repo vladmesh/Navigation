@@ -135,6 +135,12 @@ void TestGridMath::niceStep_invalidInput()
     COMPARE_EXACT(GridMath::niceStep(-inf), 0.0);
     COMPARE_EXACT(GridMath::niceStep(1000.0, 0), 0.0);
     COMPARE_EXACT(GridMath::niceStep(1000.0, -5), 0.0);
+    // span / maxLines субнормально или обнуляется: без UB, 0.
+    COMPARE_EXACT(GridMath::niceStep(std::numeric_limits<double>::denorm_min()), 0.0);
+    COMPARE_EXACT(GridMath::niceStep(1e-320, 1 << 30), 0.0);
+    COMPARE_EXACT(GridMath::niceStep(std::numeric_limits<double>::min(), 10), 0.0);
+    // Наименьший нормальный target ещё даёт шаг.
+    QVERIFY(GridMath::niceStep(std::numeric_limits<double>::min() * 10, 10) > 0.0);
 }
 
 void TestGridMath::niceStep_maxLines()
@@ -195,6 +201,12 @@ void TestGridMath::gridLines_fractionalStep()
                   (std::vector<double>{5123400.0, 5123400.01, 5123400.02, 5123400.03, 5123400.04, 5123400.05}));
     COMPARE_LINES(GridMath::gridLines(-0.25, 0.25, 0.05),
                   (std::vector<double>{-0.25, -0.2, -0.15, -0.1, -0.05, 0.0, 0.05, 0.1, 0.15, 0.2, 0.25}));
+    // Шаги не из ряда 1-2-5: значения остаются кратными шагу (раньше округлялись по
+    // labelDecimals и давали 0.3/0.8 вместо 0.25/0.75).
+    COMPARE_LINES(GridMath::gridLines(0.0, 1.0, 0.25), (std::vector<double>{0.0, 0.25, 0.5, 0.75, 1.0}));
+    COMPARE_LINES(GridMath::gridLines(0.0, 0.1, 0.025), (std::vector<double>{0.0, 0.025, 0.05, 0.075, 0.1}));
+    COMPARE_LINES(GridMath::gridLines(5123400.0, 5123401.0, 0.25),
+                  (std::vector<double>{5123400.0, 5123400.25, 5123400.5, 5123400.75, 5123401.0}));
 }
 
 void TestGridMath::gridLines_invalidInput()
@@ -211,6 +223,8 @@ void TestGridMath::gridLines_invalidInput()
     QVERIFY(GridMath::gridLines(-inf, 1000.0, 100.0).empty());
     QVERIFY(GridMath::gridLines(0.0, inf, 100.0).empty());
     QVERIFY(GridMath::gridLines(0.0, 1000.0, inf).empty());
+    // max / step переполняется до inf.
+    QVERIFY(GridMath::gridLines(0.0, 1e300, 1e-300).empty());
 }
 
 void TestGridMath::gridLines_maxCount()
@@ -220,7 +234,8 @@ void TestGridMath::gridLines_maxCount()
     QCOMPARE(GridMath::gridLines(0.0, 999.0, 1.0).size(), size_t(1000));
     QCOMPARE(GridMath::gridLines(0.0, 1000.0, 100.0, 11).size(), size_t(11));
     QVERIFY(GridMath::gridLines(0.0, 1000.0, 100.0, 10).empty());
-    QVERIFY(GridMath::gridLines(0.0, 1e300, 1e-300).empty());
+    // Конечное, но огромное число линий: отказ по maxCount, а не по переполнению.
+    QVERIFY(GridMath::gridLines(0.0, 1e12, 1.0).empty());
 }
 
 void TestGridMath::labelDecimals_examples_data()

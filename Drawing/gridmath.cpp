@@ -29,6 +29,25 @@ double scaled(int mantissa, int exponent)
     return mantissa * std::pow(10.0, exponent); // субнормальные шаги
 }
 
+// Наименьшее d, при котором step × 10^d — целое (с допуском 8 ulp), то есть
+// сколько знаков после запятой нужно, чтобы записать сам шаг: 0.25 → 2, 0.1 → 1, 200 → 0.
+// Не labelDecimals: тот считает знаки подписи только для шагов из niceStep ({1,2,5}×10^n).
+// -1, если такого d нет (шаг не десятичный в пределах точности double) — тогда не округляем.
+int stepDecimals(double step)
+{
+    for (int d = 0; d <= 340; ++d) {
+        const double scale = pow10Positive(d);
+        if (!std::isfinite(scale))
+            return -1;
+        const double scaled = step * scale;
+        if (!std::isfinite(scaled))
+            return -1;
+        if (std::fabs(scaled - std::round(scaled)) <= 8.0 * std::numeric_limits<double>::epsilon() * scaled)
+            return d;
+    }
+    return -1;
+}
+
 } // namespace
 
 namespace GridMath {
@@ -38,9 +57,16 @@ double niceStep(double span, int maxLines)
     if (!std::isfinite(span) || span <= 0.0 || maxLines < 1)
         return 0.0;
 
+    // Субнормальное (или обнулившееся) span / maxLines: log10 даст -inf или почти -inf,
+    // а приведение -inf к int — UB. Такой шаг всё равно не нарисовать.
+    const double target = span / maxLines;
+    if (!(target >= std::numeric_limits<double>::min()))
+        return 0.0;
+
     // log10 может ошибиться на единицу у точных степеней десяти, поэтому начинаем на
     // порядок ниже и перебираем кандидатов по возрастанию: первый подходящий — наименьший.
-    const int startExponent = static_cast<int>(std::floor(std::log10(span / maxLines))) - 1;
+    // Здесь target нормальный, поэтому floor(log10(target)) лежит в [-308, 308].
+    const int startExponent = static_cast<int>(std::floor(std::log10(target))) - 1;
     static const int mantissas[] = {1, 2, 5};
 
     for (int exponent = startExponent; exponent <= startExponent + 3; ++exponent) {
@@ -82,14 +108,20 @@ std::vector<double> gridLines(double min, double max, double step, int maxCount)
     if (count > maxCount)
         return {};
 
-    const int decimals = labelDecimals(step);
+    // Округляем до числа знаков самого шага, чтобы 0.1-шаг давал 0.3, а не
+    // 0.30000000000000004, и 0.25-шаг давал 0.75, а не 0.8.
+    const int decimals = stepDecimals(step);
     const double scale = decimals > 0 ? pow10Positive(decimals) : 1.0;
     const int n = static_cast<int>(count);
     lines.reserve(static_cast<size_t>(n));
     for (int i = 0; i < n; ++i) {
         double value = (first + i) * step;
-        if (decimals > 0 && std::isfinite(scale))
-            value = std::round(value * scale) / scale;
+        if (decimals > 0) {
+            const double scaled = value * scale;
+            // За 2^53 у double нет дробной части — округлять нечего.
+            if (std::isfinite(scaled) && std::fabs(scaled) < 9007199254740992.0)
+                value = std::round(scaled) / scale;
+        }
         lines.push_back(value);
     }
     return lines;
