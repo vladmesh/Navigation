@@ -149,7 +149,9 @@ win32:RC_FILE = resources_2.rc
 # После сборки release-версии под Windows разворачиваем рядом с .exe все
 # нужные Qt-библиотеки и плагины через windeployqt, иначе приложение не
 # запустится на машине без установленного Qt.
-win32 {
+# CONFIG+=no_windeployqt отключает этот шаг (CI smoke-e2e проверяет набор
+# из deploy/win64-mingw, windeployqt не должен докладывать свои файлы).
+win32:!no_windeployqt {
     CONFIG(release, debug|release) {
         WINDEPLOYQT = $$shell_path($$[QT_INSTALL_BINS]/windeployqt.exe)
         DEPLOY_TARGET = $$shell_path($$OUT_PWD/release/$${TARGET}.exe)

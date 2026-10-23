@@ -7,6 +7,9 @@
 #include <QSplashScreen>
 #include <QPixmap>
 #include <QScreen>
+#include <QImage>
+#include <QTimer>
+#include <cstdio>
 
 QPalette getLightPalette();
 QPalette getToxicPalette();
@@ -49,6 +52,22 @@ int main(int argc, char *argv[])
     QTimer::singleShot(1000, &w, [&]() { w.show(); });
 
     // w.show();
+
+    // --smoke: CI self-check. Exit after 3 s with code 0 if the splash logo (SVG plugin),
+    // the icon (ICO plugin) and the main window are OK, otherwise with code 1.
+    if (QCoreApplication::arguments().contains(QStringLiteral("--smoke"))) {
+        QTimer::singleShot(3000, &a, [&]() {
+            const bool svgOk = !logo.isNull();
+            const bool icoOk = !QImage(QStringLiteral(":/Data/icon.ico")).isNull();
+            const bool windowOk = w.isVisible() && !splash.isVisible();
+            fprintf(stderr, "SMOKE platform=%s svg=%d ico=%d window=%d\n", qPrintable(QGuiApplication::platformName()),
+                    svgOk, icoOk, windowOk);
+            const bool ok = svgOk && icoOk && windowOk;
+            fprintf(stderr, ok ? "SMOKE OK\n" : "SMOKE FAIL\n");
+            fflush(stderr);
+            a.exit(ok ? 0 : 1);
+        });
+    }
 
     return a.exec();
 }

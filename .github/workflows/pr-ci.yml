@@ -74,6 +74,76 @@ jobs:
           path: tst_parsers.xml
           if-no-files-found: ignore
 
+  windows-mingw-smoke:
+    name: Windows / MinGW 6.10.2 build + smoke e2e (deploy/win64-mingw)
+    runs-on: windows-latest
+    env:
+      QT_MINGW_VERSION: "6.10.2"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt 6.10.2 MinGW + MinGW 13.1.0
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_MINGW_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_mingw
+          modules: ${{ env.QT_MODULES }}
+          tools: tools_mingw1310
+          cache: true
+
+      - name: Toolchain info
+        shell: pwsh
+        run: |
+          $mingw = Join-Path $env:RUNNER_WORKSPACE "Qt\Tools\mingw1310_64\bin"
+          if (-not (Test-Path $mingw)) { $mingw = (Get-ChildItem -Recurse -Directory -Path (Join-Path $env:RUNNER_WORKSPACE "Qt\Tools") -Filter bin | Where-Object { Test-Path (Join-Path $_.FullName "g++.exe") } | Select-Object -First 1).FullName }
+          "$mingw" | Out-File -FilePath $env:GITHUB_PATH -Append
+          & "$mingw\g++.exe" --version
+          qmake -query QT_VERSION
+
+      - name: Runtime set matches the official Qt build
+        shell: bash
+        run: |
+          QT_BIN="$(qmake -query QT_INSTALL_BINS)"; QT_PLUG="$(qmake -query QT_INSTALL_PLUGINS)"
+          cd deploy/win64-mingw
+          fail=0
+          for f in $(find . -name '*.dll' | sort); do
+            case "$f" in ./platforms/*|./imageformats/*) ref="$QT_PLUG/${f#./}";; *) ref="$QT_BIN/${f#./}";; esac
+            a=$(sha256sum "$f" | cut -c1-64); b=$(sha256sum "$ref" | cut -c1-64)
+            if [ "$a" = "$b" ]; then echo "same  $f"; else echo "::error::$f differs from $ref"; fail=1; fi
+          done
+          exit $fail
+
+      - name: Build Ship (release, MinGW, no windeployqt)
+        shell: cmd
+        run: |
+          mkdir build-mingw && cd build-mingw
+          qmake ..\Ship.pro CONFIG+=release CONFIG+=no_windeployqt || exit /b 1
+          mingw32-make -j4 || exit /b 1
+          dir release\Ship.exe
+
+      - name: Ship.exe imports
+        shell: bash
+        run: |
+          objdump -p build-mingw/release/Ship.exe > imports.txt
+          grep 'DLL Name' imports.txt
+          echo "Symbols imported from Qt6Core5Compat.dll:"
+          awk '/DLL Name: Qt6Core5Compat.dll/{f=1;next} /DLL Name:/{f=0} f && NF>=3 {print "  " $3}' imports.txt
+
+      - name: Smoke e2e (Ship.exe --smoke with deploy/win64-mingw only)
+        shell: pwsh
+        run: .github/scripts/smoke-e2e.ps1 -Exe build-mingw\release\Ship.exe -Runtime deploy\win64-mingw -Work e2e
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-e2e-logs
+          path: |
+            e2e/stderr.txt
+            e2e/stdout.txt
+          if-no-files-found: ignore
+
   linux-sanitizers:
     name: Linux / GCC ASan+UBSan(+LSan) unit tests
     runs-on: ubuntu-latest
