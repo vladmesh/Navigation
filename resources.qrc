@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Data/SurveyInfo.txt</file>
+        <file>Data/icon.ico</file>
+        <file>Data/logoGeodevice.svg</file>
+    </qresource>
+</RCC>

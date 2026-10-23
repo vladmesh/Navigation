@@ -1,0 +1,17 @@
+/build/*
+*.user
+/Ship.pro.user
+/release/*
+/Docs/*
+Ship.pro.user
+*.user
+*.TMP
+Ship.pro.user
+.qmake.stash
+DEV_PLAN.md
+DEV_PLAN_CLIENT.md
+CLAUDE.md
+CLASS_DIAGRAM.md
+aqtinstall.log
+.qtcreator/
+*.user.*

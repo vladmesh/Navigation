@@ -1,0 +1,17 @@
+H0100 AREA NAME                 KSA                                             
+H0101 JOB DESCRIPTION           2D HIGH RESOLUTION SURVEY                       
+H0102 VESSEL DETAILS            MV Qatif boat              1                    
+H0103 SOURCE DETAILS                                                            
+H0104 STREAMER DETAILS                                                          
+H0105 OTHER DETAILS                                                             
+H0105 OTHER DETAILS                                                             
+H0200 DATE OF SURVEY            23.06.1997                                      
+H0201 DATE OF TAPE              23.06.1997                                      
+H0202 TAPE VERSION ID                                                           
+H0203 LINE PREFIX                                                               
+H0300 CLIENT NAME               SAUDI ARAMCO                                    
+H0400 GEOPHYSICAL CONTRACTOR    GEODEVICE                                       
+H0500 POSITION CONTRACTOR       GEODEVICE                                       
+H0600 POS. PROC. CONTRACTOR     GEODEVICE                                       
+H0700 POS./ COMPUTER SYSTEM     GEODEVICE                                       
+H0800 SHOTPOINT POSITION        GEODEVICE                                       
