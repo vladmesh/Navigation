@@ -47,7 +47,6 @@ public:
      */
     static QVector<QPointer<FixedItem>> readFromJSON(QFile* file, QStringList* errors = nullptr);
 
-
     /**
      * @brief Записывает элементы в JSON-объект.
      * @param ItemsVector Вектор указателей на элементы `FixedItem` или его наследников.

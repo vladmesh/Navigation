@@ -55,7 +55,6 @@ void TowedItem::calcIFNotConnected()
     if (realAzimuthOfTowingRadians == -1) { // если нам неизвестен реальный азимут буксировки
         // драггинг алгоритм, основан наалгоритме погони https://habr.com/ru/articles/254485/
 
-
         double dx;
         double dy;
         if (towingPoint->itemType == "Streamer") {

@@ -53,7 +53,6 @@ QStringList P190_creator::createHeader(int dayNumber) {
 QStringList P190_creator::createHeader() {
     QStringList header = initializeHeaderFile();
 
-
     for (int i = 0; i < header.size(); i++) {
         if (header[i].contains("H0200 DATE OF SURVEY")) {
             header[i] = replaceDates(header[i]);

@@ -12,7 +12,6 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-
 /**
  * @class StreamerDialog
  * @brief Класс диалогового окна для настройки параметров косы.
