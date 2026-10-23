@@ -97,6 +97,8 @@ jobs:
           $results | ForEach-Object { Select-String -Path $_.FullName -Pattern '^(NO ERRORS FOUND|ERRORS FOUND:|\s+\d+ unique,)' | ForEach-Object { $_.Line } }
           if ($rc -ne 0) { Write-Host "::error::Dr. Memory exit code $rc (3 = memory errors found, other = tool/test failure)"; exit 1 }
           # Тесты должны реально пройти под Dr. Memory, а не просто не упасть.
+          Write-Host "---- QtTest log under Dr. Memory ----"
+          if (Test-Path $testlog) { Get-Content $testlog }
           $totals = Select-String -Path $testlog -Pattern '^Totals: (\d+) passed, (\d+) failed' | Select-Object -Last 1
           if (-not $totals) { Write-Host "::error::no QtTest Totals line under Dr. Memory"; exit 1 }
           Write-Host "Under Dr. Memory: $($totals.Line)"
