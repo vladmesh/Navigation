@@ -8,18 +8,18 @@
 | Epic | 01 / 8 — Сетка координат в зоне отрисовки |
 | ADR | docs/adr/0001-coordinate-grid.md |
 | Release branch | release/epic-01 |
-| Stage | task 01 — PR open, PR-CI run 1 |
+| Stage | task 01 — review round 1 RED, coder fixing |
 | Current task | 01 — Чистая функция расчёта шага сетки + unit-тест (issue #4, PR #5) |
-| Next role | reviewer |
-| Hand-off | PR #5 (epic-01/task-01-gridmath → release/epic-01); docs/sessions/2026-10-23-epic-01-coder-task-01.md; ADR 0001 Task 01 |
-| Last update | 2026-10-23 21:50, coder |
+| Next role | coder |
+| Hand-off | PR #5; docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-1.md (findings 1–3) |
+| Last update | 2026-10-23 22:05, reviewer |
 
 ## Counters
 
 | Counter | Value | Ceiling | Scope |
 |---|---|---|---|
 | ci_runs | 1 | 10 | per task |
-| review_rounds | 0 | 3 | per PR |
+| review_rounds | 1 | 3 | per PR |
 | build_attempts | 0 | 5 | per build cycle |
 | colleague_returns | 0 | 2 (3rd → human-epic-owner) | per epic |
 
@@ -35,3 +35,4 @@
 - 2026-10-23 architect-plan: plan done — ADR 0001 accepted, 2 таска, ветка release/epic-01 создана; конспект docs/sessions/2026-10-23-epic-01-architect-plan.md
 - 2026-10-23 coder: task 01 — issue #4, PR #5 в release/epic-01; PR-CI: no workflow yet (ci_runs 0); локально tst_gridmath 27/27 pass (Qt 6.8.3 Linux), Ship.pro собирается; отчёт docs/sessions/2026-10-23-epic-01-coder-task-01.md; next: reviewer
 - 2026-10-23 coder: task 01 — release/epic-01 синхронизирована с main (PR #10, PR-CI есть); в PR #5 влита release-ветка, tst_gridmath добавлен в PR-CI; PR-CI run 1
+- 2026-10-23 reviewer: task 01 round 1 — RED (1 blocker: UB в niceStep при субнормальном span/maxLines; 1 major: gridLines округляет по labelDecimals, неверно для шага 0.25; 1 nit); PR-CI run 1 зелёный (4/4); отчёт docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-1.md; next: coder
