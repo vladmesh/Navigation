@@ -1,0 +1,45 @@
+name: Nightly Dr. Memory (Windows)
+
+# Заготовка: проверка утечек/ошибок памяти на Windows через Dr. Memory
+# на автономных юнит-тестах. Не блокирующая (continue-on-error).
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  drmemory:
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: "qtpositioning"
+          cache: true
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build unit tests (debug)
+        shell: cmd
+        run: |
+          mkdir build-tests && cd build-tests
+          qmake ..\Test\unit\unit.pro CONFIG+=debug || exit /b 1
+          nmake || exit /b 1
+
+      - name: Install Dr. Memory
+        run: choco install drmemory -y --no-progress
+
+      - name: Run under Dr. Memory
+        shell: pwsh
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          $dr = Get-ChildItem "C:\Program Files (x86)\Dr. Memory\bin64\drmemory.exe","C:\Program Files\Dr. Memory\bin64\drmemory.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          & $dr.FullName -batch -exit_code_if_errors 1 -logdir . -- build-tests\debug\tst_parsers.exe

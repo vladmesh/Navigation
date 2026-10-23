@@ -46,11 +46,11 @@ QVector<QPointer<FixedItem>> ItemsLoader::readFromJSON(QFile *file)
         }
     }
 
-    for (auto i = sortedArrayOfJson.begin(); i != sortedArrayOfJson.end(); ++i) { //deleting empty JsonValues
+    for (auto i = sortedArrayOfJson.begin(); i != sortedArrayOfJson.end();) { // deleting empty JsonValues
         if (!(*i)["name"].toString().isNull()) {
-            // qDebug() << *i;
+            ++i;
         } else {
-            sortedArrayOfJson.erase(i);
+            i = sortedArrayOfJson.erase(i); // erase инвалидирует итератор
         }
     }
 

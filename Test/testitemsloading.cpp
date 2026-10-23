@@ -1,4 +1,5 @@
 #include "testitemsloading.h"
+#include "testdatapath.h"
 
 testItemsLoading::testItemsLoading() {
 
@@ -14,7 +15,7 @@ void testItemsLoading::runTests()
 void testItemsLoading::itemsToJson() ///TODO::добавить в MW в Save configuration
 {
 
-    QString filepath = "C:/Users/sabrahar/Documents/Ship_logs/json/test.json";
+    QString filepath = testDataPath("json/test.json");
     QVector<QPointer<FixedItem>> items = createItems2309();
     for (auto i:items) {
         qDebug() << i->name;
@@ -29,8 +30,8 @@ void testItemsLoading::itemsToJson() ///TODO::добавить в MW в Save con
 
 void testItemsLoading::jsonToItems() ///TODO::добавить в MW в Save configuration
 {
-    QString filepath = "C:/Users/sabrahar/Documents/Ship_logs/json/test.json";
-    QString filepathOut = "C:/Users/sabrahar/Documents/Ship_logs/json/test_test.json";
+    QString filepath = testDataPath("json/test.json");
+    QString filepathOut = testDataPath("json/test_test.json");
     QFile* file = new QFile(filepath);
 
     QVector<QPointer<FixedItem>> itemsfromJson = ItemsLoader::readFromJSON(file);

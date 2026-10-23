@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QFileDialog>
 #include <QFile>
-#include <QProgressbar>
+#include <QProgressBar>
 
 #include "DataReader/segyreader.h"
 #include "coordinator.h"
