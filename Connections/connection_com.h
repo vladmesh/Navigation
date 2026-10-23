@@ -1,7 +1,6 @@
 #ifndef CONNECTION_COM_H
 #define CONNECTION_COM_H
 
-// #include "connection.h"
 #include "connectionlogic.h"
 
 #include <QSerialPort>
@@ -33,7 +32,6 @@ public:
     Connection_com(QString COM_port, int BaudRate, QString filename);
 
     ~Connection_com() override;
-    // void recieve_data(QByteArray data);
 
     QString filename;
     QString getComPort();
@@ -45,13 +43,11 @@ public:
     void reconnect() override;
 
 private:
-    // Ui::Connection_com *ui; ///< Интерфейс пользователя для класса Connection_com.
     QSerialPort SerialPort; ///< Объект для работы с COM-портом.
 
     QByteArray data; ///< Буфер данных для чтения из порта.
     QString COM_port; ///< Имя COM-порта.
     int BaudRate = 19200; ///< Скорость передачи данных, по умолчанию 19200.
-
 
 
 private slots:

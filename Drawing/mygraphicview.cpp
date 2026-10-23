@@ -10,48 +10,30 @@ MyGraphicView::MyGraphicView(QWidget* parent)
     transform.scale(1, -1);  // Ось Y теперь направлена вниз
     view.setTransform(transform);
 
-    // drawShip();
     loadVerticesFromFile(shipFileName);
     drawAxes();
     getSceneProperties();
-    // drawCenter();
-    // scene->setSceneRect(scene->itemsBoundingRect());
     view.show();
     scene->setSceneRect(scene->sceneRect().left()-200, scene->sceneRect().top()-200, 600, 600);
-    // drawGrid();
 
 }
 
 MyGraphicView::~MyGraphicView(){
-    // for (auto i: VectorGraphicsTextVault){
-    //     delete i;
-    // }
-    // for (auto i: VectorAllOtherGraphicsVault){
-    //     delete i;
-    // }
     saveVerticesToFile(shipFileName);
 }
-
 
 
 void MyGraphicView::addPoint(float x, float y, float z, QString name)
 {
     Q_UNUSED(z); //wow
     HoverPaintingPoint *pointItem = new HoverPaintingPoint(x, y, name);
-    // pointItem->setBrush(QBrush(Qt::red));
     scene->addItem(pointItem);
-    // QGraphicsTextItem* newItemNameLabel = new QGraphicsTextItem(name);
-    // newItemNameLabel->setPos(x,-5+y);
-    // VectorGraphicsTextVault.append(newItemNameLabel);
-    // scene->addItem(newItemNameLabel);
 
-    // ItemsPosVector.push_back(schemeElement(x-2.5,y-2.5,z-2.5,name));
 
 }
 
 void MyGraphicView::drawShip() {
     if (MyShip) {
-        // delete MyShip;
         MyShip = new QGraphicsPolygonItem(shipFig);
         MyShip->setBrush(QBrush(QColorConstants::Svg::lightblue));
         scene->addItem(MyShip);
@@ -105,7 +87,6 @@ void MyGraphicView::drawAxes()
 
     VectorGraphicsTextVault.append(xLabel);
     VectorGraphicsTextVault.append(yLabel);
-
 
 
     QFont font;
@@ -215,12 +196,10 @@ void MyGraphicView::update()
     scene->clear();
     drawShip();
     drawAxes();
-    // qDebug() << "UPDATE";
     for (auto i: Vault->ItemsVault) {
         if (i->itemType == "Fixed") {
             addPoint(i->x, i->y, 0, i->name);
         } else if (i->itemType == "Streamer") {
-            // drawStreamer(qobject_cast<QPointer<Streamer>>(i));
             drawStreamer(qobject_cast<Streamer*>(i));
         } else {
             TowedItem* towed = qobject_cast<TowedItem*>(i);
@@ -409,7 +388,6 @@ void MyGraphicView::saveVerticesToFile(const QString &fileName)
         QTextStream out(&file);
         for (const QPointF &point : shipFig) {
             if (point.x() == 0 && point.y() == 0) continue;
-            // qDebug() << point;
             out << (int)point.x() << " " << (int)point.y() << "\n";
         }
         file.close();

@@ -6,8 +6,6 @@
 #include "itemsloader.h"
 
 
-// #include "test_postprocessing.cpp"
-
 class testItemsLoading
 {
 public:

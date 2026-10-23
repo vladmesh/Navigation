@@ -10,9 +10,7 @@
 #include <QPointer>
 
 #include "nmeaparser.h"
-// #include "connection.h"
 #include "connectionlogic.h"
-// #include "logger.h"
 #include "CircularBuffer.h"
 
 /**
@@ -27,9 +25,7 @@ class FixedItem : public QObject
 Q_OBJECT
 private:
     friend class Fabric;
-    // friend class Coordinator;
     friend class ItemsLoader;
-    friend class MariMag;
     /**
      * @brief Конструктор с параметрами для создания фиксированного объекта.
      * @param x Начальная координата X на схеме.
@@ -73,11 +69,6 @@ public:
     /// Последние полученные данные NMEA.
     NmeaParser::CoordinateData lastGGAData = {{0, 0}, {0, 0}, QDateTime(), 0}; ///< Данные NMEA GGA.
     NmeaParser::NmeaRMCData lastRMCData = {0, 0}; ///< Данные NMEA RMC.
-
-    /**
-     * @brief Выводит текущие координаты объекта. Для отладки.
-     */
-    void printPos();
 
 
     /// Информация об объекте.
@@ -170,8 +161,6 @@ protected:
     static CircularBuffer sharedCircularBuffer; ///< Общий кольцевой буфер координат.
 
 };
-
-
 
 
 #endif // FIXEDITEM_H

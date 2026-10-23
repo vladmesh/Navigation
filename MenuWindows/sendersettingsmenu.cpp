@@ -12,15 +12,11 @@ SenderSettingsMenu::SenderSettingsMenu() {
     portSpinBox->setMaximum(20000);
     portSpinBox->setValue(1004);
 
-    // // Чекбокс
-    // sendingCheckBox = new QCheckBox("Sending", this);
-    // sendingCheckBox->setChecked(false);
 
     // Layout
     QFormLayout *formLayout = new QFormLayout;
     formLayout->addRow("IP Address:", ipLineEdit);
     formLayout->addRow("Port:", portSpinBox);
-    // formLayout->addRow(sendingCheckBox);
 
     // Кнопки
     QPushButton *okButton = new QPushButton("Start", this);
@@ -48,7 +44,6 @@ SenderSettingsMenu::SenderSettingsMenu() {
 
 void SenderSettingsMenu::saveParams()
 {
-    // qDebug() << portSpinBox->value() << QHostAddress(ipLineEdit->text());
     portNumber = portSpinBox->value();
     IP = QHostAddress(ipLineEdit->text());
 }

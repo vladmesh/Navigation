@@ -7,10 +7,7 @@ UberPainter::UberPainter(ItemsStorage *storage, QWidget *parent) :
     setScene(graphicsScene);
     this->resetTransform();         // Сброс трансформаций
     this->scale(1, -1);
-    // graphicsScene->
-    // setRenderHint(QPainter::Antialiasing);
     createContainer();
-    // graphicsScene->addEllipse(1,1,1,1);
     setDragMode(QGraphicsView::ScrollHandDrag);
 }
 
@@ -84,28 +81,15 @@ void UberPainter::drawCoordinatesNet(double minX, double minY, double maxX, doub
         QGraphicsLineItem* line = graphicsScene->addLine(x, minY - 500, x, maxY + 500, QPen(Qt::lightGray));
         Q_UNUSED(line);
         if (x == minX - 50) continue;
-        // QGraphicsTextItem* text = graphicsScene->addText(QString::number(x), smallFont);
 
 
-        // QTransform mirrorTransform;
-        // mirrorTransform.scale(1, -1);  // Отражаем по вертикали
-        // text->setTransform(mirrorTransform);
-
-        // text->setPos(x, minY - 10);  // Размещаем значение над линией
-        // text->setDefaultTextColor(Qt::black);
     }
 
     for (double y = minY - 500; y <= maxY + 500; y += stepSize) {
         QGraphicsLineItem* line = graphicsScene->addLine(minX - 500, y, maxX + 500, y, QPen(Qt::lightGray));
         Q_UNUSED(line);
-        // QGraphicsTextItem* text = graphicsScene->addText(QString::number(y, 'g', 7), smallFont);
 
-        // QTransform mirrorTransform;
-        // mirrorTransform.scale(1, -1);  // Отражаем по вертикали
-        // text->setTransform(mirrorTransform);
 
-        // text->setPos(minX - 70, y+17);  // Размещаем значение слева от линии
-        // text->setDefaultTextColor(Qt::black);
     }
 
 
@@ -143,14 +127,6 @@ void UberPainter::centerView()
     }
 
 
-
-    // centerOn((visibleArea.center().x() + objectsArea.center().x())/2, (visibleArea.center().y() + objectsArea.center().y())/2);
-    // qDebug() << visibleArea << objectsArea;
-    // qDebug() << visibleArea.center().x() - objectsArea.center().x() << visibleArea.center().y() - objectsArea.center().y();
-    // qDebug() << __FUNCTION__;
-
-
-    // translate()
 }
 
 
@@ -161,7 +137,6 @@ void UberPainter::mousePressEvent(QMouseEvent *event)
         return;
     }
     if (event->button() == Qt::LeftButton) {
-        // if (isNotDrawingLine) return;
         isPanning = true;
         lastMousePos = event->pos();
         setCursor(Qt::ClosedHandCursor); // Изменяем курсор при захвате
@@ -171,7 +146,6 @@ void UberPainter::mousePressEvent(QMouseEvent *event)
         startPoint = mapToScene(event->pos());
         setCursor(Qt::BlankCursor); ///setCursor(Qt::BlankCursor);
 
-        // if (distanceLine != nullptr) delete distanceLine;
         distanceLine = new QGraphicsLineItem();
         distanceLineLen = new QGraphicsTextItem();
         distanceLineAz = new QGraphicsTextItem();
@@ -223,7 +197,6 @@ void UberPainter::mouseMoveEvent(QMouseEvent *event)
         distanceLineAz->setTransform(mirrorTransform);
 
 
-
         if (distanceLine != nullptr) delete distanceLine;
         distanceLine = graphicsScene->addLine(startPoint.x(),
             startPoint.y(), mapToScene(event->pos()).x(), mapToScene(event->pos()).y(), QPen(QColor(165, 42, 42))); //mr brown
@@ -243,7 +216,6 @@ void UberPainter::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::RightButton) {
         isPanning = false;
         setCursor(Qt::ArrowCursor); // Возвращаем курсор обратно
-        // delete startPoint;
         if (distanceLine != nullptr && !(event->buttons() & Qt::RightButton)) delete distanceLine;
         distanceLine = new QGraphicsLineItem();
         distanceLineLen = new QGraphicsTextItem();
@@ -266,7 +238,6 @@ void UberPainter::wheelEvent(QWheelEvent *event)
         scale(1.0 / scaleFactor, 1.0 / scaleFactor); // Уменьшаем масштаб
     }
 
-    // updateCoordinates(); // Обновляем координаты при масштабировании
     QGraphicsView::wheelEvent(event);
 }
 
@@ -282,7 +253,6 @@ void UberPainter::updateView()
     maxY = std::numeric_limits<double>::lowest();
 
     for (auto i: recentPositions) {
-        // qDebug() << i <<__LINE__;
         for (QPointF coor: i) {
             if (coor.x() < 10 || coor.y() < 10) continue;
             minX = std::min(minX, coor.x());
@@ -293,7 +263,6 @@ void UberPainter::updateView()
     }
 
 
-    // graphicsScene->setSceneRect(minX - 50, minY - 50, (maxX - minX) + 100, (maxY - minY) + 100);
     graphicsScene->setSceneRect(minX - 500, minY - 500, (maxX - minX) + 1000, (maxY - minY) + 1000);
 
 
@@ -323,12 +292,9 @@ void UberPainter::updateView()
         int totalSteps = queue.size() / subItemsCount;  // Количество шагов для изменения прозрачности
         int step = totalSteps > 1 ? 100 / (totalSteps - 1) : 100;  // Шаг изменения прозрачности
 
-        // qDebug() << minX << minY << maxX << maxY <<__FUNCTION__;
-        // if (queue.size()== QUEUES_SIZE && minX && minY && maxX && maxY)  //рисует сетку координат
 
         // Отрисовываем координаты с учетом прозрачности
         int index = 0;
-        // qDebug() << item->name << queue.size() << subItemsCount;
         for (int i = 0; i < queue.size(); i += subItemsCount) {
             int alpha = qMin(100, (step * index)/2);  // Прозрачность от 0 до 100%
             QColor pointColor = color;
@@ -337,16 +303,9 @@ void UberPainter::updateView()
             // Отрисовываем все координаты для текущего шага
             for (int j = 0; j < subItemsCount; ++j) {
                 const QPointF& pos = queue[i + j];
-                // qDebug() << alpha << i<<"alpha" << pos;
-                // if (color == QColor(0, 0, 255)) {
-                //     graphicsScene->addEllipse(
-                //         pos.x() - 0.2, pos.y() - 0.2, 0.4, 0.4, QPen(Qt::NoPen), QBrush(pointColor)
-                //         );
-                // } else {
                 graphicsScene->addEllipse(
                     pos.x() - 2, pos.y() - 2, 4, 4, QPen(Qt::NoPen), QBrush(pointColor)
                     );
-                // }
             }
             ++index;
         }
@@ -357,14 +316,12 @@ void UberPainter::updateView()
 
 void UberPainter::collectItems()
 {
-    //QMap<FixedItem*, QQueue<QPointF>> recentPositions;
 
     for (FixedItem* item: MyVault->ItemsVault) {
         QQueue<QPointF>* curQueue = &recentPositions[item];
         if (item->itemType == "Streamer") {
             Streamer* streamer = dynamic_cast<Streamer*>(item);
             QVector<QPointF> chansPos = getCoor(streamer);
-            // qDebug() << __FUNCTION__ << QUEUES_SIZE * streamer->getChanCount();
             if (curQueue->size() >= (QUEUES_SIZE*streamer->getChanCount())) {
                 for (uint i = 0; i < streamer->getChanCount(); i++) {
                     curQueue->dequeue();
@@ -393,7 +350,6 @@ QVector<QPointF> UberPainter::getCoor(Streamer *streamer)
     for (uint i = 0; i < streamer->getChanCount(); i++) {
         QPointF chanCoor = QPointF(streamer->getChan(i+1)->x_coor, streamer->getChan(i+1)->y_coor);
         res[i] = chanCoor;
-        // qDebug() << __FUNCTION__ << res[i];
     }
     return res;
 }

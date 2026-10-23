@@ -50,10 +50,8 @@ public:
 
         // Возвращаем дату, прибавляя номер дня минус один
         QDate ret = firstDayOfYear.addDays(dayOfYear-1);
-        // qDebug() << ret <<__FUNCTION__;
         return ret;
     }
-
 
 
     void setPath(P190_creator* victim);

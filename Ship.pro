@@ -1,8 +1,12 @@
-QT += core gui network serialport location core5compat positioning
+QT += core gui network serialport location positioning
 #
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
+
+# В релизной сборке qDebug() не печатает (часть вызовов выводит каждый NMEA-пакет).
+# qInfo/qWarning/qCritical остаются.
+CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -16,23 +20,17 @@ INCLUDEPATH += ./Drawing \
 ./Parsers \
 ./Service \
 ./Data \
-./Data/Params \
 ./DataReader \
-./Test \
 ./Observervation \
 ./MenuWindows
 
 
 SOURCES += \
-    # Connections/connection_udp.cpp \
     Connections/connectionlogic.cpp \
     Connections/connectionui.cpp \
-    # Connections/depthsensors.cpp \
     Connections/sender.cpp \
     DataVault/itemsloader.cpp \
     DataVault/itemsstorage.cpp \
-    # Drawing/lordofgraphic.cpp \
-    # Drawing/sidegraphicview.cpp \
     Drawing/gridmath.cpp \
     Drawing/uberpainter.cpp \
     Fabric/buoydialog.cpp \
@@ -43,29 +41,20 @@ SOURCES += \
     MenuWindows/sendersettingsmenu.cpp \
     Objects/buoy.cpp \
     Objects/fixeditem.cpp \
-    Objects/marimag.cpp \
     Objects/source.cpp \
     Objects/streamer.cpp \
     Objects/toweditem.cpp \
     DataReader/segyreader.cpp \
     Observervation/objectobserver.cpp \
     Observervation/virtualobserver.cpp \
-    Parsers/marimagparser.cpp \
     Parsers/ppkparser.cpp \
     Service/coordinator.cpp \
-    Service/logger.cpp \
     MenuWindows/p190headerchanger.cpp \
     Service/postprocessor.cpp \
     Service/postprocessorview.cpp \
-    Test/marimagparsertest.cpp \
-    Test/test_postprocessing.cpp \
-    Test/testdragging.cpp \
-    Test/testitemsloading.cpp \
-    Test/testppkparser.cpp \
     main.cpp \
     mainwindow.cpp \
     Drawing/mygraphicview.cpp \
-    # Connections/connection.cpp \
     Connections/connection_com.cpp \
     Connections/connection_net.cpp \
     Parsers/nmeaparser.cpp \
@@ -73,10 +62,8 @@ SOURCES += \
     ConnectionCreator/connection_creator.cpp
 
 HEADERS += \
-    # Connections/connection_udp.h \
     Connections/connectionlogic.h \
     Connections/connectionui.h \
-    # Connections/depthsensors.h \
     Connections/sender.h \
     DataVault/CircularBuffer.h \
     DataVault/itemsloader.h \
@@ -84,8 +71,6 @@ HEADERS += \
     DataVault/structures.h \
     Drawing/gridmath.h \
     Drawing/hoverpaintingrpoint.h \
-    # Drawing/lordofgraphic.h \
-    # Drawing/sidegraphicview.h \
     Drawing/uberpainter.h \
     Fabric/buoydialog.h \
     Fabric/fabric.h \
@@ -97,30 +82,21 @@ HEADERS += \
     MenuWindows/shipparamschanger.h \
     Objects/buoy.h \
     Objects/fixeditem.h \
-    Objects/marimag.h \
     Objects/source.h \
     Objects/streamer.h \
     Objects/toweditem.h \
     DataReader/segyreader.h \
     Observervation/objectobserver.h \
     Observervation/virtualobserver.h \
-    Parsers/marimagparser.h \
     Parsers/ppkparser.h \
     Service/coordinator.h \
     Service/customdoublespinbox.h \
     Service/functions.h \
-    Service/logger.h \
     MenuWindows/p190headerchanger.h \
     Service/postprocessor.h \
     Service/postprocessorview.h \
-    Test/marimagparsertest.h \
-    Test/test_postprocessing.h \
-    Test/testdragging.h \
-    Test/testitemsloading.h \
-    Test/testppkparser.h \
     mainwindow.h \
     Drawing/mygraphicview.h \
-    # Connections/connection.h \
     ConnectionCreator/connection_creator.h \
     Connections/connection_com.h \
     Connections/connection_net.h \
@@ -130,10 +106,7 @@ HEADERS += \
 FORMS += \
     Connections/connectionui.ui \
     mainwindow.ui \
-    ConnectionCreator/connection_creator.ui \
-    # Connections/connection.ui \
-    Connections/connection_com.ui \
-    Connections/connection_net.ui
+    ConnectionCreator/connection_creator.ui
 
 
 
@@ -151,7 +124,9 @@ win32:RC_FILE = resources_2.rc
 # После сборки release-версии под Windows разворачиваем рядом с .exe все
 # нужные Qt-библиотеки и плагины через windeployqt, иначе приложение не
 # запустится на машине без установленного Qt.
-win32 {
+# CONFIG+=no_windeployqt отключает этот шаг (CI smoke-e2e проверяет набор
+# из deploy/win64-mingw, windeployqt не должен докладывать свои файлы).
+win32:!no_windeployqt {
     CONFIG(release, debug|release) {
         WINDEPLOYQT = $$shell_path($$[QT_INSTALL_BINS]/windeployqt.exe)
         DEPLOY_TARGET = $$shell_path($$OUT_PWD/release/$${TARGET}.exe)

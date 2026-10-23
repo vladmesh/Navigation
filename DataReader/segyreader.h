@@ -22,7 +22,6 @@
  */
 class Q_DECL_EXPORT SegYReader
 {
-    // Q_OBJECT
 public:
     /**
      * @struct SegyData

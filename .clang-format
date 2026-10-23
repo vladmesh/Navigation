@@ -1,0 +1,29 @@
+# Стиль, близкий к существующему коду (Qt Creator по умолчанию).
+# В CI проверяются только строки, изменённые в PR/push (clang-format-diff),
+# старый код целиком не переформатируется.
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 120
+AccessModifierOffset: -4
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterFunction: true
+  AfterStruct: false
+  AfterEnum: false
+  AfterNamespace: false
+  AfterControlStatement: Never
+  BeforeElse: false
+  BeforeCatch: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+PointerAlignment: Left
+SortIncludes: Never
+IncludeBlocks: Preserve
+BinPackParameters: true
+BinPackArguments: true
+NamespaceIndentation: None
+Standard: c++17

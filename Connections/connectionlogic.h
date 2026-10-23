@@ -10,7 +10,6 @@
 #include <memory>
 #include "connectionui.h"
 #include "nmeaparser.h"
-// #include "logger.h"
 
 class Connection : public QObject
 {
@@ -53,15 +52,13 @@ private:
     static NmeaParser nmeaParser;
     bool signalTimerAlert = false;
     QTimer* timer = nullptr;
-    // Logger* log = nullptr;
 
-    uint calcWindow = 20;
+    qsizetype calcWindow = 20; ///< размер окна для подсчёта качества, пакетов
     double border = 0.85;
     QVector<bool> packetsRecieved;
     float currentQuality = 0;
-    QVector<bool>::iterator iter;
+    qsizetype oldestPacket = 0; ///< индекс самого старого пакета в заполненном окне
 
-    QDir logsDir = QDir("~/Documents/Ship_logs");
     QTextStream* datastream = nullptr;
 
 };
