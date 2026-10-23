@@ -125,7 +125,11 @@ jobs:
 
       - name: Ship.exe imports
         shell: bash
-        run: objdump -p build-mingw/release/Ship.exe | grep 'DLL Name'
+        run: |
+          objdump -p build-mingw/release/Ship.exe > imports.txt
+          grep 'DLL Name' imports.txt
+          echo "Symbols imported from Qt6Core5Compat.dll:"
+          awk '/DLL Name: Qt6Core5Compat.dll/{f=1;next} /DLL Name:/{f=0} f && NF>=3 {print "  " $3}' imports.txt
 
       - name: Smoke e2e (Ship.exe --smoke with deploy/win64-mingw only)
         shell: pwsh
