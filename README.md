@@ -20,4 +20,12 @@ GitHub Actions, все workflow в `.github/workflows/`:
 cd Test/unit && qmake unit.pro && make && QT_QPA_PLATFORM=offscreen ./tst_parsers
 ```
 
-Старые тестовые сценарии в `Test/` (`test_postprocessing`, `testppkparser`, `testitemsloading`) работают на полевых данных, которых нет в репозитории. Путь к данным задаётся переменной `NAV_TEST_DATA_DIR` (по умолчанию `./testdata`). В CI они пропускаются.
+Юнит-тесты на исправления C1-C3 (`Test/unit/critical`, собирают исходники приложения через `Test/app_sources.pri`):
+
+```sh
+cd Test/unit/critical && qmake critical.pro && make && QT_QPA_PLATFORM=offscreen ./tst_critical
+```
+
+Старые тестовые сценарии (`test_postprocessing`, `testppkparser`, `testitemsloading`) лежат в `Test/legacy` и собираются отдельным бинарём `legacy.pro`, в `Ship.pro` не входят. Они работают на полевых данных, которых нет в репозитории. Путь к данным задаётся переменной `NAV_TEST_DATA_DIR` (по умолчанию `./testdata`). В CI они пропускаются.
+
+Незаконченные фичи вынесены в `archive/` (см. `archive/README.md`), в сборку не входят.
