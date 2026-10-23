@@ -22,13 +22,15 @@
 
 Вырезаны из файлов, которые остаются в сборке. В шапке каждого файла:
 откуда взят, объявления из заголовка, как вернуть.
+Расширение `.cpp.txt`, чтобы фрагменты не попадали под clang-format и
+cppcheck в CI: это не компилируемые единицы.
 
 | Файл | Откуда | Что это | Готовность |
 |---|---|---|---|
-| `streamer-catenary.cpp` (б3) | `Objects/streamer.cpp` | `calcChansByChainAlgorithm`, `findA` (Ньютон), `calculateAzimuth`: раскладка каналов по цепной линии между головой и хвостовым буем. Был выключен `#define CHAINALGO` перед `#ifdef`. | Средняя. Выражение без эффекта `realAzimuthOfTowingRadians + M_PI/2;`. Данные для проверки есть в ручном сценарии `testPostprocessing::testChainAlgo` (`Test/legacy`), но из-за `#define` он шёл по прямой. |
-| `streamer-checkStreamerCoordinates.cpp` (б12) | `Objects/streamer.cpp` | Проверка координат каналов. | Заглушка, возвращает 666. |
-| `coordinator-source-multilateration.cpp` (б4) | `Service/coordinator.cpp` | `updateSourcePosition` + `calculateError`: позиция источника градиентным спуском по расстояниям до приёмников. | Только алгоритм. Источник расстояний не определён. |
-| `streamerdialog-csv.cpp` (б8) | `Fabric/streamerdialog.cpp` | Импорт и экспорт раскладки косы в CSV. | Высокая, но кнопки не создавались; `saveToCSV` пишет захардкоженные глубины, одна строка с `,` вместо `;`, `readCSV` не читает `Channel spacing`. |
+| `streamer-catenary.cpp.txt` (б3) | `Objects/streamer.cpp` | `calcChansByChainAlgorithm`, `findA` (Ньютон), `calculateAzimuth`: раскладка каналов по цепной линии между головой и хвостовым буем. Был выключен `#define CHAINALGO` перед `#ifdef`. | Средняя. Выражение без эффекта `realAzimuthOfTowingRadians + M_PI/2;`. Данные для проверки есть в ручном сценарии `testPostprocessing::testChainAlgo` (`Test/legacy`), но из-за `#define` он шёл по прямой. |
+| `streamer-checkStreamerCoordinates.cpp.txt` (б12) | `Objects/streamer.cpp` | Проверка координат каналов. | Заглушка, возвращает 666. |
+| `coordinator-source-multilateration.cpp.txt` (б4) | `Service/coordinator.cpp` | `updateSourcePosition` + `calculateError`: позиция источника градиентным спуском по расстояниям до приёмников. | Только алгоритм. Источник расстояний не определён. |
+| `streamerdialog-csv.cpp.txt` (б8) | `Fabric/streamerdialog.cpp` | Импорт и экспорт раскладки косы в CSV. | Высокая, но кнопки не создавались; `saveToCSV` пишет захардкоженные глубины, одна строка с `,` вместо `;`, `readCSV` не читает `Channel spacing`. |
 | `p190-multisource-header.cpp` (б9) | `Parsers/p190_creator.cpp` | Строки P1/90 по каждому источнику, заполнение H0103, `setLineName`. | ~10%. Фильтр по `sourceID` был заменён на `if (true)`, циклы пустые. |
-| `buoydialog-streamer-binding.cpp` (б10) | `Fabric/buoydialog.cpp` | Выбор косы для хвостового буя в диалоге буя. | Закомментировано автором, связь теперь через `Streamer::setEndBuoy`. Скорее отказ от фичи. |
-| `sendersettingsmenu-sending-checkbox.cpp` (б11) | `MenuWindows/sendersettingsmenu.cpp` | Чекбокс «Sending» в настройках отправителя. | Закомментировано автором, вместо него кнопки Start/Stop. |
+| `buoydialog-streamer-binding.cpp.txt` (б10) | `Fabric/buoydialog.cpp` | Выбор косы для хвостового буя в диалоге буя. | Закомментировано автором, связь теперь через `Streamer::setEndBuoy`. Скорее отказ от фичи. |
+| `sendersettingsmenu-sending-checkbox.cpp.txt` (б11) | `MenuWindows/sendersettingsmenu.cpp` | Чекбокс «Sending» в настройках отправителя. | Закомментировано автором, вместо него кнопки Start/Stop. |

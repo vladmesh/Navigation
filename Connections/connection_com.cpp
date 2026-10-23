@@ -1,8 +1,6 @@
 #include "connection_com.h"
 
-Connection_com::Connection_com()
-{
-}
+Connection_com::Connection_com() {}
 /**
  * @brief Конструктор с параметрами для инициализации COM-порта и файла записи.
  * @param COM_port Имя COM-порта.
@@ -13,8 +11,7 @@ Connection_com::Connection_com()
  * если он указан и имеет расширение ".nmea".
  */
 Connection_com::Connection_com(QString COM_port, int BaudRate, QString filename)
-    : filename(filename), COM_port(COM_port),
-    BaudRate(BaudRate)
+    : filename(filename), COM_port(COM_port), BaudRate(BaudRate)
 {
 
     ui->setAttribute(Qt::WA_DeleteOnClose);

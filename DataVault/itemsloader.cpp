@@ -15,13 +15,17 @@ ItemsLoader::ItemsLoader(QObject *parent)
     : QObject{parent}
 {}
 
-QVector<QPointer<FixedItem>> ItemsLoader::readFromJSON(QFile *file, QStringList *errors)
+QVector<QPointer<FixedItem>> ItemsLoader::readFromJSON(QFile* file, QStringList* errors)
 {
     QVector<QPointer<FixedItem>> res;
     loadErrors.clear();
     struct ReportErrors {
-        QStringList *out;
-        ~ReportErrors() { if (out) *out = loadErrors; }
+        QStringList* out;
+        ~ReportErrors()
+        {
+            if (out)
+                *out = loadErrors;
+        }
     } report{errors};
     // Ensure the file is open and ready to be read
     if (!file->open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -43,25 +47,22 @@ QVector<QPointer<FixedItem>> ItemsLoader::readFromJSON(QFile *file, QStringList 
 
     QJsonObject jsonObj = jsonDoc.object();
 
-
     QVector<QJsonValue> sortedArrayOfJson;
     sortedArrayOfJson.reserve(jsonObj.size());
     for (auto i:jsonObj) {
         sortedArrayOfJson.push_back(i);
     }
-    //убираем записи без имени
-    sortedArrayOfJson.removeIf([](const QJsonValue &v) {
-        return v["name"].toString().isNull();
+    // убираем записи без имени
+    sortedArrayOfJson.removeIf([](const QJsonValue& v) { return v["name"].toString().isNull(); });
+    // объект создаётся после того, к кому он привязан: порядок по creationPriority
+    std::stable_sort(sortedArrayOfJson.begin(), sortedArrayOfJson.end(), [](const QJsonValue& a, const QJsonValue& b) {
+        return a["creationPriority"].toInt() < b["creationPriority"].toInt();
     });
-    //объект создаётся после того, к кому он привязан: порядок по creationPriority
-    std::stable_sort(sortedArrayOfJson.begin(), sortedArrayOfJson.end(),
-                     [](const QJsonValue &a, const QJsonValue &b) {
-                         return a["creationPriority"].toInt() < b["creationPriority"].toInt();
-                     });
 
-    for (const QJsonValue &value : sortedArrayOfJson) {
+    for (const QJsonValue& value : sortedArrayOfJson) {
         FixedItem* item = createItemFromJson(value);
-        if (item == nullptr) continue;
+        if (item == nullptr)
+            continue;
         res.append(item);
         vault.SaveItem(item);
     }
@@ -104,12 +105,10 @@ FixedItem* ItemsLoader::createItemFromJson(QJsonValue jsonObject)
         double absoluteLayback = jsonTowedItem["absoluteLayback"].toDouble();
         FixedItem* towingPoint = vault.getItem(towingPointName);
         if (towingPoint == nullptr) {
-            qWarning() << "ItemsLoader: towing point" << towingPointName
-                       << "not found for" << name << ", item skipped";
+            qWarning() << "ItemsLoader: towing point" << towingPointName << "not found for" << name << ", item skipped";
             loadErrors << QString("%1: towing point \"%2\" not found").arg(name, towingPointName);
             return nullptr;
         }
-
 
         if (itemType == "Towed") {
             TowedItemInfo info(towingPoint, absoluteLayback, 90, name);
@@ -135,8 +134,9 @@ FixedItem* ItemsLoader::createItemFromJson(QJsonValue jsonObject)
         } else if (itemType == "Streamer") {
             QJsonObject jsonStreamerItem = jsonTowedItem["Streamer"].toObject();
 
-            Streamer* streamerItem = new Streamer(name, towingPoint,
-                NULL, absoluteLayback, jsonStreamerItem["NumChanels"].toInt(0), jsonStreamerItem["Step between Channels"].toString());
+            Streamer* streamerItem =
+                new Streamer(name, towingPoint, NULL, absoluteLayback, jsonStreamerItem["NumChanels"].toInt(0),
+                             jsonStreamerItem["Step between Channels"].toString());
             item = streamerItem;
             if (jsonStreamerItem["hasEndBuoy"].toBool()) {
                 ifStreamerNeedsEndBuoy = true;

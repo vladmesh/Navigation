@@ -9,7 +9,7 @@
 #include "testitemsloading.h"
 #include "testppkparser.h"
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
     const QString scenario = argc > 1 ? QString::fromLocal8Bit(argv[1]) : QString();

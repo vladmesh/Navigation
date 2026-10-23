@@ -19,7 +19,7 @@
  *
  * Этот класс предоставляет интерфейс для выбора и настройки параметров косы,
  * таких как количество каналов и расстояние между ними.
- * Импорт/экспорт CSV перенесён в archive/snippets/streamerdialog-csv.cpp.
+ * Импорт/экспорт CSV перенесён в archive/snippets/streamerdialog-csv.cpp.txt.
  */
 class StreamerDialog : public QDialog
 {

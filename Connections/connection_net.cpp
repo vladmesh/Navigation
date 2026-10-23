@@ -1,8 +1,6 @@
 #include "connection_net.h"
 
-Connection_Net::Connection_Net()
-{
-}
+Connection_Net::Connection_Net() {}
 
 /**
  * @brief Конструктор с параметрами для инициализации сетевого соединения и файла записи.

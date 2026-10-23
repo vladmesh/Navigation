@@ -7,7 +7,8 @@ PostProcessor::PostProcessor() {
     p190Creator = new P190_creator();
 }
 
-PostProcessor::~PostProcessor() {
+PostProcessor::~PostProcessor()
+{
     delete p190Creator;
 }
 
@@ -20,9 +21,9 @@ int PostProcessor::mainProcess()
     Coordinator coordinator;
     coordinator.Vault = MyVault;
 
-    //повторный запуск после ошибки не должен дописывать пары к старым
+    // повторный запуск после ошибки не должен дописывать пары к старым
     pairs.clear();
-    for (const auto &itemFile : pairItemFile) {
+    for (const auto& itemFile : pairItemFile) {
         const QString name = itemFile.first.toLower();
         if (!name.endsWith(".ppk") && !name.endsWith(".nmea")) {
             qWarning() << "unsupported navigation file" << itemFile.first;
@@ -59,9 +60,9 @@ int PostProcessor::mainProcess()
         for (int i = 0; i < pairItemFile.size(); i++) {
             QStringList parts;
             if (files[i]->fileName().toLower().endsWith(".ppk")) {
-               parts = findPpkForSegy(pair, files[i].get(), &positions[i]);
+                parts = findPpkForSegy(pair, files[i].get(), &positions[i]);
             } else if (files[i]->fileName().toLower().endsWith(".nmea")) {
-               parts = findNmeaForSegy(pair, files[i].get(), &positions[i]);
+                parts = findNmeaForSegy(pair, files[i].get(), &positions[i]);
             } else {
                 qWarning() << "unsupported navigation file" << files[i]->fileName();
                 return WrongNavFile;

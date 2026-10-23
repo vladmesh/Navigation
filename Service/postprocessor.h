@@ -29,9 +29,9 @@ public:
     /// Коды возврата mainProcess().
     enum Result {
         Ok = 0,
-        WrongNavFile = 1,   ///< файл навигации не .nmea и не .ppk
-        NoFfidSource = 2,   ///< не задан ни каталог SEG-Y, ни txt с FFID
-        NotEnoughFfid = 3,  ///< в источнике FFID меньше двух записей
+        WrongNavFile = 1,  ///< файл навигации не .nmea и не .ppk
+        NoFfidSource = 2,  ///< не задан ни каталог SEG-Y, ни txt с FFID
+        NotEnoughFfid = 3, ///< в источнике FFID меньше двух записей
     };
 
     /**

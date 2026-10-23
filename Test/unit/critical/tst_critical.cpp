@@ -17,7 +17,7 @@ public:
     void reconnect() override {}
 };
 
-QJsonObject fixedItem(const QString &name, int priority)
+QJsonObject fixedItem(const QString& name, int priority)
 {
     QJsonObject o;
     o["name"] = name;
@@ -29,7 +29,7 @@ QJsonObject fixedItem(const QString &name, int priority)
     return o;
 }
 
-QJsonObject towedItem(const QString &name, const QString &towingPoint, int priority)
+QJsonObject towedItem(const QString& name, const QString& towingPoint, int priority)
 {
     QJsonObject towed;
     towed["Towing point"] = towingPoint;
@@ -42,7 +42,7 @@ QJsonObject towedItem(const QString &name, const QString &towingPoint, int prior
     return o;
 }
 
-QString writeJson(const QTemporaryDir &dir, const QString &fileName, const QJsonObject &obj)
+QString writeJson(const QTemporaryDir& dir, const QString& fileName, const QJsonObject& obj)
 {
     QString path = dir.filePath(fileName);
     QFile f(path);
@@ -52,7 +52,7 @@ QString writeJson(const QTemporaryDir &dir, const QString &fileName, const QJson
     return path;
 }
 
-void deleteItems(QVector<QPointer<FixedItem>> &items)
+void deleteItems(QVector<QPointer<FixedItem>>& items)
 {
     // Сначала буксируемые, затем точки буксировки: порядок обратный созданию.
     for (int i = items.size() - 1; i >= 0; --i)
@@ -190,10 +190,10 @@ void TestCritical::loaderInvalidJson()
 
 // ItemsStorage::sortItemsByCalcPriority зацикливается на пустом хранилище
 // (вне этого PR), поэтому в хранилище кладём один объект.
-static FixedItem *oneItem(ItemsStorage &vault)
+static FixedItem* oneItem(ItemsStorage& vault)
 {
     Fabric fabric;
-    FixedItem *item = fabric.CreateItem(FixedItemInfo(0, 0, 0, "ship"), false);
+    FixedItem* item = fabric.CreateItem(FixedItemInfo(0, 0, 0, "ship"), false);
     vault.ItemsVault.push_back(item);
     return item;
 }
