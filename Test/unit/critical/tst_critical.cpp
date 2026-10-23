@@ -102,6 +102,16 @@ void TestCritical::calcQualityRingBuffer()
     for (int i = 0; i < 10; ++i)
         q = con.calcQuality(true);
     QVERIFY(qAbs(q - 0.5f) < 1e-4f);
+
+    // Окно ровно 20 пакетов: один успешный пакет вытесняется через 20
+    // неуспешных. В старом коде 21-й пакет уходил в ячейку за end(),
+    // окно фактически было 21, и здесь оставалось 0.05.
+    for (int i = 0; i < 20; ++i)
+        con.calcQuality(false);
+    con.calcQuality(true);
+    for (int i = 0; i < 20; ++i)
+        q = con.calcQuality(false);
+    QVERIFY2(qAbs(q) < 1e-4f, qPrintable(QString::number(q)));
 }
 
 void TestCritical::loaderValidLayoutSortedByPriority()
