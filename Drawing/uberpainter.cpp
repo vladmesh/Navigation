@@ -1,5 +1,9 @@
 #include "uberpainter.h"
 
+#include "gridmath.h"
+
+#include <algorithm>
+#include <mutex>
 
 UberPainter::UberPainter(ItemsStorage *storage, QWidget *parent) :
     QGraphicsView(parent), MyVault(storage), graphicsScene(new QGraphicsScene)
@@ -23,95 +27,60 @@ void UberPainter::run() //срабатывает по таймеру
     //isDrawingLine - флаг что мы рисуем линии. он снят, пока меряем расстояние от точки до точки на карте
 }
 
-void UberPainter::updateCoordinates()
+void UberPainter::drawGrid()
 {
-    // Удаляем все текстовые элементы, оставляя сетку
-    for (auto item : graphicsScene->items()) {
-        if (dynamic_cast<QGraphicsTextItem*>(item)) {
-            graphicsScene->removeItem(item);
-            delete item;
-        }
-    }
+    delete gridGroup; // дети (линии и подписи) удаляются вместе с группой
+    gridGroup = nullptr;
 
-    // Получаем видимую область с учетом инверсии
+    const QRect viewRect = viewport()->rect();
+    const QRectF visible = mapToScene(viewRect).boundingRect();
+    const double step = GridMath::niceStep(std::min(visible.width(), visible.height()), 10);
+    if (step <= 0.0)
+        return;
 
-    // Настраиваем шрифт с динамическим размером
+    gridGroup = new QGraphicsItemGroup();
+    gridGroup->setZValue(-10); // под треками и объектами
+    graphicsScene->addItem(gridGroup);
+
+    // Линии с запасом в один шаг за краями, чтобы при пане не было пустых полос.
+    const QRectF area = visible.adjusted(-step, -step, step, step);
+    const std::vector<double> xs = GridMath::gridLines(area.left(), area.right(), step);
+    const std::vector<double> ys = GridMath::gridLines(area.top(), area.bottom(), step);
+
+    QPen pen(QColor(200, 200, 200));
+    pen.setCosmetic(true);
+    pen.setWidth(0);
+    for (double x : xs)
+        (new QGraphicsLineItem(x, area.top(), x, area.bottom(), gridGroup))->setPen(pen);
+    for (double y : ys)
+        (new QGraphicsLineItem(area.left(), y, area.right(), y, gridGroup))->setPen(pen);
+
+    // Подписи: ItemIgnoresTransformations сам компенсирует scale(1, -1) и зум, поэтому
+    // текст не зеркальный и одного размера. Смещение от линии и края — в пикселях
+    // (собственный transform такого элемента задаётся в координатах устройства).
     QFont font;
-    font.setPointSizeF(10.0 / transform().m11()); // Привязываем размер шрифта к масштабу
-
-
-    //отрисовка координат при движении зажатой мыши
-    QTransform mirrorTransform;
-    mirrorTransform.scale(1, -1);  // Отражаем по вертикали
-
-    QRectF visibleArea = mapToScene(viewport()->geometry()).boundingRect();
-    // Рисуем координаты вдоль верхней границы (для X)
-    for (double x = visibleArea.left()+(visibleArea.right() - visibleArea.left())/8; x <= visibleArea.right(); x += (visibleArea.right() - visibleArea.left())/8) {
-        QGraphicsTextItem* textX = graphicsScene->addText(QString::number(x), font);
-        textX->setPos(x, visibleArea.bottom() - 5); // Позиция вдоль инвертированной верхней границы
-        textX->setDefaultTextColor(Qt::black);
-        textX->setTransform(mirrorTransform);
+    font.setPointSizeF(8.0);
+    const int decimals = GridMath::labelDecimals(step);
+    const QPointF bottomLeft = mapToScene(viewRect.bottomLeft()); // X левого края, Y нижнего
+    const int marginPx = 3;
+    auto addLabel = [&](double value, const QPointF& anchor, bool alongBottom) {
+        const double shown = (value == 0.0) ? 0.0 : value; // без "-0"
+        auto* label = new QGraphicsSimpleTextItem(QString::number(shown, 'f', decimals), gridGroup);
+        label->setFont(font);
+        label->setBrush(QColor(90, 90, 90));
+        label->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+        label->setPos(anchor);
+        const qreal h = label->boundingRect().height();
+        // X: справа от линии над нижним краем; Y: над линией правее левого края.
+        label->setTransform(QTransform::fromTranslate(marginPx, alongBottom ? -h - marginPx : -h));
+    };
+    for (double x : xs) {
+        if (x >= visible.left() && x <= visible.right())
+            addLabel(x, QPointF(x, bottomLeft.y()), true);
     }
-
-    // Рисуем координаты вдоль левой границы (для Y)
-    for (double y = visibleArea.top() + abs(visibleArea.top() - visibleArea.bottom())/8; y <= visibleArea.bottom() - abs(visibleArea.top() - visibleArea.bottom())/8; y += abs(visibleArea.top() - visibleArea.bottom())/8) {
-        QGraphicsTextItem* textY = graphicsScene->addText(QString::number(y,'g', 8), font);
-        textY->setPos(visibleArea.left() + 5, y); // Позиция слева
-        textY->setDefaultTextColor(Qt::black);
-        textY->setTransform(mirrorTransform);
-    }
-}
-
-void UberPainter::drawCoordinatesNet(double minX, double minY, double maxX, double maxY)
-{
-    minX -= 50;
-    minY -= 50;
-    maxX -= 50;
-    maxX -= 50;
-    const double stepSize = 50.0;
-    if (minX == std::numeric_limits<double>::max()) return;
-    minX = static_cast<int>(std::round(minX / 50) * 50);
-    minY = static_cast<int>(std::round(minY / 50) * 50);
-    maxX = static_cast<int>(std::round(maxX / 50) * 50);
-    maxY = static_cast<int>(std::round(maxY / 50) * 50);
-
-    QFont smallFont;
-    smallFont.setPointSize(6);
-    for (double x = minX - 500; x <= maxX + 500; x += stepSize) {
-        QGraphicsLineItem* line = graphicsScene->addLine(x, minY - 500, x, maxY + 500, QPen(Qt::lightGray));
-        Q_UNUSED(line);
-        if (x == minX - 50) continue;
-
-
-    }
-
-    for (double y = minY - 500; y <= maxY + 500; y += stepSize) {
-        QGraphicsLineItem* line = graphicsScene->addLine(minX - 500, y, maxX + 500, y, QPen(Qt::lightGray));
-        Q_UNUSED(line);
-
-
-    }
-
-
-    QTransform mirrorTransform;
-    mirrorTransform.scale(1, -1);
-    QFont font;
-    font.setPointSizeF(10.0 / transform().m11()); // Привязываем размер шрифта к масштабу
-    QRectF visibleArea = mapToScene(viewport()->geometry()).boundingRect();
-    // Рисуем координаты вдоль верхней границы (для X)
-    for (double x = visibleArea.left()+(visibleArea.right() - visibleArea.left())/8; x <= visibleArea.right(); x += (visibleArea.right() - visibleArea.left())/8) {
-        QGraphicsTextItem* textX = graphicsScene->addText(QString::number(x), font);
-        textX->setPos(x, visibleArea.bottom() - 5); // Позиция вдоль инвертированной верхней границы
-        textX->setDefaultTextColor(Qt::black);
-        textX->setTransform(mirrorTransform);
-    }
-
-    // Рисуем координаты вдоль левой границы (для Y)
-    for (double y = visibleArea.top() + abs(visibleArea.top() - visibleArea.bottom())/8; y <= visibleArea.bottom() - abs(visibleArea.top() - visibleArea.bottom())/8; y += abs(visibleArea.top() - visibleArea.bottom())/8) {
-        QGraphicsTextItem* textY = graphicsScene->addText(QString::number(y,'g', 8), font);
-        textY->setPos(visibleArea.left() + 5, y); // Позиция слева
-        textY->setDefaultTextColor(Qt::black);
-        textY->setTransform(mirrorTransform);
+    for (double y : ys) {
+        if (y >= visible.top() && y <= visible.bottom())
+            addLabel(y, QPointF(bottomLeft.x(), y), false);
     }
 }
 
@@ -164,8 +133,6 @@ void UberPainter::mouseMoveEvent(QMouseEvent *event)
         lastMousePos = event->pos();
         horizontalScrollBar()->setValue(horizontalScrollBar()->value() - delta.x());
         verticalScrollBar()->setValue(verticalScrollBar()->value() - delta.y());
-
-        updateCoordinates(); // Обновляем координаты при сдвиге
     } else if (isPanning && (event->buttons() & Qt::RightButton)) {
         isNotDrawingLine = false;
         QPointF cur = mapToScene(event->pos());
@@ -202,7 +169,12 @@ void UberPainter::mouseMoveEvent(QMouseEvent *event)
             startPoint.y(), mapToScene(event->pos()).x(), mapToScene(event->pos()).y(), QPen(QColor(165, 42, 42))); //mr brown
     }
 
-    QGraphicsView::mouseMoveEvent(event);
+    QGraphicsView::mouseMoveEvent(event); // ScrollHandDrag тоже сдвигает вид, сетку — после
+
+    if (isPanning && (event->buttons() & Qt::LeftButton)) {
+        QMutexLocker locker(&sceneMutex);
+        drawGrid();
+    }
 }
 
 void UberPainter::mouseReleaseEvent(QMouseEvent *event)
@@ -239,6 +211,20 @@ void UberPainter::wheelEvent(QWheelEvent *event)
     }
 
     QGraphicsView::wheelEvent(event);
+
+    QMutexLocker locker(&sceneMutex);
+    drawGrid(); // шаг меняется сразу, без ожидания таймера
+}
+
+void UberPainter::resizeEvent(QResizeEvent* event)
+{
+    QGraphicsView::resizeEvent(event);
+    // Ресайз вьюпорта может прийти синхронно изнутри updateView() (setSceneRect меняет
+    // полосы прокрутки), где sceneMutex уже захвачен. Повторно его не берём: updateView()
+    // сам нарисует сетку после setSceneRect.
+    std::unique_lock<QMutex> lock(sceneMutex, std::try_to_lock);
+    if (lock.owns_lock())
+        drawGrid();
 }
 
 void UberPainter::updateView()
@@ -246,6 +232,7 @@ void UberPainter::updateView()
     centerView();
     QMutexLocker locker(&sceneMutex);
     graphicsScene->clear();
+    gridGroup = nullptr; // clear() уже удалил группу
 
     minX = std::numeric_limits<double>::max();
     minY = std::numeric_limits<double>::max();
@@ -262,11 +249,9 @@ void UberPainter::updateView()
         }
     }
 
-
     graphicsScene->setSceneRect(minX - 500, minY - 500, (maxX - minX) + 1000, (maxY - minY) + 1000);
 
-
-    drawCoordinatesNet(minX, minY, maxX, maxY);
+    drawGrid();
 
     for (auto it = recentPositions.begin(); it != recentPositions.end(); ++it) {
         FixedItem* item = it.key();
