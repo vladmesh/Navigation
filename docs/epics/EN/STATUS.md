@@ -8,11 +8,11 @@
 | Epic | 01 / 8 — Сетка координат в зоне отрисовки |
 | ADR | docs/adr/0001-coordinate-grid.md |
 | Release branch | release/epic-01 |
-| Stage | planning — done |
-| Current task | 01 — Чистая функция расчёта шага сетки + unit-тест (issue —, PR —) |
-| Next role | coder |
-| Hand-off | docs/adr/0001-coordinate-grid.md, Task 01 |
-| Last update | 2026-10-23 18:55, architect-plan |
+| Stage | task 01 — PR open, awaiting review |
+| Current task | 01 — Чистая функция расчёта шага сетки + unit-тест (issue #4, PR #5) |
+| Next role | reviewer |
+| Hand-off | PR #5 (epic-01/task-01-gridmath → release/epic-01); docs/sessions/2026-10-23-epic-01-coder-task-01.md; ADR 0001 Task 01 |
+| Last update | 2026-10-23 20:10, coder |
 
 ## Counters
 
@@ -27,9 +27,10 @@
 
 | # | Task | Status | Issue | PR |
 |---|---|---|---|---|
-| 01 | Чистая функция расчёта шага сетки (GridMath) + unit-тест | todo | | |
+| 01 | Чистая функция расчёта шага сетки (GridMath) + unit-тест | in review | #4 | #5 |
 | 02 | Адаптивная сетка и подписи в UberPainter (фикс границ, удаление updateCoordinates) | todo | | |
 
 ## Log
 
 - 2026-10-23 architect-plan: plan done — ADR 0001 accepted, 2 таска, ветка release/epic-01 создана; конспект docs/sessions/2026-10-23-epic-01-architect-plan.md
+- 2026-10-23 coder: task 01 — issue #4, PR #5 в release/epic-01; PR-CI: no workflow yet (ci_runs 0); локально tst_gridmath 27/27 pass (Qt 6.8.3 Linux), Ship.pro собирается; отчёт docs/sessions/2026-10-23-epic-01-coder-task-01.md; next: reviewer
