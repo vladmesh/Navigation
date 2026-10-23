@@ -18,7 +18,6 @@ They do not work with the MSVC build (`windows-msvc` job, Qt 6.8.3).
 | `Qt6Network.dll` | imported by Ship.exe (QUdpSocket, QTcpSocket) | owner |
 | `Qt6SerialPort.dll` | imported by Ship.exe (QSerialPort) | owner |
 | `Qt6Positioning.dll` | imported by Ship.exe (QGeoCoordinate) | owner |
-| `Qt6Core5Compat.dll` | imported by Ship.exe (QRegExp) | owner |
 | `Qt6Svg.dll` | dependency of `imageformats/qsvg.dll` (splash logo `:/Data/logoGeodevice.svg`) | owner |
 | `libgcc_s_seh-1.dll`, `libstdc++-6.dll`, `libwinpthread-1.dll` | MinGW 13.1.0 C++ runtime, imported by Ship.exe and Qt | official Qt 6.10.2 `win64_mingw` (aqt), `bin/` |
 | `platforms/qwindows.dll` | platform plugin for a normal desktop start | official Qt 6.10.2 `win64_mingw` (aqt), `plugins/` |
@@ -31,7 +30,7 @@ this with sha256 against the Qt it installs.
 
 Not included, not needed for start: `styles/` (the app sets the built-in `Fusion` style),
 `iconengines/qsvgicon.dll` (icons are created from `.ico`), `tls/`, `networkinformation/`
-(no HTTPS / QNetworkInformation), `Qt6Location.dll` (listed in `Ship.pro`, but no symbol is used,
+(no HTTPS / QNetworkInformation), `Qt6Core5Compat.dll` (`core5compat` removed from `Ship.pro`, `QRegExp` is no longer used), `Qt6Location.dll` (listed in `Ship.pro`, but no symbol is used,
 so the linker drops the import), `opengl32sw.dll`, `d3dcompiler_47.dll`, translations.
 Without `qwindows.dll` the app runs only with `QT_QPA_PLATFORM=offscreen`.
 
