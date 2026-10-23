@@ -17,7 +17,6 @@
 
 
 #include "itemsstorage.h"
-// #include "logger.h"
 
 namespace Ui {
 class Sender;
@@ -29,7 +28,6 @@ class Sender : public QObject
 public:
     Sender();
     ~Sender();
-    // Logger* log;
 
     QStringList createPackage();
     bool connectToHost();
@@ -45,7 +43,6 @@ public:
     void setNeedSendPackage(bool newNeedSendPackage);
 
     void setMyVault(ItemsStorage* newMyVault);
-
 
 
 public slots:

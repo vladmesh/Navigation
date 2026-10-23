@@ -1,0 +1,39 @@
+# Dr. Memory suppressions for nightly-drmemory.yml.
+# Only entries whose TOP of stack is inside Qt / Windows system DLLs.
+# Reports whose top frames are in Parsers/ or Test/ are real findings: fix them,
+# do not add them here. Origin: run 39994743165 (Qt 6.8.3 msvc2022_64 debug,
+# windows-2022): 165 unique reports, all inside Qt6Cored (QDateTime::fromString ->
+# time zone / registry lookup) and USER32 window creation inside QCoreApplication.
+
+# Qt internals (no PDB for Qt in CI, so frame names are unresolved).
+UNINITIALIZED READ
+name=qt-core-internal
+Qt6Cored.dll!*
+
+# AVX-512 masked load (vmovdqu8 {%k1}) in Qt string code reads past the
+# allocation under the mask; known Dr. Memory false positive.
+UNADDRESSABLE ACCESS
+name=qt-core-avx512-masked-load
+Qt6Cored.dll!*
+
+# Registry reads issued by Qt (time zone / locale lookup).
+UNINITIALIZED READ
+name=qt-registry-query
+KERNELBASE.dll!BaseRegQueryValueInternal
+KERNELBASE.dll!RegQueryValueExW
+Qt6Cored.dll!*
+
+# memset replacement called from Qt code.
+UNINITIALIZED READ
+name=qt-memset
+*!replace_memset
+Qt6Cored.dll!*
+
+# Hidden message window created by QCoreApplication (event dispatcher).
+UNINITIALIZED READ
+name=qt-create-window
+system call NtUserCreateWindowEx*
+USER32.dll!*
+USER32.dll!*
+USER32.dll!CreateWindowExW
+Qt6Cored.dll!*

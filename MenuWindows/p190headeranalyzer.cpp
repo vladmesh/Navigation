@@ -65,7 +65,6 @@ QString p190HeaderAnalyzer::getHeaderStringFromItem(QPointer<FixedItem> item)
     } else if (QString(item->metaObject()->className()) == "Towed") {
         return QString();
     } else if (QString(item->metaObject()->className()) == "Buoy") {
-        // Buoy *buoyRaw = qobject_cast<Buoy*>(item.data());
         return QString();
     } else if (QString(item->metaObject()->className()) == "Streamer") {
         Streamer *StreamerRaw = qobject_cast<Streamer*>(item.data());

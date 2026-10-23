@@ -5,21 +5,6 @@ BuoyDialog::BuoyDialog(ItemsStorage* vault, bool needConnection)
     ///если без соединения, то к косе не привязан, т.е. он не концевой
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
-    // QHBoxLayout *comboBoxLayout = new QHBoxLayout();
-
-    // if (needConnection){
-    //     QLabel *comboBoxLabel = new QLabel("Streamer Items:");
-    //     comboBox = new QComboBox();
-    //     comboBoxLayout->addWidget(comboBoxLabel);
-    //     comboBoxLayout->addWidget(comboBox);
-    //     mainLayout->addLayout(comboBoxLayout);
-    //     for (const auto &item : vault->ItemsVault) {
-    //         if (QString(item->metaObject()->className()) ==  "Streamer") {
-    //             comboBox->addItem(item->name);
-    //         }
-    //     }
-    // }
-
     QHBoxLayout *spinBoxLayout = new QHBoxLayout();
     spinBoxLabel1 = new QLabel("Anthena Height:");
     spinBox1 = new QDoubleSpinBox();
@@ -49,19 +34,6 @@ BuoyDialog::BuoyDialog(ItemsStorage* vault, bool needConnection)
 
 
 void BuoyDialog::onSetButtonClicked() {
-    // if (needConnection) {
-    //     if (comboBox->count() == 0) {
-    //         reject();
-    //     } else {
-    //         selectedStreamerName = comboBox->currentText();
-    //         selectedStreamer = qobject_cast<Streamer*>(MyVault->getItem(selectedStreamerName));
-    //     }
-    //     if (selectedStreamerName.isEmpty()) {
-    //         //просто буй, возможно leadBuoy
-    //     } else {
-    //         qDebug() << MyVault->getItem(selectedStreamerName)->name << "buoyDialog";
-    //     }
-    // }
     AnthenaHeight = spinBox1->value();
     TowingDepth = spinBox2->value();
     accept();

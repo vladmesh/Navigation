@@ -11,7 +11,6 @@
 #include <QVector>
 #include <QDir>
 #include <QStandardPaths>
-#include <QRegExp>
 #include <QCoreApplication>
 #include <QRegularExpression>
 
@@ -69,16 +68,7 @@ public:
      * @param tailBuoy Номер хвостового буя.
      * @return Сформированная строка.
      */
-    QStringList createMainInfoBlock(int ffid, int sourceID);
-    /**
-     * @brief Создание строки для основного блока.
-     * @param item Указатель на фиксированный элемент.
-     * @param pointNumber Номер точки.
-     * @param tailBuoy Номер хвостового буя.
-     * @return Сформированная строка.
-     */
 
-    QString createMainRow(FixedItem* item, int pointNumber, int tailBuoy);
 
     /**
      * @brief Создание строки для основного блока (новая версия).
@@ -106,8 +96,6 @@ public:
     QStringList createHeader(int dayNumber);
 
 
-    /// Запись данных блока (коса и все остальное)в файл
-    void writeP190Block();
     /**
      * @brief Запись списка строк в файл.
      * @param data Список строк для записи.
@@ -118,24 +106,11 @@ public:
      * @param Vault Указатель на хранилище объектов.
      */
     void setItemStoragePtr(ItemsStorage* Vault);
-    /**
-     * @brief Установка имени линии.
-     * @param newLineName Новое имя линии.
-     */
-    void setLineName(const QString &newLineName);
     QString createFileName();
-    /**
-     * @brief Преобразование координат.
-     * @param input Входная строка с координатами.
-     * @return Преобразованная строка с координатами.
-     */
-    QString convertCoordinates(const QString &input);
     /// Установка пути для сохранения файлов
     void setPath(const QDir &newPath);
     /// Установка FFID
     void setFFID(int newFFID);
-     /// Получение указателя на хранилище объектов
-    ItemsStorage *getMyVault() const;
     /// Установка хранилища объектов
     void setMyVault(ItemsStorage *newMyVault);
     /// Установка дня опроса
@@ -160,11 +135,9 @@ private:
     static QDir path; ///< Путь для сохранения файлов.
     QString fileName; ///< Имя выходного файла.
     QFile* outputFile = nullptr; ///< Указатель на файл вывода.
-    QTextStream* outputStream = nullptr; ///< Поток записи в файл.
     ItemsStorage* MyVault = nullptr; ///< Указатель на хранилище объектов.
 
     QChar tailBuoy; //ну и костыль. руки бы оторвать разрабу
-    // QString floatToQString(float value, int totalLength, int decimalPlaces);
 
     QStringList initializeHeaderFile(); // Проверяем/копируем файл при запуске
     bool headerIsWritten = false; ///< Флаг, указывающий, был ли записан заголовок.
@@ -179,8 +152,6 @@ private:
 
     ///working with HEADER and LINE
     QString lineName = "AA10AA0707077"; // len = 13
-
-    void fillSourceInfoInHeader(QStringList& header); //not done
 
 
 signals:

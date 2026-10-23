@@ -1,7 +1,7 @@
 #ifndef HOVERPAINTINGRPOINT_H
 #define HOVERPAINTINGRPOINT_H
 
-#include <QGraphicsEllipseItem >
+#include <QGraphicsEllipseItem>
 #include <QBrush>
 #include <QGraphicsSceneHoverEvent>
 

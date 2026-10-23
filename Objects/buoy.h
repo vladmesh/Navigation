@@ -2,7 +2,6 @@
 #define BUOY_H
 
 #include "toweditem.h"
-// #include "structures.h"
 
 /**
  * @class Buoy

@@ -12,7 +12,6 @@ public:
     QString loadFile(const QString &fileName);
     void saveFile(const QString &fileName);
     void insertLine(const QString &line);
-    QString getContent() const;
 
     QString content; //хранилище всей информации для заголовка P190
 private:

@@ -134,7 +134,6 @@ struct SourceInfo {
      * @param info Информация о буксируемом объекте.
      */
     SourceInfo(TowedItemInfo info, double AnthenaHeight = 1, double sourceDepth = 0.15) : info(info), AnthenaHeight(AnthenaHeight), sourceDepth(sourceDepth) {};
-    // SourceInfo(TowedItemInfo info, double AnthenaHeight, double sourceDepth) : info(info), AnthenaHeight(AnthenaHeight), sourceDepth(sourceDepth) {};
 };
 
 #endif // STRUCTURES_H

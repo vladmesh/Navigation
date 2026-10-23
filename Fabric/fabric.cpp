@@ -13,7 +13,6 @@ Fabric::~Fabric()
 
 FixedItem* Fabric::CreateItem(FixedItemInfo info, bool needConnect)
 {
-    // qDebug() <<needConnect;
     FixedItem* item = new FixedItem(
         info.SchemeCoors.x, info.SchemeCoors.y,info.SchemeCoors.z,
         info.ItemName);
@@ -57,9 +56,6 @@ Streamer* Fabric::CreateItem(StreamerInfo info)
         info.chans = dialog.chans;
         info.numOfChannels = dialog.numOfChannels;
         ///streamer params dialog
-        // Streamer* streamer = new Streamer(info.towedInfo.name,
-        //     info.towedInfo.toWhoIsWired, info.towedInfo.angleToWired,
-        //     info.towedInfo.wireLength, info.numOfChannels, info.chans);
         Streamer* streamer;
         if (dialog.dChString.isEmpty()) {
             streamer = new Streamer(info.towedInfo.name,
@@ -75,7 +71,6 @@ Streamer* Fabric::CreateItem(StreamerInfo info)
         return nullptr;
     }
 }
-
 
 
 Buoy* Fabric::CreateItem(BuoyInfo info, bool needConnection)
@@ -99,9 +94,7 @@ Buoy* Fabric::CreateItem(BuoyInfo info, bool needConnection)
             return nullptr;
         }
         if (bindItemConnection(newBuoy, con)){
-            // qDebug() << "Fabric::CreateItem";
         }
-        // if (dialog.selectedStreamer) dialog.selectedStreamer->endBuoy = newBuoy; ///привязываем буй к косе
     }
     return newBuoy;
 
@@ -138,7 +131,6 @@ Connection* Fabric::createConnection(QString itemName)
 {
     Connection* res = nullptr;
     connectionCreator->setLastCreatedFileName(itemName);
-    // connectionCreator->updateCOMPortsList();
     if (connectionCreator->exec() == QDialog::Accepted){
         qDebug() << "Fabric::createConnection() Accepted";
         connectionCreator->close();
@@ -152,14 +144,12 @@ Connection* Fabric::createConnection(QString itemName)
 }
 
 
-
 int Fabric::bindItemConnection(FixedItem *to, Connection *who)
 {
     if (who != nullptr && to != nullptr) {
         to->connection = who;
         to->hasConnection = true;
         QString className = who->metaObject()->className();
-        // qDebug() << who->metaObject()->className() <<"Class name";
         if (className == QStringLiteral("Connection_com")) {
             Connection_com* tmp = dynamic_cast<Connection_com*>(who);
             qDebug() << tmp->getComPort() <<"Binded to" << to->name;

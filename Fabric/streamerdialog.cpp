@@ -64,7 +64,6 @@ StreamerDialog::StreamerDialog(QWidget* parent)
     connect(tabWidget, &QTabWidget::currentChanged, this, &StreamerDialog::updateStatusLabel);
 
 
-
     multiChannelComboBoxDistance->setCurrentIndex(2);
     multiChannelComboBoxChannels->setCurrentIndex(1);
 
@@ -90,7 +89,6 @@ StreamerDialog::StreamerDialog(QWidget* parent)
 
 void StreamerDialog::onFinishButtonClicked()
 {
-    // qDebug() << "StreamerDialog::onFinishButtonClicked";
     createChansValues();
     elasticSectionLength = 0;
     leadingDamperLength = elasticSectionLength;
@@ -107,97 +105,6 @@ void StreamerDialog::updateStatusLabel()
     statusLabel->setText("Total Length: " + QString::number(totalLength) + " m.");
 }
 
-void StreamerDialog::loadCSVFile() {
-    QString filePath = QFileDialog::getOpenFileName(this, tr("Open CSV File"), "", tr("CSV Files (*.csv)"));
-    if (!filePath.isEmpty()) {
-        readCSV(filePath);
-    } else {
-        QMessageBox::warning(this, tr("Error"), tr("File Is Empty"));
-        return;
-    }
-}
-
-void StreamerDialog::readCSV(const QString& filePath) {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::warning(this, tr("Error"), tr("Cannot open file"));
-        return;
-    }
-
-    QTextStream in(&file);
-    chans.clear();
-    numOfChannels = 0;
-    float leadingDamperLength = 0.0;
-    float endDamperLength = 0.0;
-
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        QStringList fields = line.split(';');
-        bool ok;
-        if (fields.size() != 2) continue; // Skip lines with unexpected number of fields
-
-        if (fields[0] == "leading damper section length (m)") {
-            leadingDamperLength = fields[1].toFloat();
-        } else if (fields[0] == "end damper section length (m)") {
-            endDamperLength = fields[1].toFloat();
-        } else if (fields[0] == "Channels count") {
-            numOfChannels = fields[1].toInt();
-        } else if (fields[0].toInt(&ok) > 0 && ok) { // Assume first field is channel number
-            chans.append(fields[1].toFloat());
-        }
-    }
-
-    if (!chans.isEmpty()) {
-        totalLength = leadingDamperLength + endDamperLength + chans.last() - chans.first();
-        QMessageBox::information(this, tr("Success"), tr("CSV file loaded successfully."));
-    } else {
-        QMessageBox::warning(this, tr("Error"), tr("CSV file is empty or invalid."));
-    }
-    accept();
-}
-
-void StreamerDialog::saveToCSV() {
-    // Generate file name
-    QString baseFileName;
-    if (tabWidget->currentIndex() == 0) {
-        baseFileName = singleChannelComboBox->currentText() + ".csv";
-    } else {
-        baseFileName = QString("HRStreamer_%1_%2.csv").arg(numOfChannels).arg(chans.isEmpty() ? 0 : chans[0]);
-    }
-    QFile file(baseFileName);
-    int suffix = 1;
-    createChansValues();
-    // Check if file already exists and add suffix if necessary
-    while (file.exists()) {
-        baseFileName = QString("%1_new%2.csv").arg(baseFileName.left(baseFileName.lastIndexOf('.'))).arg(suffix);
-        file.setFileName(baseFileName);
-        ++suffix;
-    }
-    // Open file for writing
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, tr("Error"), tr("Cannot create file"));
-        return;
-    }
-
-    QTextStream out(&file);
-
-    // Write headers and values to the file
-    out << "leading damper section length (m);" << leadingDamperLength << "\n";
-    out << "end damper section length (m);" << endDamperLength << "\n";
-    out << "Channel spacing (m);" << (chans.size() > 1 ? chans[1] - chans[0] : 0) << "\n";
-    out << "Channels count;" << numOfChannels << "\n";
-    out << "Leading buoy towing depth (m),0.5\n";
-    out << "End buoy towing depth (m);1.5\n";
-    out << "Distance to end buoy (m);3\n\n";
-    out << "Channel number;offset from leading buoy\n";
-
-    for (int i = 0; i < chans.size(); ++i) {
-        out << i + 1 << ";" << chans[i] << "\n";
-    }
-
-    file.close();
-    QMessageBox::information(this, tr("Success"), tr("CSV file saved successfully."));
-}
 
 void StreamerDialog::createChansValues()
 {
@@ -223,14 +130,12 @@ void StreamerDialog::createChansValues()
             dChString = "1&2";
         }
     } else{ //HRStreamer-1
-        // float dCh = 0.2;
         dChString = "";
         switch(singleChannelComboBox->currentIndex()){
         case 0:
             numOfChannels = 2;
             chans.append(0);
             chans.append(chans[0] + 0.8);
-            // qDebug() << "1x8";
             singleChannelType = "1x8";
             break;
         case 1:
@@ -238,7 +143,6 @@ void StreamerDialog::createChansValues()
             chans.append(0);
             chans.append(chans[0] + 0.8);
             chans.append(chans[1] + 1.6);
-            // qDebug() << "1x16";
             singleChannelType = "1x16";
             break;
         case 2:
@@ -246,7 +150,6 @@ void StreamerDialog::createChansValues()
             chans.append(0);
             chans.append(chans[0] + 0.8);
             chans.append(chans[1] + 2.4);
-            // qDebug() << "1x24";
             singleChannelType = "1x24";
             break;
         case 3:
@@ -255,7 +158,6 @@ void StreamerDialog::createChansValues()
             chans.append(chans[0] + 0.8);
             chans.append(chans[1] + 2.4);
             chans.append(chans[2] + 4);
-            // qDebug() << "1x48";
             singleChannelType = "1x48";
             break;
         case 4:
@@ -265,7 +167,6 @@ void StreamerDialog::createChansValues()
             chans.append(chans[1] + 2.4);
             chans.append(chans[2] + 4);
             chans.append(chans[3] + 7.2);
-            // qDebug() << "1x96";
             singleChannelType = "1x96";
             break;
         default:

@@ -14,8 +14,6 @@ ItemsStorage::~ItemsStorage() {
 
 void ItemsStorage::SaveItem(FixedItem* NewItem){
     ItemsVault.push_back(NewItem);
-    // connect
-    // qDebug() <<"I am in Vault "<<NewItem->itemType<<NewItem->name;
 
 }
 
@@ -23,7 +21,6 @@ void ItemsStorage::DeleteItem(QString Name) {
     for (auto it = ItemsVault.begin(); it != ItemsVault.end(); it++) {
         qDebug() <<(*it)->name;
     }
-    // return;
     for (auto it = ItemsVault.begin(); it != ItemsVault.end(); it++) {
         if ((*it) == nullptr) {
             delete *it;
@@ -36,17 +33,9 @@ void ItemsStorage::DeleteItem(QString Name) {
             break;
         }
     }
-    // for (auto it = ItemsVault.begin(); it != ItemsVault.end(); it++) {
-    //     if ((*it)->IShouldBeDeleted) {
-    //         delete *it;
-    //         ItemsVault.erase(it);
-    //         break;
-    //     }
-    // }
     for (auto it = ItemsVault.begin(); it != ItemsVault.end(); it++) {
         qDebug() <<(*it)->name;
     }
-    // qDebug();
 }
 void ItemsStorage::setItemForCalculation() {
     setItemForCalculation(this->ItemsVault);
@@ -148,7 +137,6 @@ void ItemsStorage::setItemsCreationIndex(QVector<QPointer<FixedItem>> &ItemsVaul
             }
         } else {
             lastPriority.push_back(QPointer(qobject_cast<TowedItem*>(i)));
-            // lastPriority.push_back(QPointer(dynamic_cast<TowedItem*>(i)));
         }
     }
 
@@ -163,9 +151,6 @@ void ItemsStorage::setItemsCreationIndex(QVector<QPointer<FixedItem>> &ItemsVaul
         }
         timeBreakerFlag++;
     }
-    // for (auto i: ItemsVault) {
-    //     qDebug() << i->name << i->creationPriority;
-    // }
 
 }
 
@@ -176,12 +161,6 @@ void ItemsStorage::deleteAllItems()
     }
 }
 
-void ItemsStorage::cleanVector()
-{
-    ItemsVault.erase(std::remove_if(ItemsVault.begin(), ItemsVault.end(),
-        [](const QPointer<FixedItem>& ptr) { return ptr.isNull(); }),
-        ItemsVault.end());
-}
 
 FixedItem* ItemsStorage::getItem(QString name) {
     for (auto it = ItemsVault.begin(); it != ItemsVault.end(); it++) {

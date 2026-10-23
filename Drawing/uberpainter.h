@@ -14,12 +14,9 @@
 #include <QGraphicsLineItem>
 #include <QGraphicsTextItem>
 #include <cmath>
-// #include <deque>
 #include <QQueue>
 
 #include "itemsstorage.h"
-
-// #include "structures.h"
 
 
 #define QUEUES_SIZE 5
@@ -150,6 +147,5 @@ private:
 
     bool isNotDrawingLine = true; ///< Флаг, указывающий на режим рисования линии.
 
-    QVector<QGraphicsItem*> coordinateItems; ///< Вектор для хранения элементов координатной сетки.
 };
 #endif // UBERPAINTER_H

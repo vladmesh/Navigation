@@ -1,10 +1,6 @@
 #include "connection_com.h"
-// #include "ui_connection_com.h"
 
-Connection_com::Connection_com() /*: ui(new Ui::Connection_com)*/
-{
-    // ui->setupUi(this);
-}
+Connection_com::Connection_com() {}
 /**
  * @brief Конструктор с параметрами для инициализации COM-порта и файла записи.
  * @param COM_port Имя COM-порта.
@@ -15,18 +11,15 @@ Connection_com::Connection_com() /*: ui(new Ui::Connection_com)*/
  * если он указан и имеет расширение ".nmea".
  */
 Connection_com::Connection_com(QString COM_port, int BaudRate, QString filename)
-    : filename(filename), /*ui(new Ui::Connection_com),*/ COM_port(COM_port),
-    BaudRate(BaudRate)
+    : filename(filename), COM_port(COM_port), BaudRate(BaudRate)
 {
 
-    // ui->setupUi(this);
     ui->setAttribute(Qt::WA_DeleteOnClose);
 
     if (!filename.isEmpty() && filename.endsWith(".nmea")) create_file_for_nmea(this->filename); //создание файла
     // Устанавливаем параметры порта
     SerialPort.setPortName(COM_port);
     SerialPort.setBaudRate(BaudRate);
-    // SerialPort.setBaudRate(QSerialPort::Baud115200);
 
     SerialPort.setDataBits(QSerialPort::Data8);
     SerialPort.setParity(QSerialPort::NoParity);
@@ -47,7 +40,6 @@ Connection_com::~Connection_com()
 {
     SerialPort.close();
     file->close();
-    // if (ui) delete ui;
 }
 
 QString Connection_com::getComPort()
@@ -119,8 +111,6 @@ void Connection_com::ReadyRead() {
         }
         data.clear();
         data = removedPart;
-        // DataBuffer.clear();
     }
-    // qDebug() <<"_____________";
 }
 
