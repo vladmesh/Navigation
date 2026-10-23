@@ -40,7 +40,6 @@ MainWindow::MainWindow(QWidget *parent)
     ///p190Creator
     p190Creator = new P190_creator();
     p190Creator->setItemStoragePtr(Vault);
-    // p190Creator->initializeHeaderFile();
 
     DrawingAreaTopView = new MyGraphicView(this);
     ui->verticalLayout->addWidget(DrawingAreaTopView);
@@ -52,36 +51,30 @@ MainWindow::MainWindow(QWidget *parent)
     paintingTimer = new QTimer(this);
     painter = new UberPainter(Vault);
     ui->verticalLayout->addWidget(painter);
-    // painter->hide();
     connect(paintingTimer, &QTimer::timeout, this, &MainWindow::runPainterRun);
     paintingTimer->start(1000);
 
     setMenuBar(menuBar());
 
     setWindowTitle("Seismic Navigation");
-    // painter->run();
 
 
     ///one path to rule all the files
     ///and logger
-    // logger = (&Logger::instance());
     setPathForAllFiles();
 
-    // logger->createLogFile();
 
     //наблюдатель за объектами
     objObserver = new ObjectObserver(Vault);
     objObserver->setTableWithItems(tableWithItems);
 
 
-    //set analyzer which analyze the vault;
     P190HeaderAnalyzer.setVault(Vault);
     packageSender->setMyVault(Vault);
 }
 
 MainWindow::~MainWindow()
 {
-    // log->logMessage(this, Logger::Info, "Main Window destructor");
     qDebug() << __FUNCTION__;
     paintingTimer->stop();
     delete DrawingAreaTopView;
@@ -89,8 +82,6 @@ MainWindow::~MainWindow()
     delete MyFabric;
     delete ui;
     if (objObserver) delete objObserver;
-    // if (logger) logger->suicide();
-    // exit(0);
 }
 
 
@@ -116,18 +107,9 @@ void MainWindow::on_DeleteItemPushButton_clicked()
     recursiveItemDeleting(std::vector<QString>{deleteName});
 
 
-    // painter->eraseFromPainting(Vault->getItem(deleteName)); //удаляем элемент из сета в Uberpainter
-    // if (row >= 0) {
-    //     tableWithItems->removeRow(row);
-    //     Vault->DeleteItem(deleteName);
-    // }
-    // ui->ComboBoxWiredWith->removeItem(ui->ComboBoxWiredWith->findText(deleteName));
-
-
     DrawingAreaTopView->update();
     paintingTimer->start();
     updateWiredWithComboBox();
-    // destroyObject();
 }
 
 
@@ -151,7 +133,6 @@ void MainWindow::on_AddItemtPushButton_clicked()
         double y = ui->YCoorSpinBox->value();
         double z = ui->ZCoorSpinBox->value();
         FixedItemInfo FixedItemInfo(x,y,z,name);
-        //newItem =
         newItem = createFixedItem(FixedItemInfo);
     } else if (ui->ItemTypeTabWidget->currentIndex() == 1) {
         ///getting params for towed
@@ -171,13 +152,11 @@ void MainWindow::on_AddItemtPushButton_clicked()
 
         if (itemType == "Streamer") {
             StreamerInfo StreamerItemInfo{TowedItemInfo, 0, {0}};
-            // Streamer* newItem =
             towedItem = createStreamerItem(StreamerItemInfo);
         } else if (itemType == "Buoy") {
             BuoyInfo BuoyItemInfo{TowedItemInfo, -1,-1};
             towedItem = createBuoyItem(BuoyItemInfo);
         } else if (itemType == "Towed") {
-            //newItem =
             towedItem = createTowedItem(TowedItemInfo);
         } else if (itemType == "Source") {
             SourceInfo SourceItemInfo = {TowedItemInfo, -1, -1};
@@ -229,14 +208,11 @@ void MainWindow::setUpObjectsTable() {
     tableWithItems->setSelectionMode(QAbstractItemView::SingleSelection);
 
     connect(tableWithItems, &QTableWidget::itemChanged, this, &MainWindow::onItemChanged);
-    // connect(tableWithItems, &QTableWidget::currentCellChanged, )
-    // tableWithItems->setEditTriggers(QTableWidget::NoEditTriggers);
 }
 
 void MainWindow::addItemToObjectsList(FixedItem* newItem) {
 
     QString name = newItem->name;
-    // QString type = newItem->itemType;
     float x = newItem->x;
     float y = newItem->y;
     float z = newItem->z;
@@ -261,7 +237,6 @@ void MainWindow::addItemToObjectsList(FixedItem* newItem) {
             }
         }
     }
-    // QTableWidgetItem* item = tableWithItems->item(NumberOfRowsInTable, 1);
 
     if (newItem->hasConnection == false) {
         tableWithItems->item(NumberOfRowsInTable, 4)->setText("None");
@@ -276,7 +251,6 @@ void MainWindow::addItemToObjectsList(FixedItem* newItem) {
 }
 
 void MainWindow::onItemChanged(QTableWidgetItem* item) {
-    // return;
     if (!tableWithItems->item(item->row(), 4)) return;
     if (tableWithItems->item(item->row(), 4)->text().isEmpty()) return;
     //защита от срабатывания при создании ячеек, т.к. текст в State появляется последним
@@ -295,8 +269,6 @@ void MainWindow::onItemChanged(QTableWidgetItem* item) {
                 editedItem->x = tableWithItems->item(item->row(), 1)->text().toDouble(&ok);
                 editedItem->y = tableWithItems->item(item->row(), 2)->text().toDouble(&ok);
                 editedItem->z = tableWithItems->item(item->row(), 3)->text().toDouble(&ok);
-                // qDebug() << editedItem->x << editedItem->y << __FUNCTION__;
-                // qDebug() << "Cell changed at row" << item->row()<< "column" << column << "to" << newValue << __FUNCTION__;
             }
         }
     }
@@ -327,7 +299,6 @@ void MainWindow::saveLayoutToJson()
     QString fileName = QFileDialog::getSaveFileName(nullptr, "Save configuration",
                                                     QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/Ship_logs/json", "Config Files (*.json);;All Files (*)");
     if (!fileName.isEmpty()) {
-        // QMessageBox::information(nullptr, "Save configuration", QString("Configuration saved at %1").arg(fileName));
         QJsonObject params = ItemsLoader::instance().writeToJSON(this->Vault->ItemsVault);
         ItemsLoader::saveJsonObjectToFile(params, fileName);
     }
@@ -364,13 +335,11 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         qDebug() << "Closing...";
         event->accept();
         destroyAllTheObjects();
-        // delete this;
     } else if (msgBox.clickedButton() == saveButton) {
         qDebug() << "Saving config...";
         saveLayoutToJson();
         event->accept();
         destroyAllTheObjects();
-        // delete this;
     } else if (msgBox.clickedButton() == noButton) {
         qDebug() << "Cancel closing.";
         event->ignore();
@@ -472,13 +441,11 @@ void MainWindow::setMenuBar(QMenuBar *menuBar) //здесь мы создаем 
     QObject::connect(p190HeaderAction, &QAction::triggered, menuBar->parent(), [this]() {
         P190HeaderChanger *headerChanger = new P190HeaderChanger();
         headerChanger->setVault(Vault);
-        // headerChanger->setAttribute(Qt::WA_DeleteOnClose);
         headerChanger->show();
     });
     QAction* shipParamsChangerAction = new QAction("Ship Settings", settingsMenu);
     QObject::connect(shipParamsChangerAction, &QAction::triggered, menuBar->parent(), [this]() {
         ShipParamsChanger* shipParamChanger = new ShipParamsChanger(nullptr, DrawingAreaTopView->MyShip);
-        // shipParamChanger->setAttribute(Qt::WA_DeleteOnClose);
         if (shipParamChanger->exec() == QDialog::Accepted) {
             QVector<QPointF> tmp = shipParamChanger->getFigureCoordinates();
             for (auto i: shipParamChanger->getFigureCoordinates()) {
@@ -489,10 +456,8 @@ void MainWindow::setMenuBar(QMenuBar *menuBar) //здесь мы создаем 
             DrawingAreaTopView->updateShip();
             DrawingAreaTopView->update();
             coordinator->boardDepthChanged(shipParamChanger->getMainDeckHeight());
-            // boardDepthChanged
         }
         delete shipParamChanger;
-        // shipParamChanger.show();
     });
 
     settingsMenu->addAction(p190HeaderAction);
@@ -534,21 +499,9 @@ void MainWindow::setPathForAllFiles()
 
     if (MyFabric) MyFabric->connectionCreator->setDirPath(dir);
     if (p190Creator) p190Creator->setPath(dir);
-    // if (logger) logger->setPath(dir);
-    // PostProcessorView::getInstance()->po
 
 }
 
-
-// void MainWindow::setSegyReader()
-// {
-//     sr = new SegYReader();
-//     sr->readPathWithSegy(QDir("C:\\Users\\sabrahar\\Desktop\\FINAL\\20240923_UHRS_48\\RAW"));
-
-//     for (auto i:sr->pairs) {
-//         pairs.append(i);
-//     }
-// }
 
 void MainWindow::hideDangerousButtons()
 {
@@ -582,8 +535,6 @@ FixedItem* MainWindow::createFixedItem(FixedItemInfo NewItemInfo) {
 
 
     ///adding new object to our Drawing area
-    // DrawingAreaTopView->addPoint(NewItem->x,NewItem->y,NewItem->z,NewItem->name);
-    // DrawingAreaSideView->addPoint(NewItem->x,NewItem->y,NewItem->z,NewItem->name);
     ///adding new object to our Drawing area
 
     return NewItem;
@@ -608,9 +559,6 @@ TowedItem* MainWindow::createTowedItem(TowedItemInfo NewItemInfo) {
 
 
     ///adding new object to our Drawing area
-    // DrawingAreaTopView->addPoint(NewItem->x,NewItem->y,NewItem->z,NewItem->name);
-    // DrawingAreaSideView->addPoint(NewItem->x,NewItem->y,NewItem->z,NewItem->name);
-    // drawLineToTowed(NewItem);
     ///adding new object to our Drawing area
 
 
@@ -619,10 +567,7 @@ TowedItem* MainWindow::createTowedItem(TowedItemInfo NewItemInfo) {
 
 Streamer* MainWindow::createStreamerItem(StreamerInfo info)
 {
-    // QString name = info.towedInfo.name;
-    // FixedItem* twiw = info.towedInfo.toWhoIsWired;
 
-    // Streamer* NewItem = new Streamer();
     Streamer* NewItem = MyFabric->CreateItem(info);
     if (NewItem == nullptr) return nullptr;
 
@@ -636,14 +581,6 @@ Streamer* MainWindow::createStreamerItem(StreamerInfo info)
 
     ///Drawing
     drawLineToTowed(NewItem);
-    // DrawingAreaSideView->drawStreamer(NewItem->x, NewItem->y,
-    //     NewItem->getChan(NewItem->getChanCount()-1)->x,
-    //     NewItem->getChan(NewItem->getChanCount()-1)->y,
-    //     NewItem->getChanCount());
-    // DrawingAreaSideView->drawStreamer(NewItem->x, NewItem->z,
-    //     NewItem->getChan(NewItem->getChanCount()-1)->x,
-    //     NewItem->getChan(NewItem->getChanCount()-1)->z,
-    //     NewItem->getChanCount());
 
 
     return NewItem;
@@ -662,7 +599,6 @@ Buoy* MainWindow::createBuoyItem(BuoyInfo BuoyItemInfo)
     if (NewItem == nullptr) return nullptr;
     if (QString(BuoyItemInfo.towedInfo.toWhoIsWired->metaObject()->className()) == "Streamer") {
         dynamic_cast<Streamer*>(Vault->getItem(BuoyItemInfo.towedInfo.toWhoIsWired->name))->setEndBuoy(NewItem);
-        // NewItem->wireLength += dynamic_cast<Streamer*>(Vault->getItem(BuoyItemInfo.towedInfo.toWhoIsWired->name))->getTotalLength();
     }
     //тут мы проверяем, что если буй привязан к косе, то коса->концевой буй* = новый созданный объект
     //а потом увеличиваем дистанцию буксировки на длину косы
@@ -678,11 +614,6 @@ Buoy* MainWindow::createBuoyItem(BuoyInfo BuoyItemInfo)
 
     ///adding ability to wire any towed item with it
     ui->ComboBoxWiredWith->addItem(NewItem->name);
-
-    //drawing
-    // drawLineToTowed(NewItem);
-    // DrawingAreaTopView->addPoint(NewItem->x,NewItem->y,NewItem->z,NewItem->name);
-    // DrawingAreaSideView->addPoint(NewItem->x,NewItem->y,NewItem->z,NewItem->name);
 
     return NewItem;
 }
@@ -707,11 +638,6 @@ Source* MainWindow::createSourceItem(SourceInfo SourceItemInfo) //метод д�
 
     ///adding ability to wire any towed item with it
     ui->ComboBoxWiredWith->addItem(NewItem->name);
-
-    //drawing
-    // drawLineToTowed(NewItem);
-    // DrawingAreaTopView->addPoint(NewItem->x,NewItem->y,NewItem->z,NewItem->name);
-    // DrawingAreaSideView->addPoint(NewItem->x,NewItem->y,NewItem->z,NewItem->name);
 
     return NewItem;
 }
@@ -775,13 +701,9 @@ void MainWindow::drawLineToTowed(TowedItem* item) {
         float streamerLength = dynamic_cast<Streamer*>(item->towingPoint)->totalLength;
         DrawingAreaTopView->drawLineToTowed(item->x, item->y,
                                             item->towingPoint->x-streamerLength, item->towingPoint->y);
-        // DrawingAreaSideView->drawLineToTowed(item->x, item->z,
-        //                                      item->towingPoint->x-streamerLength, item->towingPoint->z);
     } else {
         DrawingAreaTopView->drawLineToTowed(item->x, item->y,
             item->towingPoint->x, item->towingPoint->y);
-        // DrawingAreaSideView->drawLineToTowed(item->x, item->z,
-        //     item->towingPoint->x, item->towingPoint->z);
     }
 }
 
@@ -789,7 +711,6 @@ void MainWindow::on_TopViewRB_clicked()
 {
     DrawingAreaTopView->show();
     painter->hide();
-    // DrawingAreaSideView->hide();
 }
 
 
@@ -797,59 +718,8 @@ void MainWindow::on_SideViewRB_clicked()
 {
     DrawingAreaTopView->hide();
     painter->show();
-    // DrawingAreaSideView->show();
 }
 
-// void MainWindow::on_RBFixed_clicked()
-// {
-//     ui->ComboBoxItemType->setDisabled(true);
-//     ui->ComboBoxWiredWith->setDisabled(true);
-//     ui->WireLengthSpinBox->setDisabled(true);
-
-//     ui->XCoorSpinBox->setDisabled(false);
-//     ui->YCoorSpinBox->setDisabled(false);
-//     // ui->ZLineEdit->setDisabled(false);
-//     ui->ItemNameLineEdit->setText("Fixed");
-
-//     // ui->WireLengthSpinBox->hide();
-//     // ui->ComboBoxWiredWith->hide();
-//     // ui->ComboBoxItemType->hide();
-//     // ui->label->hide();
-//     // ui->label_6->hide();
-//     // ui->label_7->hide();
-
-//     // ui->XLineEdit->show();
-//     // ui->YLineEdit->show();
-//     // ui->label_3->show();
-//     // ui->label_4->show();
-// }
-
-
-// void MainWindow::on_RBTowed_clicked()
-
-// {
-//     ui->ComboBoxItemType->setDisabled(false);
-//     ui->ComboBoxWiredWith->setDisabled(false);
-//     ui->WireLengthSpinBox->setDisabled(false);
-
-//     ui->XCoorSpinBox->setDisabled(true);
-//     ui->YCoorSpinBox->setDisabled(true);
-
-//     // ui->WireLengthSpinBox->show();
-//     // ui->ComboBoxWiredWith->show();
-//     // ui->ComboBoxItemType->show();
-//     // ui->label->show();
-//     // ui->label_6->show();
-//     // ui->label_7->show();
-
-//     // ui->XLineEdit->hide();
-//     // ui->YLineEdit->hide();
-//     // ui->label_3->hide();
-//     // ui->label_4->hide();
-
-//     emit on_ComboBoxItemType_activated(ui->ComboBoxItemType->currentIndex());
-//     // ui->ZLineEdit->setDisabled(true);
-// }
 
 void MainWindow::on_ComboBoxItemType_activated(int index)
 {
@@ -880,32 +750,6 @@ void MainWindow::on_ComboBoxItemType_activated(int index)
     }
 }
 
-
-// void MainWindow::on_pushButton_clicked()
-// {
-//     static int timerRunsFlag = 0;
-//     if (!timerRunsFlag) {
-//         timerRunsFlag = 1;
-//         coordinator->wireFixedItems();
-//         p190Creator->createP190File();
-//         return;
-//         MyTimer->start(200);
-//         // qDebug() << "start";
-//     } else {
-//         timerRunsFlag = 0;
-//         MyTimer->stop();
-//     }
-// }
-
-
-// void MainWindow::on_pushButton_2_clicked()
-// {
-//     for (FixedItem* it: Vault->ItemsVault) {
-//         if (it->hasConnection) {
-//             it->connection->reconnect();
-//         }
-//     }
-// }
 
 void MainWindow::runPainterRun()
 {

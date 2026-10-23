@@ -89,7 +89,6 @@ StreamerDialog::StreamerDialog(QWidget* parent)
 
 void StreamerDialog::onFinishButtonClicked()
 {
-    // qDebug() << "StreamerDialog::onFinishButtonClicked";
     createChansValues();
     elasticSectionLength = 0;
     leadingDamperLength = elasticSectionLength;
@@ -131,14 +130,12 @@ void StreamerDialog::createChansValues()
             dChString = "1&2";
         }
     } else{ //HRStreamer-1
-        // float dCh = 0.2;
         dChString = "";
         switch(singleChannelComboBox->currentIndex()){
         case 0:
             numOfChannels = 2;
             chans.append(0);
             chans.append(chans[0] + 0.8);
-            // qDebug() << "1x8";
             singleChannelType = "1x8";
             break;
         case 1:
@@ -146,7 +143,6 @@ void StreamerDialog::createChansValues()
             chans.append(0);
             chans.append(chans[0] + 0.8);
             chans.append(chans[1] + 1.6);
-            // qDebug() << "1x16";
             singleChannelType = "1x16";
             break;
         case 2:
@@ -154,7 +150,6 @@ void StreamerDialog::createChansValues()
             chans.append(0);
             chans.append(chans[0] + 0.8);
             chans.append(chans[1] + 2.4);
-            // qDebug() << "1x24";
             singleChannelType = "1x24";
             break;
         case 3:
@@ -163,7 +158,6 @@ void StreamerDialog::createChansValues()
             chans.append(chans[0] + 0.8);
             chans.append(chans[1] + 2.4);
             chans.append(chans[2] + 4);
-            // qDebug() << "1x48";
             singleChannelType = "1x48";
             break;
         case 4:
@@ -173,7 +167,6 @@ void StreamerDialog::createChansValues()
             chans.append(chans[1] + 2.4);
             chans.append(chans[2] + 4);
             chans.append(chans[3] + 7.2);
-            // qDebug() << "1x96";
             singleChannelType = "1x96";
             break;
         default:

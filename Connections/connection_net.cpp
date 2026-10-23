@@ -43,7 +43,6 @@ Connection_Net::~Connection_Net()
 {
     file->close();
     socket->close();
-    // if (ui) delete ui;
     delete socket;
 }
 
@@ -118,10 +117,8 @@ void Connection_Net::ReadyRead()
     if (check_nmea_data(data)) { ///������������ �����������
         recieve_data(data);
         calcQuality(true);
-        // qDebug() << "GOOD DATA "<< data;
     } else {
         calcQuality(false);
-        // qDebug() << "BAD DATA "<< data;
     }
 }
 

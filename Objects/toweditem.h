@@ -37,7 +37,6 @@ public:
     virtual ~TowedItem();
 
     void updateLayout();
-    // void calcItemCoordinates();
     /**
      * @brief Перегруженный метод вычисления координат объекта, если он не подключен.
      */
@@ -62,8 +61,6 @@ public:
      */
     QString getLastRMC();
 
-    // QString name;
-    // QString itemType;
     /**
      * @brief Устанавливает высоту борта объекта. Больше не используется.
      * @param newBoardHeight Новая высота борта.

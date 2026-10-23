@@ -16,8 +16,6 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    // testPostprocessing test;
-    // return 0;
 
     a.setStyle("Fusion");
     a.setWindowIcon(QIcon(":/Data/icon.ico"));
@@ -49,7 +47,6 @@ int main(int argc, char *argv[])
     QTimer::singleShot(1000, &splash, &QSplashScreen::close); // Закрыть заставку через 3 секунды
     QTimer::singleShot(1000, &w, [&]() { w.show(); });
 
-    // w.show();
 
     // --smoke: CI self-check. Exit after 3 s with code 0 if the splash logo (SVG plugin),
     // the icon (ICO plugin) and the main window are OK, otherwise with code 1.

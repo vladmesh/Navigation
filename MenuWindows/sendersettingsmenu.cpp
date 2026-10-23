@@ -44,7 +44,6 @@ SenderSettingsMenu::SenderSettingsMenu() {
 
 void SenderSettingsMenu::saveParams()
 {
-    // qDebug() << portSpinBox->value() << QHostAddress(ipLineEdit->text());
     portNumber = portSpinBox->value();
     IP = QHostAddress(ipLineEdit->text());
 }

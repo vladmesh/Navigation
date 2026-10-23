@@ -46,11 +46,9 @@ Streamer::Streamer(QString name, FixedItem *towingPoint, double angleToWired,
         if (chanStep == "1&2") {
             for (int i = 0; i < 24; i++) {
                 chans.append(i);
-                // qDebug() << chans[i];
             }
             for (int i = 0; i < 24; i++) {
                 chans.append(chans[23] + 2 + i*2);
-                // qDebug() << chans[24+i];
             }
         }
     }
@@ -93,7 +91,6 @@ Streamer::Streamer(QString name, FixedItem *towingPoint, double angleToWired, do
 
 void Streamer::calcChansCoors()
 {
-    // double azRad = azimuthOfMovement*M_PI/180;
 
     if (endBuoy != nullptr) {
         if (!endBuoy->hasConnection) {
@@ -104,8 +101,6 @@ void Streamer::calcChansCoors()
     } else {
         calcChansCoorsNoEndBuoy();
     }
-    // qDebug() << realAzimuthOfTowingRadians << sharedCircularBuffer.calculateAzimuth();
-    // ChannelsVector[0]->showAzDistToObj(ChannelsVector[ChannelsVector.count() - 1]);
     calcStreamerDepth();
 
 }
@@ -166,7 +161,6 @@ void Streamer::calcChansStreamerIsStrict()
     ChannelsVector[0]->x_coor = this->x_coor;
     ChannelsVector[0]->y_coor = this->y_coor;
 
-    // qDebug() << x_coor << y_coor << towingPoint->x_coor << towingPoint->y_coor << __FUNCTION__;
 
     QPointF pTowingPoint(towingPoint->x_coor, towingPoint->y_coor);
     QPointF pEndBuoy(endBuoy->x_coor, endBuoy->y_coor);
@@ -174,12 +168,8 @@ void Streamer::calcChansStreamerIsStrict()
     double deltaY = pTowingPoint.y() - pEndBuoy.y();
     realAzimuthOfTowingRadians = qAtan2(deltaX, deltaY);
 
-    // qDebug() << pTowingPoint <<pEndBuoy;
-    // qDebug() << __FUNCTION__ << qRadiansToDegrees(realAzimuthOfTowingRadians) << qRadiansToDegrees(sharedCircularBuffer.calculateAzimuth());
-    // qDebug();
 
     for(int i = 1; i < ChannelsVector.size(); i++) {
-        // ChannelsVector[i]->height = this->height + chans[i]* dh;
         ChannelsVector[i]->x_coor = x_coor - (1)*(chans[i]) *qSin(realAzimuthOfTowingRadians);
         ChannelsVector[i]->y_coor = y_coor - (1)*(chans[i]) *qCos(realAzimuthOfTowingRadians);
     }
@@ -190,7 +180,6 @@ void Streamer::calcChansStreamerIsStrict()
 void Streamer::printChansCoor() //функция для дебага. выводит координаты ка
 {
     int i = 0;
-    // QDebug deb = qDebug();
     for (Channel* ch: ChannelsVector) {
         if (std::isnan(ch->x_coor)) {
             qDebug() <<qSetRealNumberPrecision(10)<< "Chan "
@@ -250,7 +239,6 @@ void Streamer::calcStreamerDepth()
             for (int i = 0; i < NumChanels; i++) {
                 ChannelsVector[i]->depth = defaultChannelDepth;
             }
-            // qDebug() << "Streamer hasn't depth information";
         }
     }
 }
@@ -266,14 +254,12 @@ QString Streamer::Channel::getUTMPos()
     QString res(22, ' ');
     res.replace(4, 9,floatToQString(x_coor, 9,1));
     res.replace(13, 8,floatToQString(y_coor, 9,1));
-    // qDebug() <<locale.toString(y_coor, 'f', 10)<<doubleToQString(y_coor, 10,2) << __FUNCTION__;
 
     res.replace(22, 4,floatToQString(depth, 4, 1));
 
     for (int i = 0; i < 4; i++) {
         res[i] = floatToQString(myNumber, 4, -1)[i];
     }
-    // qDebug() << res;
     return res;
 }
 

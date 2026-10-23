@@ -23,12 +23,6 @@ QStringList P190_creator::createShotBlock()
     QStringList mainBlock = createMainInfoBlock(this->FFID);
     QStringList streamerBlock = createStreamerBlock();
 
-    // for (QString l: mainBlock) {
-    //     // qDebug() << l;
-    // }
-    // for (QString l: streamerBlock) {
-    //     // qDebug() << l;
-    // }
 
     res.append(mainBlock);
     res.append(streamerBlock);
@@ -38,25 +32,11 @@ QStringList P190_creator::createShotBlock()
 
 
 QStringList P190_creator::createHeader(int dayNumber) {
-    // initializeHeaderFile(); // Проверяем/копируем файл при запуске
     QString filePath = "./ModifiedSurveyInfo.txt";
     QFile file(filePath);
     QStringList header = initializeHeaderFile();
 
-    // if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    //     QTextStream in(&file);
 
-    //     // Читаем строки из файла и добавляем их в QStringList
-    //     while (!in.atEnd()) {
-    //         QString line = in.readLine();
-    //         header << line;
-    //     }
-
-    //     file.close();
-    // } else {
-    //     // Обработка ошибки, если файл не удалось открыть
-    //     qWarning("Cannot open file for reading: %s", qPrintable(file.errorString()));
-    // }
     for (int i = 0; i < header.size(); i++) {
         if (header[i].contains("H0200 DATE OF SURVEY")) {
             header[i] = replaceDates(header[i]);
@@ -69,25 +49,9 @@ QStringList P190_creator::createHeader(int dayNumber) {
 }
 
 QStringList P190_creator::createHeader() {
-    // QString filePath = ":/Data/SurveyInfo.txt";
-    // QFile file(filePath);
     QStringList header = initializeHeaderFile();
 
-    // if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    //     QTextStream in(&file);
 
-    //     // Читаем строки из файла и добавляем их в QStringList
-    //     while (!in.atEnd()) {
-    //         QString line = in.readLine();
-    //         line = line.remove('"');
-    //         header << line;
-    //     }
-
-    //     file.close();
-    // } else {
-    //     // Обработка ошибки, если файл не удалось открыть
-    //     qWarning("Cannot open file for reading: %s", qPrintable(file.errorString()));
-    // }
     for (int i = 0; i < header.size(); i++) {
         if (header[i].contains("H0200 DATE OF SURVEY")) {
             header[i] = replaceDates(header[i]);
@@ -135,8 +99,6 @@ void P190_creator::writeToFile(QStringList data) {
         for (QString str: data) {
             if (str.isEmpty() || str.length() < 20) continue;
             outputFile->write(QByteArray(str.toUtf8()) + "\n");
-            // logmsg(str);
-                // outputFile->write("\n");
         }
         outputFile->close();
     }
@@ -182,7 +144,6 @@ QStringList P190_creator::createMainInfoBlock(int ffid) {
     currentSourceNumber = 0;
     QStringList res;
     QString tmp;
-    // int pointNumber = ffid;
     for (FixedItem* item: MyVault->ItemsVault) {
         if (QString(item->metaObject()->className()) == "Streamer") {
             continue;
@@ -192,7 +153,6 @@ QStringList P190_creator::createMainInfoBlock(int ffid) {
         if (QString(item->metaObject()->className()) == "Buoy") {
             currentBuoyNumber++;
         }
-        // currentSourceNumber++;
         if (tmp.isEmpty()) continue;
         res.append(tmp);
     }
@@ -228,10 +188,8 @@ QString P190_creator::createMainRow__new(FixedItem *item, int pointNumber, int t
             TailBuoyID = ' ';
         }
 
-        // TailBuoyID = '1';
     } else if (QString(item->metaObject()->className()) == "Source") {
         type = 'S';
-        // TailBuoyID = '1';
         if (dynamic_cast<Source*>(item)->sourceID != -1) {
             SourceID = QString::number(dynamic_cast<Source*>(item)->sourceID).at(0);
         } else {
@@ -251,7 +209,6 @@ QString P190_creator::createMainRow__new(FixedItem *item, int pointNumber, int t
     res.replace(16, 1, VesselID);
     res.replace(17, 1, SourceID);
     res.replace(18, 1, TailBuoyID);
-    // qDebug() <<"-"<<VesselID<<"-"<<SourceID<<"-"<<TailBuoyID<<"-"<<item->name;
     res.replace(19, 6, QString(6-QString::number(pointNumber).length(), ' ') + QString::number(pointNumber));
     res.replace(25, 21, QGeoCoordinate(item->latitude, item->longitude).
         toString(QGeoCoordinate::CoordinateFormat::DegreesWithHemisphere).remove("°").remove(' '));

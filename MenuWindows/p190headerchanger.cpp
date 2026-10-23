@@ -91,22 +91,9 @@ void P190HeaderChanger::insertLine(QString line)
 }
 
 
-
-
 void P190HeaderChanger::loadFile(const QString &fileName) {
-    // QFile file(fileName);
-    // if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    //     QTextStream in(&file);
-    //     while (!in.atEnd()) {
-    //         QString line = in.readLine();
-    //         if (line.isEmpty()) continue;
-    //         content += line + '\n'; // Учитываем ширину строки
-    //     }
 
-    //     textEdit->setPlainText(content);
-    // } else {
 
-    // }
     if (headerProcessor.loadFile(fileName).isEmpty()) {
         QMessageBox::warning(this, "Error", "Cannot open file for reading.\nReload programm");
     } else {

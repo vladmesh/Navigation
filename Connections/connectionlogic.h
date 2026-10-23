@@ -10,7 +10,6 @@
 #include <memory>
 #include "connectionui.h"
 #include "nmeaparser.h"
-// #include "logger.h"
 
 class Connection : public QObject
 {
@@ -53,7 +52,6 @@ private:
     static NmeaParser nmeaParser;
     bool signalTimerAlert = false;
     QTimer* timer = nullptr;
-    // Logger* log = nullptr;
 
     uint calcWindow = 20;
     double border = 0.85;

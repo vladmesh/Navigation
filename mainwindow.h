@@ -7,7 +7,6 @@
 #include "itemsloader.h"
 #include "coordinator.h"
 #include "p190_creator.h"
-// #include "logger.h"
 #include "postprocessor.h"
 #include "segyreader.h"
 #include "postprocessorview.h"
@@ -164,14 +163,9 @@ private:
     ItemsStorage* Vault = nullptr;
     QTableWidget* tableWithItems = nullptr;
     Coordinator* coordinator = nullptr;
-    // Logger* logger = nullptr;
 
     int NumberOfRowsInTable = 0;
 
-    // SegYReader* sr = nullptr;
-    // void setSegyReader();
-    // QVector <SegYReader::SegyData> pairs;
-    // int curSegyFile = 0;
 
     ///<наблюдатель за объектами и соединениями
     ///<когда соединение ломается/чинится, через систему
@@ -194,9 +188,6 @@ private slots:
     void on_TopViewRB_clicked();
     void on_SideViewRB_clicked();
     void on_ComboBoxItemType_activated(int index);
-    // void on_doubleSpinBox_valueChanged(double arg1);
-    // void on_pushButton_clicked();
-    // void on_pushButton_2_clicked();
 
 
     void runPainterRun(); ///< Запускает обновление отрисовки объектов классом UberPainter

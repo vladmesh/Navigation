@@ -100,7 +100,6 @@ private:
     /// @brief Представляет отдельный канал косы.
     class Channel : public TowedItem
     {
-        // Q_OBJECT
     public:
         Channel(uint myNumber);
 

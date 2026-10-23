@@ -86,7 +86,6 @@ public:
     void deleteAllItems();
 
     QVector<QPointer<FixedItem>> ItemsVault; ///< Контейнер для хранения элементов типа FixedItem.
-    // QMutex mutex; ///< Мьютекс для защиты доступа к контейнеру элементов.
 
 };
 

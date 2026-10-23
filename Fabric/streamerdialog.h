@@ -13,8 +13,6 @@
 #include <QMessageBox>
 
 
-// #include "itemsstorage.h"
-
 /**
  * @class StreamerDialog
  * @brief Класс диалогового окна для настройки параметров косы.
@@ -32,7 +30,6 @@ public:
      * @param parent Указатель на родительский виджет.
      */
     StreamerDialog(QWidget *parent = nullptr);
-    // StreamerDialog(ItemsStorage* Vault);
 
     uint numOfChannels; ///< Количество каналов стримера.
     QVector<double> chans; ///< Вектор расстояний между каналами.

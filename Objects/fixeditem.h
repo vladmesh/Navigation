@@ -10,9 +10,7 @@
 #include <QPointer>
 
 #include "nmeaparser.h"
-// #include "connection.h"
 #include "connectionlogic.h"
-// #include "logger.h"
 #include "CircularBuffer.h"
 
 /**
@@ -27,7 +25,6 @@ class FixedItem : public QObject
 Q_OBJECT
 private:
     friend class Fabric;
-    // friend class Coordinator;
     friend class ItemsLoader;
     /**
      * @brief Конструктор с параметрами для создания фиксированного объекта.

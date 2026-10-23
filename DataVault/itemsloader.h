@@ -56,12 +56,6 @@ public:
     static QJsonObject writeToJSON(QVector<QPointer<FixedItem>> ItemsVector);
 
 
-    // /**
-    //  * @brief Читает элемент из JSON-объекта и создаёт объекты `FixedItem` или его наследников
-    //  * @param obj Указатель на объект JSON.
-    //  * @return Вектор указателей на загруженные объекты `FixedItem`.
-    //  */
-    // static QPointer<FixedItem> readOneObjFromJSONObject(QJsonObject obj);
 
 
     /**

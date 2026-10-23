@@ -27,5 +27,4 @@ static QString floatToQString(double value, int totalLength, int decimalPlaces) 
 }
 
 
-
 #endif // FUNCTIONS_H

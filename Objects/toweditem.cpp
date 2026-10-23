@@ -23,10 +23,6 @@ TowedItem::TowedItem(QString Name,
         wireLength = absoluteLayback - dynamic_cast<TowedItem*>(towingPoint)->absoluteLayback;
     }
 
-    // if (QString(towingPoint->metaObject()->className()) == "Streamer") {
-    //     wireLength -= dynamic_cast<Streamer*>(towingPoint)->getTotalLength();
-    // }
-
 
     itemType = "Towed";
 
@@ -35,15 +31,10 @@ TowedItem::TowedItem(QString Name,
     z = 0;
     qDebug() <<QString(this->metaObject()->className())<< " Item Created "<<x<<y<<z<<name <<" towed by "<<towingPoint->name;
 
-    // qDebug() << name <<
     towingPoint->vectorOfConnected.append(this);
     qDebug() << "TowedItem::TowedItem" << towingPoint->name << name;
 
-    // if (towingPoint->hasConnection) {
-    //     azimuthOfMovement = towingPoint->azimuthOfMovement;
-    // } else {
         azimuthOfMovement = sharedCircularBuffer.calculateAzimuth();
-    // }
 }
 
 TowedItem::~TowedItem() {
@@ -61,7 +52,6 @@ void TowedItem::updateLayout()
 void TowedItem::calcIFNotConnected()
 {
     NmeaParser parser;
-    // double azRad = -1;
     if (realAzimuthOfTowingRadians == -1) { // если нам неизвестен реальный азимут буксировки
         // драггинг алгоритм, основан наалгоритме погони https://habr.com/ru/articles/254485/
 
@@ -103,14 +93,7 @@ void TowedItem::calcIFNotConnected()
         double heightDiffCoef = qCos(qAsin(heightDiff / distance));
 
         // Если расстояние больше длины троса, перемещаем объект
-        // double trueWireLength = std::sqrt(wireLength*wireLength - heightDiff*heightDiff);
 
-        // if (distance > trueWireLength) {
-        //     double scale = (distance - trueWireLength) / distance; // Масштабируем вектор
-        //     x_coor = x_coor + dx * scale;
-        //     y_coor = y_coor + dy * scale;
-        // }
-        // azimuthOfMovement = sharedCircularBuffer.calculateAzimuth();
         x_coor = towingPoint->x_coor + (x-towingPoint->x)*qSin(realAzimuthOfTowingRadians) * heightDiffCoef + (y-towingPoint->y)*qCos(realAzimuthOfTowingRadians) * heightDiffCoef;
         y_coor = towingPoint->y_coor + (x-towingPoint->x)*qCos(realAzimuthOfTowingRadians) * heightDiffCoef - (y-towingPoint->y)*qSin(realAzimuthOfTowingRadians) * heightDiffCoef;
     }
@@ -135,12 +118,8 @@ QString TowedItem::getLastGGA()
     if (connection != nullptr && hasConnection) {
         newGGA = connection->lastRecievedGGA;
         lastGGAData = nmeaParser.parseNmeaGGA(newGGA);
-        // connection->lastRecievedGGA = "empty GGA";
-        // parser.printNmeaGGAData(lastGGAData);
     } else if(towingPoint != nullptr) {
         newGGA = towingPoint->getLastGGA();
-        // lastGGAData = towingPoint->lastGGAData;
-        // connection->lastRecievedRMC = "empty RMC";
         lastGGAData = nmeaParser.parseNmeaGGA(newGGA);
     }
     return newGGA;
@@ -152,7 +131,6 @@ QString TowedItem::getLastRMC()
     if (connection != nullptr && hasConnection) {
         newRMC = connection->lastRecievedRMC;
         lastRMCData = nmeaParser.parseNmeaRMC(newRMC);
-        // parser.printNmeaRMCData(lastRMCData);
     } else if(towingPoint != nullptr) {
         newRMC = towingPoint->getLastRMC();
         lastRMCData = towingPoint->lastRMCData;

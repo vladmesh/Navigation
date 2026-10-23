@@ -55,7 +55,6 @@ QVector<QPointer<FixedItem>> ItemsLoader::readFromJSON(QFile *file)
     }
 
     for (auto i = sortedArrayOfJson.begin(); i != sortedArrayOfJson.end(); ++i) {
-        // tmp.SaveItem((*i));
         auto item = createItemFromJson(*i);
         res.append(item);
         vault.SaveItem(item);
@@ -90,7 +89,6 @@ FixedItem* ItemsLoader::createItemFromJson(QJsonValue jsonObject)
     if (itemType == "Fixed") {
         FixedItemInfo info(jsonItem["x"].toDouble(0),
                            jsonItem["y"].toDouble(0),jsonItem["z"].toDouble(0),name);
-        // item = new FixedItem(info.SchemeCoors.x, info.SchemeCoors.y,info.SchemeCoors.z,name);
         item = fabric.CreateItem(info, false); //создаем без подключения, чтобы не вызывать ConnectionCreator
         vault.SaveItem(item);
     } else {
@@ -101,7 +99,6 @@ FixedItem* ItemsLoader::createItemFromJson(QJsonValue jsonObject)
 
 
         if (itemType == "Towed") {
-            // TowedItem* towedItem = new TowedItem(name, vault.getItem(towingPointName), NULL, wireLength);
             TowedItemInfo info(vault.getItem(towingPointName), absoluteLayback, 90, name);
             TowedItem* towedItem = fabric.CreateItem(info,false);
             item = towedItem;
@@ -111,15 +108,12 @@ FixedItem* ItemsLoader::createItemFromJson(QJsonValue jsonObject)
             float sourceDepth = jsonSourceItem["sourceDepth"].toDouble();
             float AnthenaHeight = jsonSourceItem["AnthenaHeight"].toDouble();
             Source* sourceItem = fabric.CreateItem(SourceInfo(info, AnthenaHeight, sourceDepth), false);
-            // Source* sourceItem = new Source(name, vault.getItem(towingPointName), NULL, wireLength);
             item = sourceItem;
         } else if (itemType == "Buoy") {
             QJsonObject jsonBuoyItem = jsonTowedItem["buoy"].toObject();
             TowedItemInfo info(vault.getItem(towingPointName), absoluteLayback, 90, name);
             BuoyInfo infoB(info, jsonBuoyItem["AnthenaHeight"].toDouble(), jsonBuoyItem["towingDepth"].toDouble());
             Buoy* buoyItem  = fabric.CreateItem(infoB, false);
-            // Buoy* buoyItem = new Buoy(name, vault.getItem(towingPointName), NULL,
-            //     absoluteLayback, jsonBuoyItem["AnthenaHeight"].toDouble(), jsonBuoyItem["towingDepth"].toDouble());
 
             item = buoyItem;
             if (ifStreamerNeedsEndBuoy && buoyItem->name == endBuoyNameForStreamer) {
@@ -151,8 +145,6 @@ FixedItem* ItemsLoader::createItemFromJson(QJsonValue jsonObject)
         }
     }
     item->creationPriority = creationPriority;
-    // qDebug() << item->name << item->itemType << item->creationPriority << __FUNCTION__;
-    // qDebug();
     vault.setItemForCalculation(vault.ItemsVault);
 
     return item;
@@ -198,22 +190,17 @@ QJsonObject ItemsLoader::writeToJSON(QVector<QPointer<FixedItem>> ItemsVector)
     for (int i = 0; i < ItemsVector.size(); i++) {
         FixedItem* item = ItemsVector.at(i);
         jsonFixed["name"] = item->name;
-        // qDebug() << "Parameter written: name =" << item->name;
 
         jsonFixed["creationPriority"] = item->creationPriority;
         jsonFixed["type"] = item->itemType;
-        // qDebug() << "Parameter written: type =" << item->itemType;
 
         if (item->connection != nullptr) {
             jsonFixed["hasConnection"] = true;
         }
-        // jsonFixed["hasConnection"] = item->hasConnection;
-        // qDebug() << "Parameter written: hasConnection =" << item->hasConnection;
 
 
         if (item->hasConnection || item->connection != nullptr) {
             jsonFixed["connection"] = connectionToJson(item->connection);
-            // qDebug() << "Parameter written: connection (complex object)";
         }
 
         if (item->itemType == "Fixed") {
@@ -225,17 +212,14 @@ QJsonObject ItemsLoader::writeToJSON(QVector<QPointer<FixedItem>> ItemsVector)
             QJsonObject jsonTowed;
             TowedItem* itemTowed = dynamic_cast<TowedItem*>(item);
             jsonTowed["Towing point"] = itemTowed->towingPoint->name;
-            // qDebug() << "Parameter written:  =" << itemTowed->towingPoint->name;
 
             jsonTowed["absoluteLayback"] = itemTowed->absoluteLayback;
-            // qDebug() << "Parameter written: wireLength =" << itemTowed->wireLength;
 
             if (item->itemType == "Buoy") {
                 QJsonObject jsonBuoy;
                 jsonBuoy["AnthenaHeight"] = dynamic_cast<Buoy*>(item)->AnthenaHeight;
                 jsonBuoy["towingDepth"] = dynamic_cast<Buoy*>(item)->towingDepth;
                 jsonTowed["buoy"] = jsonBuoy;
-                // qDebug() << "Parameter written: buoy (complex object)";
             } else if (item->itemType == "Streamer") {
                 QJsonObject jsonStreamer;
                 QJsonArray chans;
@@ -255,7 +239,6 @@ QJsonObject ItemsLoader::writeToJSON(QVector<QPointer<FixedItem>> ItemsVector)
 
                 jsonTowed["Streamer"] = jsonStreamer;
                 jsonStreamer = QJsonObject();
-                // qDebug() << "Parameter written: Streamer (complex object)";
             } else if (item->itemType == "Source") {
                 QJsonObject jsonSource;
                 jsonSource["AnthenaHeight"] = dynamic_cast<Source*>(item)->AnthenaHeight;
@@ -273,44 +256,6 @@ QJsonObject ItemsLoader::writeToJSON(QVector<QPointer<FixedItem>> ItemsVector)
 
     return obj;
 }
-
-// QVector<QPointer<FixedItem> > ItemsLoader::readFromJSONObject(QJsonObject jsonObj) {
-//     QVector<QPointer<FixedItem>> res;
-
-//     QVector<QJsonValue> sortedArrayOfJson(jsonObj.size());
-//     for (auto i:jsonObj) {
-//         sortedArrayOfJson.push_back(i);
-//     }
-//     for (int i = 0; i < sortedArrayOfJson.size()-1; i++) { //bubble sort by creationPriority
-//         for (int j = 0; j < sortedArrayOfJson.size() - 1 - i; j++) {
-//             if (sortedArrayOfJson[j]["creationPriority"].toInt() > sortedArrayOfJson[j+1]["creationPriority"].toInt()) {
-//                 std::swap(sortedArrayOfJson[j], sortedArrayOfJson[j+1]);
-//             }
-//         }
-//     }
-
-//     for (auto i = sortedArrayOfJson.begin(); i != sortedArrayOfJson.end(); ++i) { //deleting empty JsonValues
-//         if (!(*i)["name"].toString().isNull()) {
-//             // qDebug() << *i;
-//         } else {
-//             sortedArrayOfJson.erase(i);
-//         }
-//     }
-
-//     for (auto i = sortedArrayOfJson.begin(); i != sortedArrayOfJson.end(); ++i) {
-//         // tmp.SaveItem((*i));
-//         auto item = createItemFromJson(*i);
-//         res.append(item);
-//         vault.SaveItem(item);
-//     }
-
-//     vault.sortItemsByCalcPriority();
-//     vault.setItemForCalculation(res);
-
-
-//     vault.ItemsVault.clear();
-//     return res;
-// }
 
 
 QJsonObject ItemsLoader::connectionToJson(Connection *conn) {
@@ -345,8 +290,6 @@ bool ItemsLoader::saveJsonObjectToFile(QJsonObject &jsonObject, QString &filePat
 
     return true;
 }
-
-
 
 
 void ItemsLoader::setCreationPriority(QVector<QPointer<FixedItem>> &ItemsVault)

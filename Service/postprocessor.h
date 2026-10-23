@@ -9,7 +9,6 @@
 #include "DataReader/segyreader.h"
 #include "coordinator.h"
 #include "p190_creator.h"
-// #include "logger.h"
 #include "itemsstorage.h"
 #include "nmeaparser.h"
 #include "itemsloader.h"
@@ -111,12 +110,10 @@ public:
 
 
 //взаимодействие с интерфейсом PostProcessorView
-    // ItemsStorage Vault;
     QVector<QPointer<FixedItem>> items; ///< Вектор указателей на объекты.
     int itemsWithConnection = 0;
 
     QFile* jsonSchemeFile;
-    // QVector<QFile*> nmeaFiles;
     QVector<QFile*> NmeaFiles;///< Вектор файлов NMEA для поспроцессинга.
     QVector<QFile*> ppkFiles;///< Вектор файлов PPK для поспроцессинга..
     QString ffidTimeSourceTxtFile; ///< Имя текстового файла с источником времени - FFID.

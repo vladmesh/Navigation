@@ -23,7 +23,6 @@ Connection_com::Connection_com(QString COM_port, int BaudRate, QString filename)
     // Устанавливаем параметры порта
     SerialPort.setPortName(COM_port);
     SerialPort.setBaudRate(BaudRate);
-    // SerialPort.setBaudRate(QSerialPort::Baud115200);
 
     SerialPort.setDataBits(QSerialPort::Data8);
     SerialPort.setParity(QSerialPort::NoParity);
@@ -44,7 +43,6 @@ Connection_com::~Connection_com()
 {
     SerialPort.close();
     file->close();
-    // if (ui) delete ui;
 }
 
 QString Connection_com::getComPort()
@@ -116,8 +114,6 @@ void Connection_com::ReadyRead() {
         }
         data.clear();
         data = removedPart;
-        // DataBuffer.clear();
     }
-    // qDebug() <<"_____________";
 }
 

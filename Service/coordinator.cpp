@@ -9,9 +9,6 @@ int Coordinator::calcCoors()
     try {
         for (auto item: Vault->ItemsVault) {
             if (item == nullptr) {
-                // for (auto i = Vault->ItemsVault.begin(); i != Vault->ItemsVault.end(); ++i) {
-                //     Vault->ItemsVault.erase(i);
-                // }
                 continue;
             }
             if (item->needCalculate == false) return 2;
@@ -26,22 +23,18 @@ int Coordinator::calcCoors()
                 }
             }
         }
-        // qDebug() <<__FUNCTION__<<__LINE__;
         Vault->setItemForCalculation(Vault->ItemsVault);
-        // qDebug() <<__FUNCTION__<<__LINE__;
 
         for (FixedItem* item: Vault->ItemsVault) { //я вызываю метод предка
             if (item == nullptr) continue;
 
             if (item->hasConnection) continue;
-            // qDebug() << item->name << item->hasConnection;
             QString className = QString(item->metaObject()->className());
 
             if (className == "Streamer") {
                 item->calcItemCoordinates();
                 Streamer* tmp = dynamic_cast<Streamer*>(item);
                 tmp->calcChansCoors();
-                // tmp->calcStreamerDepth();s
             } else if(className == "FixedItem") {
                 item->calcItemCoordinates();
             } else if (className == "TowedItem") {

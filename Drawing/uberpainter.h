@@ -14,12 +14,9 @@
 #include <QGraphicsLineItem>
 #include <QGraphicsTextItem>
 #include <cmath>
-// #include <deque>
 #include <QQueue>
 
 #include "itemsstorage.h"
-
-// #include "structures.h"
 
 
 #define QUEUES_SIZE 5

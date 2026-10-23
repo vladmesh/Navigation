@@ -139,7 +139,6 @@ private:
     ItemsStorage* MyVault = nullptr; ///< Указатель на хранилище объектов.
 
     QChar tailBuoy; //ну и костыль. руки бы оторвать разрабу
-    // QString floatToQString(float value, int totalLength, int decimalPlaces);
 
     QStringList initializeHeaderFile(); // Проверяем/копируем файл при запуске
     bool headerIsWritten = false; ///< Флаг, указывающий, был ли записан заголовок.
