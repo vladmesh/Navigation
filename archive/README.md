@@ -25,7 +25,7 @@
 
 | Файл | Откуда | Что это | Готовность |
 |---|---|---|---|
-| `streamer-catenary.cpp` (б3) | `Objects/streamer.cpp` | `calcChansByChainAlgorithm`, `findA` (Ньютон), `calculateAzimuth`: раскладка каналов по цепной линии между головой и хвостовым буем. Был выключен `#define CHAINALGO` перед `#ifdef`. | Средняя. Выражение без эффекта `realAzimuthOfTowingRadians + M_PI/2;`. Ручной сценарий `testPostprocessing::testChainAlgo` в `Test/legacy`. |
+| `streamer-catenary.cpp` (б3) | `Objects/streamer.cpp` | `calcChansByChainAlgorithm`, `findA` (Ньютон), `calculateAzimuth`: раскладка каналов по цепной линии между головой и хвостовым буем. Был выключен `#define CHAINALGO` перед `#ifdef`. | Средняя. Выражение без эффекта `realAzimuthOfTowingRadians + M_PI/2;`. Данные для проверки есть в ручном сценарии `testPostprocessing::testChainAlgo` (`Test/legacy`), но из-за `#define` он шёл по прямой. |
 | `streamer-checkStreamerCoordinates.cpp` (б12) | `Objects/streamer.cpp` | Проверка координат каналов. | Заглушка, возвращает 666. |
 | `coordinator-source-multilateration.cpp` (б4) | `Service/coordinator.cpp` | `updateSourcePosition` + `calculateError`: позиция источника градиентным спуском по расстояниям до приёмников. | Только алгоритм. Источник расстояний не определён. |
 | `streamerdialog-csv.cpp` (б8) | `Fabric/streamerdialog.cpp` | Импорт и экспорт раскладки косы в CSV. | Высокая, но кнопки не создавались; `saveToCSV` пишет захардкоженные глубины, одна строка с `,` вместо `;`, `readCSV` не читает `Channel spacing`. |

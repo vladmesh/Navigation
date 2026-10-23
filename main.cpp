@@ -1,7 +1,4 @@
 #include "mainwindow.h"
-#include "test_postprocessing.h"
-#include "testitemsloading.h"
-#include "testppkparser.h"
 
 #include <QApplication>
 #include <QSplashScreen>

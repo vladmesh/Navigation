@@ -5,7 +5,8 @@
 // `#ifdef CHAINALGO`, so calcChansStreamerIsStrict() was always called.
 // Known issues: `realAzimuthOfTowingRadians + M_PI/2;` has no effect (no
 // assignment); comment "пока не используется". Manual scenario
-// testPostprocessing::testChainAlgo (Test/legacy) exercised it on field data.
+// testPostprocessing::testChainAlgo (Test/legacy) has field data for it, but
+// because of the #define it always ran the straight-line layout.
 // To restore: add the declarations below to class Streamer and call
 // calcChansByChainAlgorithm() from calcChansCoors() when the end buoy has a
 // connection.

@@ -4,6 +4,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
 
+# В релизной сборке qDebug() не печатает (часть вызовов выводит каждый NMEA-пакет).
+# qInfo/qWarning/qCritical остаются.
+CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT
+
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
@@ -17,7 +21,6 @@ INCLUDEPATH += ./Drawing \
 ./Service \
 ./Data \
 ./DataReader \
-./Test \
 ./Observervation \
 ./MenuWindows
 
@@ -48,10 +51,6 @@ SOURCES += \
     MenuWindows/p190headerchanger.cpp \
     Service/postprocessor.cpp \
     Service/postprocessorview.cpp \
-    Test/test_postprocessing.cpp \
-    Test/testdragging.cpp \
-    Test/testitemsloading.cpp \
-    Test/testppkparser.cpp \
     main.cpp \
     mainwindow.cpp \
     Drawing/mygraphicview.cpp \
@@ -94,10 +93,6 @@ HEADERS += \
     MenuWindows/p190headerchanger.h \
     Service/postprocessor.h \
     Service/postprocessorview.h \
-    Test/test_postprocessing.h \
-    Test/testdragging.h \
-    Test/testitemsloading.h \
-    Test/testppkparser.h \
     mainwindow.h \
     Drawing/mygraphicview.h \
     ConnectionCreator/connection_creator.h \

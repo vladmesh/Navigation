@@ -8,8 +8,8 @@ testPpkParser::testPpkParser() {
 
 void testPpkParser::readPpk()
 {
-    QString pathPPK = testDataPath("PPK GNSS data/test/GD_buoy_PPK_20240922043218.txt");
-    QString pathNMEA = testDataPath("PPK GNSS data/test/22092024endBuoy.nmea");
+    QString pathPPK = testDataPath("Desktop/FINAL/PPK GNSS data/test/GD_buoy_PPK_20240922043218.txt");
+    QString pathNMEA = testDataPath("Desktop/FINAL/PPK GNSS data/test/22092024endBuoy.nmea");
     QFile filePPKStorage(pathPPK);
     QFile fileNMEAStorage(pathNMEA);
     QFile* filePPK = &filePPKStorage;
@@ -28,15 +28,12 @@ void testPpkParser::readPpk()
         lineNMEA = fileNMEA->readLine();
         NmeaParser::CoordinateData ppkdata = PpkParser::parseLine(linePPK );
         NmeaParser::CoordinateData nmeadata = nmeaparser.parseNmeaGGA(lineNMEA);
-        // exit(123);
         if (PpkParser::compareCoordinates(ppkdata, nmeadata )) {
-            // qDebug() << "GOOD";
         } else {
             qDebug() << "NOGOOD";
             qDebug() << ppkdata.coordinate << ppkdata.coorUTM << ppkdata.dateTime << ppkdata.height;
             qDebug() << nmeadata.coordinate << nmeadata.coorUTM << nmeadata.dateTime << nmeadata.height;
         }
-        // break;
     }
 
 }
