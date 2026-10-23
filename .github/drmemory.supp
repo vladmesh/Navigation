@@ -1,39 +1,124 @@
-# Dr. Memory suppressions for nightly-drmemory.yml.
-# Only entries whose TOP of stack is inside Qt / Windows system DLLs.
-# Reports whose top frames are in Parsers/ or Test/ are real findings: fix them,
-# do not add them here. Origin: run 39994743165 (Qt 6.8.3 msvc2022_64 debug,
-# windows-2022): 165 unique reports, all inside Qt6Cored (QDateTime::fromString ->
-# time zone / registry lookup) and USER32 window creation inside QCoreApplication.
+# Dr. Memory suppressions for .github/workflows/nightly-drmemory.yml
+# (Qt 6.8.3 msvc2022_64 debug, windows-2022 = Windows Server 2022 build 20348).
+#
+# Rules:
+# - Every entry names concrete functions (Qt PDBs are installed from aqt
+#   debug_info), never a whole module.
+# - Every entry is anchored to the Qt-internal call path it was triaged on.
+# - Each entry carries the reason it is a tool false positive and a reference.
+# - A report whose frames near the top are in Parsers/, Test/, Service/ or
+#   DataVault/ and that is caused by our data is a real bug: fix it, never add it here.
+#
+# Triage (audit runs without this file): 40001351111 (200 unique reports,
+# symbolized) and 39994743165 (165 unique + 1 UNADDRESSABLE, CPU with AVX-512,
+# offsets resolved offline against Qt6Cored.pdb). Every report falls into one of
+# the three classes below. In none of them do our frames feed Qt with
+# uninitialized or out-of-bounds data: the QString passed by
+# PpkParser::parseLine to QDateTime::fromString is fully initialized, and the
+# report is raised later inside Qt's lazy system time zone initialization.
 
-# Qt internals (no PDB for Qt in CI, so frame names are unresolved).
+# ---------------------------------------------------------------------------
+# 1. Registry reads in Qt's Windows time zone backend (QWinTimeZonePrivate::init /
+#    ::systemTimeZoneId, reached from QDateTimePrivate::localStateAtMillis).
+#    Qt code (qtbase v6.8.3 src/corelib/kernel/qwinregistry.cpp:51-64):
+#      DWORD dataType = REG_NONE; DWORD dataSize = 0;            // initialized
+#      RegQueryValueExW(m_key, name, nullptr, &dataType, nullptr, &dataSize);
+#      QVarLengthArray<unsigned char> data(dataSize);
+#      std::fill(data.data(), data.data() + dataSize, 0u);       // zero-filled
+#      RegQueryValueExW(m_key, name, nullptr, nullptr, data.data(), &dataSize);
+#    All flagged reads are of dataSize/dataType or of the buffer filled by
+#    RegQueryValueExW, i.e. kernel output of NtQueryValueKey. On this OS build
+#    Dr. Memory has no syscall table ("Syscall mismatch detected. Running on
+#    unknown kernel version!" in global.*.log) and does not mark syscall
+#    out-params as defined, so every value derived from them looks uninitialized.
+#    Refs: https://github.com/DynamoRIO/drmemory/issues/2487 (no syscall info for
+#    WinVer=105 Build=20348), https://github.com/DynamoRIO/drmemory/issues/1909,
+#    https://github.com/DynamoRIO/drmemory/issues/358 (NtQueryValueKey out-params).
+# ---------------------------------------------------------------------------
+
 UNINITIALIZED READ
-name=qt-core-internal
-Qt6Cored.dll!*
-
-# AVX-512 masked load (vmovdqu8 {%k1}) in Qt string code reads past the
-# allocation under the mask; known Dr. Memory false positive.
-UNADDRESSABLE ACCESS
-name=qt-core-avx512-masked-load
-Qt6Cored.dll!*
-
-# Registry reads issued by Qt (time zone / locale lookup).
-UNINITIALIZED READ
-name=qt-registry-query
+name=qt-tz-registry: BaseRegQueryValueInternal reads RegQueryValueExW out-param
 KERNELBASE.dll!BaseRegQueryValueInternal
 KERNELBASE.dll!RegQueryValueExW
-Qt6Cored.dll!*
+Qt6Cored.dll!QWinRegistryKey::value
+Qt6Cored.dll!QWinRegistryKey::value<*>
+Qt6Cored.dll!QWinRegistryKey::stringValue
+...
+Qt6Cored.dll!QWinTimeZonePrivate::*
 
-# memset replacement called from Qt code.
 UNINITIALIZED READ
-name=qt-memset
+name=qt-tz-registry: QVarLengthArray(dataSize) after RegQueryValueExW
+Qt6Cored.dll!QVarLengthArray<*>::QVarLengthArray<*>
+Qt6Cored.dll!QWinRegistryKey::value
+Qt6Cored.dll!QWinRegistryKey::value<*>
+Qt6Cored.dll!QWinRegistryKey::stringValue
+...
+Qt6Cored.dll!QWinTimeZonePrivate::*
+
+UNINITIALIZED READ
+name=qt-tz-registry: std::fill range check on dataSize after RegQueryValueExW
+Qt6Cored.dll!std::_Verify_range<*>
+Qt6Cored.dll!std::_Adl_verify_range<*>
+Qt6Cored.dll!QWinRegistryKey::value<*>
+Qt6Cored.dll!QWinRegistryKey::stringValue
+...
+Qt6Cored.dll!QWinTimeZonePrivate::*
+
+UNINITIALIZED READ
+name=qt-tz-registry: std::fill (memset) length dataSize after RegQueryValueExW
 *!replace_memset
-Qt6Cored.dll!*
+Qt6Cored.dll!std::_Fill_memset<*>
+Qt6Cored.dll!QWinRegistryKey::value<*>
+Qt6Cored.dll!QWinRegistryKey::stringValue
+...
+Qt6Cored.dll!QWinTimeZonePrivate::*
 
-# Hidden message window created by QCoreApplication (event dispatcher).
 UNINITIALIZED READ
-name=qt-create-window
-system call NtUserCreateWindowEx*
-USER32.dll!*
-USER32.dll!*
+name=qt-tz-registry: QWinRegistryKey::value switch on dataType/dataSize
+Qt6Cored.dll!QWinRegistryKey::value
+Qt6Cored.dll!QWinRegistryKey::value<*>
+Qt6Cored.dll!QWinRegistryKey::stringValue
+...
+Qt6Cored.dll!QWinTimeZonePrivate::*
+
+# ---------------------------------------------------------------------------
+# 2. Hidden message window of the Qt event dispatcher.
+#    qt_create_internal_window (qeventdispatcher_win.cpp:280) calls
+#    CreateWindow(className, className, 0, 0, 0, 0, 0, HWND_MESSAGE, 0, hinst, 0);
+#    all arguments are constants. Parameter #14 of NtUserCreateWindowEx is
+#    built inside USER32 (CreateWindowInternal); Dr. Memory flags it for any
+#    CreateWindow call; the issue below reproduces it with a plain Win32
+#    program doing CreateWindow(..., HWND_MESSAGE, ...).
+#    Ref: https://github.com/DynamoRIO/drmemory/issues/17 ("False reports on
+#    CreateWindow", open); syscall params unknown on this build: #2487.
+# ---------------------------------------------------------------------------
+
+UNINITIALIZED READ
+name=qt-event-dispatcher-window: NtUserCreateWindowEx param built by USER32
+system call NtUserCreateWindowEx parameter value #14
+USER32.dll!VerNtUserCreateWindowEx
+USER32.dll!CreateWindowInternal
 USER32.dll!CreateWindowExW
-Qt6Cored.dll!*
+Qt6Cored.dll!qt_create_internal_window
+Qt6Cored.dll!QEventDispatcherWin32::QEventDispatcherWin32
+
+# ---------------------------------------------------------------------------
+# 3. AVX-512 masked load in qHash (only on runners whose CPU has AVX-512 + VAES).
+#    qtbase v6.8.3 src/corelib/tools/qhash.cpp:567-580 aeshash256_lt32_avx256:
+#      __mmask32 mask = _bzhi_u32(-1, unsigned(len));
+#      data = _mm256_maskz_loadu_epi8(mask, p);   // vmovdqu8 {%k1}
+#    Bytes outside the mask are neither read nor faulted on (Intel SDM, AVX-512
+#    fault suppression), so the access stays inside the QString buffer. In run
+#    39994743165 the 32-byte load at 0x...5050 had 10 valid bytes (malloc ends
+#    at 0x...505a, "0 byte(s) beyond last valid byte") and the 22 masked-out
+#    bytes were flagged, because Dr. Memory/DynamoRIO do not model opmask
+#    registers. The hashed string is the application path inserted into a
+#    QSet<QString> by QCoreApplication::applicationFilePath, not our data.
+#    Ref: https://github.com/DynamoRIO/dynamorio/issues/1312 (AVX-512 support, open).
+# ---------------------------------------------------------------------------
+
+UNADDRESSABLE ACCESS
+name=qt-qhash-avx512-masked-load: vmovdqu8 with opmask in aeshash256_lt32_avx256
+Qt6Cored.dll!aeshash256_lt32_avx256*
+Qt6Cored.dll!aeshash256_avx256*
+Qt6Cored.dll!aeshash*
