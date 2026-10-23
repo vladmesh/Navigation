@@ -8,11 +8,11 @@
 | Epic | 01 / 8 — Сетка координат в зоне отрисовки |
 | ADR | docs/adr/0001-coordinate-grid.md |
 | Release branch | release/epic-01 |
-| Stage | release build green (epic-01-rc1) — docs reconciliation |
+| Stage | build + docs ready — testing |
 | Current task | — (01, 02 done) |
-| Next role | documentator |
-| Hand-off | release-build run 40017826744, artifact Ship-epic-01-rc1 (sha256 d896720e…2b2dda); docs/sessions/2026-10-23-epic-01-builder.md |
-| Last update | 2026-10-23 22:20, builder |
+| Next role | tester |
+| Hand-off | artifact Ship-epic-01-rc1 (run 40017826744); docs PR #13; ADR 0001 acceptance criteria |
+| Last update | 2026-10-23 22:35, documentator |
 
 ## Counters
 
@@ -47,3 +47,4 @@
 - 2026-10-23 reviewer: task 02 round 2 — GREEN-WITH-NITS (1 minor perf, 2 перенесённых minor, 1 nit по ADR); отчёт docs/sessions/2026-10-23-epic-01-reviewer-task-02-round-2.md
 - 2026-10-23 architect-revision: task 02 принят — итог ci_runs 3 (+1 docs-коммит передачи), review_rounds 2; PR #12 влит merge-коммитом; ADR: Decision §2 и критерий строк уточнены, leftovers записаны; все таски done; счётчики сброшены; next: builder
 - 2026-10-23 builder: release-build (workflow_dispatch, run 40017826744) зелёный с 1-й попытки; артефакт Ship-epic-01-rc1, smoke-старт на раннере OK; отчёт docs/sessions/2026-10-23-epic-01-builder.md; next: documentator
+- 2026-10-23 documentator: README (раздел «Карта», tst_gridmath), ADR Documentation impact отмечен; docs PR #13; отчёт docs/sessions/2026-10-23-epic-01-documentator.md; next: tester
