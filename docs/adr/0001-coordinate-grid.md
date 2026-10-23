@@ -226,8 +226,10 @@ Each task = one issue, one branch `epic-01/task-MM-<slug>`, one PR into the rele
 ## Documentation impact
 
 - README: раздел про карту — сетка в метрах UTM (easting/northing), шаг адаптивный 1–2–5×10ⁿ,
-  всегда включена, подписи X внизу, Y слева.
+  всегда включена, подписи X внизу, Y слева. Сделано: `README.md` §«Карта» (documentator, 2026-10-23).
 - Build docs: новый тестовый проект `Test/unit/gridmath/tst_gridmath.pro` и как его запустить.
+  Сделано: `README.md` §CI (команда запуска, `tst_gridmath` в списке PR-CI); описание
+  `release-build.yml` приведено к фактическому workflow (имя `Ship-<version>`, триггеры, smoke-старт).
 
 ## Decisions log
 
