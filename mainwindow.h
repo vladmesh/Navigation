@@ -117,11 +117,6 @@ private:
      */
     void drawLineToTowed(TowedItem* item);
 
-    /**
-     * @brief Рисует графическое представление стримера.
-     * @param item Указатель на объект стримера.
-     */
-    void drawStreamer(Streamer* item);
 
     /**
      * @brief Добавляет объект в список объектов в графическом интерфейсе.
@@ -153,11 +148,6 @@ private:
      */
     void setPathForAllFiles();
 
-    ///Path for all generated files
-
-    ///TODO
-    void CreateShipItem();
-    ///TODO
 
     Ui::MainWindow *ui;
 
@@ -174,7 +164,6 @@ private:
     ItemsStorage* Vault = nullptr;
     QTableWidget* tableWithItems = nullptr;
     Coordinator* coordinator = nullptr;
-    QTimer* MyTimer = nullptr;
     // Logger* logger = nullptr;
 
     int NumberOfRowsInTable = 0;
@@ -201,7 +190,6 @@ private slots:
     void on_DeleteItemPushButton_clicked();
     void on_AddItemtPushButton_clicked();
 
-    void timeToCollectData(); ///< Обновляет данные объектов по таймеру.
 
     void on_TopViewRB_clicked();
     void on_SideViewRB_clicked();
@@ -209,7 +197,6 @@ private slots:
     // void on_doubleSpinBox_valueChanged(double arg1);
     // void on_pushButton_clicked();
     // void on_pushButton_2_clicked();
-
 
 
     void runPainterRun(); ///< Запускает обновление отрисовки объектов классом UberPainter
@@ -220,7 +207,6 @@ private slots:
 
 
     void destroyAllTheObjects();
-    void destroyObject(QString name = "");
 
     void updateWiredWithComboBox();
 

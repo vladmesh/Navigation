@@ -88,8 +88,6 @@ void FixedItem::calcIFNotConnected()
              (x-ItemForCalculations->x)*qCos(azRad);
 
 
-
-
     QGeoCoordinate curGeoCoordinate = nmeaParser.UTMtoGeo(QPointF(x_coor, y_coor));
     // qDebug() << x_coor << QString::number(y_coor) << name;
     // qDebug() << ItemForCalculations->x_coor << QString::number(ItemForCalculations->y_coor) << ItemForCalculations->name;
@@ -103,25 +101,6 @@ void FixedItem::calcIFNotConnected()
     height = ItemForCalculations->height - (z - ItemForCalculations->z);
 }
 
-void FixedItem::printPos()
-{
-    qDebug() <<"-----------------------FixedItem::printPos()";
-    qDebug() <<name;
-    qDebug() << "Height:" << qSetRealNumberPrecision(3) << height  ;
-    qDebug() << "UTM East:" << qSetRealNumberPrecision(10)<< x_coor ;
-    qDebug() << "UTM North:" << qSetRealNumberPrecision(10) << y_coor;
-    qDebug() << "Geo East:" << longitude;
-    qDebug() << "Geo Notrh:" << latitude;
-    qDebug() << "Azimuth of movement" << azimuthOfMovement;
-    // logmsg(name + "\nHeight " + QString::number(height) +
-    //        "\nUTM East:" + QString::number(x_coor) +
-    //        "\nUTM North:" + QString::number(y_coor) +
-    //        "\nGeo East:" + QString::number(this->longitude) +
-    //        "\nGeo Notrh:" + QString::number(this->latitude) +
-    //        "Azimuth of movement" + QString::number(azimuthOfMovement));
-
-
-}
 
 void FixedItem::deletingWires() {
     if (vectorOfConnected.isEmpty()) return;
@@ -165,7 +144,6 @@ QString FixedItem::getLastRMC()
     }
     return newRMC;
 }
-
 
 
 // void FixedItem::newNmeaArrived(QString msg) //

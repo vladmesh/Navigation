@@ -30,8 +30,6 @@ class Streamer : public TowedItem
     class Channel;
 
 
-
-
     friend class Fabric;
     friend class ItemsLoader;
     friend class testPostprocessing;
@@ -54,8 +52,6 @@ public:
 
     /// @brief Печатает координаты каналов. Для отладки.
     void printChansCoor();
-    /// @brief Печатает позицию косы. Для отладки.
-    void printPos();
 
     /// @brief Возвращает указатель на канал по его номеру.
     Channel* getChan(uint number);
@@ -63,17 +59,10 @@ public:
     /// @brief Возвращает количество каналов.
     uint getChanCount();
 
-    /// @brief Возвращает вектор, содержащий относительные позиции каналов.
-    QVector<double> getChans() const;
-
-    /// @brief Устанавливает общую длину косы.
-    void setTotalLength(double newTotalLength);
 
     /// @brief Устанавливает конечный буй косы.
     void setEndBuoy(Buoy *newEndBuoy);
 
-    /// @brief Возвращает общую длину косы.
-    double getTotalLength();
 
     /// @brief Глубина первого канала в косе.
     double depth;
@@ -84,8 +73,6 @@ public:
     double totalLength;
     Buoy* endBuoy = nullptr;
 
-    /// @brief Возвращает коэффициент расчета длины косы.
-    double getDistanceCalcCoef() const;
 
     /// @brief Шаг между каналами, заданный строкой.
     QString channelStep = "1";
@@ -104,12 +91,9 @@ private:
     QVector<Channel*> ChannelsVector; ///< Вектор каналов (объектов Channel).
 
 
-    double endDepth; ///< Глубина на конечной точке.
     double realLen; ///< Длина от начала до концевого буя.
-    double heightDifference; ///< Разница высот между начальной и конечной точками.
     double dh; ///< Изменение высоты по длине косы.
     double distanceCalcCoef; ///< Коэффициент расчета длины.
-
 
 
     /// @class Channel
@@ -128,9 +112,7 @@ private:
     };
 
 
-
 };
-
 
 
 #endif // STREAMER_H

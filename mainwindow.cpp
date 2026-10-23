@@ -13,9 +13,6 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
     setFixedSize(894, 563);
 
-    MyTimer = new QTimer(this);
-    connect(MyTimer, &QTimer::timeout, this, &MainWindow::timeToCollectData);
-
 
     ///pointer to our list with item information
     tableWithItems = ui->ItemListTable;
@@ -81,21 +78,6 @@ MainWindow::MainWindow(QWidget *parent)
     P190HeaderAnalyzer.setVault(Vault);
     packageSender->setMyVault(Vault);
 }
-void MainWindow::timeToCollectData()
-{
-    // static NmeaParser p;
-    // int FFID = pairs[curSegyFile].ffid;
-    // QTime TIME = pairs[curSegyFile].time;
-    for (auto i: Vault->ItemsVault) {
-        i->calcItemCoordinates();
-        // if (TIME.msecsTo(p.parseNmeaGGA(i->connection->lastRecievedGGA).dateTime.time()) < 1000) {
-        //     p190Creator->setFFID(FFID);
-        //     p190Creator->createShotBlock();
-        //     break;
-        // }
-        //было актуально раньше
-    }
-}
 
 MainWindow::~MainWindow()
 {
@@ -111,24 +93,6 @@ MainWindow::~MainWindow()
     // exit(0);
 }
 
-void MainWindow::destroyObject(QString name)
-{
-    paintingTimer->stop();
-    int row = -1;
-    if (tableWithItems) row = tableWithItems->currentRow();
-    if (name.isEmpty() && tableWithItems) { //это для ситуации когда функция вызывается нажатием на кнопку
-        if (row == -1 && tableWithItems) row = tableWithItems->rowCount() - 1;
-        name = tableWithItems->item(row, 0)->text();
-    }
-    painter->eraseFromPainting(Vault->getItem(name));
-    if (!name.isEmpty()) {
-        if (tableWithItems) tableWithItems->removeRow(row);
-        Vault->DeleteItem(name);
-    }
-    ui->ComboBoxWiredWith->removeItem(ui->ComboBoxWiredWith->findText(name));
-    paintingTimer->start();
-    updateWiredWithComboBox();
-}
 
 void MainWindow::updateWiredWithComboBox()
 {
@@ -158,7 +122,6 @@ void MainWindow::on_DeleteItemPushButton_clicked()
     //     Vault->DeleteItem(deleteName);
     // }
     // ui->ComboBoxWiredWith->removeItem(ui->ComboBoxWiredWith->findText(deleteName));
-
 
 
     DrawingAreaTopView->update();
@@ -380,7 +343,6 @@ void MainWindow::destroyAllTheObjects()
 }
 
 
-
 void MainWindow::closeEvent(QCloseEvent *event) {
     // Создаём QMessageBox для подтверждения закрытия
     QMessageBox msgBox(this);
@@ -495,8 +457,6 @@ void MainWindow::setMenuBar(QMenuBar *menuBar) //здесь мы создаем 
     menuBar->addMenu(aboutMenu);
 
 
-
-
     // Создаем меню "Settings"
     QMenu *settingsMenu = menuBar->findChild<QMenu*>("settingsMenu");
     if (!settingsMenu) {
@@ -538,7 +498,6 @@ void MainWindow::setMenuBar(QMenuBar *menuBar) //здесь мы создаем 
     settingsMenu->addAction(p190HeaderAction);
     settingsMenu->addAction(shipParamsChangerAction);
 }
-
 
 
 void MainWindow::loadLayout(QFile* jsonFile)
@@ -602,7 +561,6 @@ void MainWindow::hideDangerousButtons()
 }
 
 
-
 FixedItem* MainWindow::createFixedItem(FixedItemInfo NewItemInfo) {
     bool needConnection = false;
 
@@ -647,7 +605,6 @@ TowedItem* MainWindow::createTowedItem(TowedItemInfo NewItemInfo) {
     ///adding obj to table
     addItemToObjectsList(NewItem);
     ///adding obj to table
-
 
 
     ///adding new object to our Drawing area
@@ -760,8 +717,6 @@ Source* MainWindow::createSourceItem(SourceInfo SourceItemInfo) //метод д�
 }
 
 
-
-
 QString MainWindow::GetNewDeviceName(QString name) {
     //делает невозможным повторение имен
     //если имена повторяются, добавляет постфикс _1 _2 _3 и тд
@@ -828,16 +783,6 @@ void MainWindow::drawLineToTowed(TowedItem* item) {
         // DrawingAreaSideView->drawLineToTowed(item->x, item->z,
         //     item->towingPoint->x, item->towingPoint->z);
     }
-}
-void MainWindow::drawStreamer(Streamer *item)
-{
-    Q_UNUSED(item);
-    // DrawingAreaTopView->drawStreamer(item->x, item->y,
-    //     item->getChan(item->getChanCount())->x,
-    //     item->getChan(item->getChanCount())->y, item->getChanCount());
-    // DrawingAreaSideView->drawStreamer(item->x, item->z,
-    //     item->getChan(item->getChanCount())->x,
-    //     item->getChan(item->getChanCount())->z,item->getChanCount());
 }
 
 void MainWindow::on_TopViewRB_clicked()
@@ -968,7 +913,6 @@ void MainWindow::runPainterRun()
     painter->run();
 
 }
-
 
 
 //для того, чтобы абсолютный лэйбек не был больше абс.лэйбека у того объекта,

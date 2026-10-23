@@ -12,7 +12,6 @@
 #include <cstdio>
 
 QPalette getLightPalette();
-QPalette getToxicPalette();
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -24,7 +23,6 @@ int main(int argc, char *argv[])
     a.setWindowIcon(QIcon(":/Data/icon.ico"));
     QApplication::setWindowIcon(QIcon(":/Data/icon.ico"));
     QPalette goodPalette = getLightPalette();
-    QPalette toxicPalette = getToxicPalette();
     a.setPalette(goodPalette);
 
     if (QDate::currentDate().year() > 2027) {
@@ -86,18 +84,4 @@ QPalette getLightPalette() {
     lightPalette.setColor(QPalette::ButtonText, Qt::black);
     lightPalette.setColor(QPalette::BrightText, Qt::red);
     return lightPalette;
-}
-QPalette getToxicPalette() {
-    QPalette palette;
-    palette.setColor(QPalette::Window, QColor(255, 0, 255));          // Яркий розовый для фона окон
-    palette.setColor(QPalette::WindowText, QColor(0, 255, 0));        // Яркий зеленый для текста
-    palette.setColor(QPalette::Base, QColor(0, 255, 255));            // Голубой для фона виджетов (например, полей ввода)
-    palette.setColor(QPalette::AlternateBase, QColor(255, 255, 0));   // Желтый для альтернативного фона
-    palette.setColor(QPalette::ToolTipBase, QColor(255, 0, 0));       // Красный для подсказок
-    palette.setColor(QPalette::ToolTipText, QColor(255, 255, 255));   // Белый для текста подсказок
-    palette.setColor(QPalette::Text, QColor(255, 165, 0));            // Оранжевый для обычного текста
-    palette.setColor(QPalette::Button, QColor(0, 0, 255));            // Яркий синий для кнопок
-    palette.setColor(QPalette::ButtonText, QColor(255, 255, 255));    // Белый для текста на кнопках
-    palette.setColor(QPalette::BrightText, QColor(255, 0, 0));        // Ярко-красный для выделенного текста
-    return palette;
 }

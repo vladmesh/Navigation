@@ -1,4 +1,4 @@
-QT += core gui network serialport location core5compat positioning
+QT += core gui network serialport location positioning
 #
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,7 +16,6 @@ INCLUDEPATH += ./Drawing \
 ./Parsers \
 ./Service \
 ./Data \
-./Data/Params \
 ./DataReader \
 ./Test \
 ./Observervation \
@@ -29,7 +28,6 @@ SOURCES += \
     Connections/sender.cpp \
     DataVault/itemsloader.cpp \
     DataVault/itemsstorage.cpp \
-    # Drawing/lordofgraphic.cpp \
     Drawing/uberpainter.cpp \
     Fabric/buoydialog.cpp \
     Fabric/fabric.cpp \
@@ -72,7 +70,6 @@ HEADERS += \
     DataVault/itemsstorage.h \
     DataVault/structures.h \
     Drawing/hoverpaintingrpoint.h \
-    # Drawing/lordofgraphic.h \
     Drawing/uberpainter.h \
     Fabric/buoydialog.h \
     Fabric/fabric.h \
@@ -112,9 +109,7 @@ HEADERS += \
 FORMS += \
     Connections/connectionui.ui \
     mainwindow.ui \
-    ConnectionCreator/connection_creator.ui \
-    Connections/connection_com.ui \
-    Connections/connection_net.ui
+    ConnectionCreator/connection_creator.ui
 
 
 

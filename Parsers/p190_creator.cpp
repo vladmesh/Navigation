@@ -281,10 +281,6 @@ void P190_creator::setFFID(int newFFID)
     FFID = newFFID;
 }
 
-ItemsStorage *P190_creator::getMyVault() const
-{
-    return MyVault;
-}
 
 void P190_creator::setMyVault(ItemsStorage *newMyVault)
 {
@@ -379,27 +375,6 @@ QString P190_creator::createFileName()
                            .arg(currentDateTime.time().minute(), 2, 10, QChar('0'));  // Добавляем ведущий ноль для минут
     this->fileName = fileName;
     return fileName;
-}
-
-QString P190_creator::convertCoordinates(const QString &input)
-{
-    QRegExp rx("([0-9]+)° ([0-9]+)' ([0-9]+\\.[0-9]+)\" ([NSEW]), ([0-9]+)° ([0-9]+)' ([0-9]+\\.[0-9]+)\" ([NSEW])");
-    QString result;
-
-    if (rx.indexIn(input) != -1) {
-        QString latDeg = rx.cap(1);
-        QString latMin = rx.cap(2);
-        QString latSec = rx.cap(3);
-        QString latDir = rx.cap(4);
-        QString lonDeg = rx.cap(5);
-        QString lonMin = rx.cap(6);
-        QString lonSec = rx.cap(7);
-        QString lonDir = rx.cap(8);
-
-        result = latDeg + latMin + latSec + latDir + lonDeg + lonMin + lonSec + lonDir;
-    }
-
-    return result;
 }
 
 

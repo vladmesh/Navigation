@@ -150,6 +150,5 @@ private:
 
     bool isNotDrawingLine = true; ///< Флаг, указывающий на режим рисования линии.
 
-    QVector<QGraphicsItem*> coordinateItems; ///< Вектор для хранения элементов координатной сетки.
 };
 #endif // UBERPAINTER_H

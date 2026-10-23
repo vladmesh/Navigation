@@ -73,11 +73,6 @@ public:
     NmeaParser::CoordinateData lastGGAData = {{0, 0}, {0, 0}, QDateTime(), 0}; ///< Данные NMEA GGA.
     NmeaParser::NmeaRMCData lastRMCData = {0, 0}; ///< Данные NMEA RMC.
 
-    /**
-     * @brief Выводит текущие координаты объекта. Для отладки.
-     */
-    void printPos();
-
 
     /// Информация об объекте.
     QString name; ///< Имя объекта.
@@ -169,8 +164,6 @@ protected:
     static CircularBuffer sharedCircularBuffer; ///< Общий кольцевой буфер координат.
 
 };
-
-
 
 
 #endif // FIXEDITEM_H

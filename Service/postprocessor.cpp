@@ -91,7 +91,6 @@ int PostProcessor::mainProcess()
 }
 
 
-
 void PostProcessor::getDataFromSegy()
 {
 
@@ -102,34 +101,6 @@ void PostProcessor::getDataFromSegy()
     }
 }
 
-void PostProcessor::setSegyStorage(const QDir &newSegyStorage)
-{
-    segyStorage = newSegyStorage;
-}
-
-void PostProcessor::fillItemsVectors()
-{
-    for (FixedItem* i:MyVault->ItemsVault) {
-        if (i->hasConnection) {
-            if (i->connection) {
-                vectorWithCon.push_front(i);
-            } else {
-                // Logger::instance().logMessage(Logger::LogMessage(Logger::LogLevel::Error, "no connection"));
-            }
-        } else {
-            vectorWithCon.push_front(i);
-        }
-    }
-}
-
-int PostProcessor::findNmeaFiles()
-{
-    for (FixedItem* i: this->vectorWithCon) {
-        QFile* file = i->connection->file;
-        this->NmeaFiles.push_front(file);
-    }
-    return 1;
-}
 
 QStringList PostProcessor::findNmeaForSegy(SegYReader::SegyData pair, QFile* nmeaFile, int* pos) {
     QTime time = pair.time;
@@ -312,12 +283,6 @@ QVector<SegYReader::SegyData> PostProcessor::readFileAndGeneratePairs(const QStr
 }
 
 
-
-void PostProcessor::setP190(P190_creator *newP190)
-{
-    p190Creator = newP190;
-}
-
 QVector<SegYReader::SegyData> PostProcessor::prepareSegyData(QVector<SegYReader::SegyData> in)
 {
     QVector<SegYReader::SegyData> out;
@@ -369,16 +334,9 @@ QVector<SegYReader::SegyData> PostProcessor::prepareSegyData(QVector<SegYReader:
 }
 
 
-
-
 void PostProcessor::setMyVault(ItemsStorage *newMyVault)
 {
     MyVault = newMyVault;
-}
-
-void PostProcessor::setNmeaStorage(const QDir &newNmeaStorage)
-{
-    nmeaStorage = newNmeaStorage;
 }
 
 

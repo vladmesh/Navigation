@@ -61,7 +61,6 @@ private:
     float currentQuality = 0;
     QVector<bool>::iterator iter;
 
-    QDir logsDir = QDir("~/Documents/Ship_logs");
     QTextStream* datastream = nullptr;
 
 };

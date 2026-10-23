@@ -83,20 +83,11 @@ public:
      */
     static void setItemsCreationIndex(QVector<QPointer<FixedItem>> &ItemsVault);
 
-    void extracted();
     void deleteAllItems();
 
     QVector<QPointer<FixedItem>> ItemsVault; ///< Контейнер для хранения элементов типа FixedItem.
     // QMutex mutex; ///< Мьютекс для защиты доступа к контейнеру элементов.
 
-private slots:
-    /**
-     * @brief Очищает контейнер, удаляя все нулевые указатели.
-     *
-     * Используется для удаления нулевых элементов из контейнера, чтобы
-     * поддерживать чистоту данных.
-     */
-    void cleanVector();
 };
 
 #endif // ITEMSSTORAGE_H

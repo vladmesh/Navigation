@@ -34,7 +34,6 @@ public:
     StreamerDialog(QWidget *parent = nullptr);
     // StreamerDialog(ItemsStorage* Vault);
 
-    QString retrunValue; ///< Возвращаемое значение диалога.
     uint numOfChannels; ///< Количество каналов стримера.
     QVector<double> chans; ///< Вектор расстояний между каналами.
     double elasticSectionLength; ///< не используется

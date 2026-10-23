@@ -78,8 +78,6 @@ public:
      */
     QGeoCoordinate UTMtoGeo(const QPointF &coordinate);
 
-    void printNmeaGGAData(CoordinateData data);
-    void printNmeaRMCData(NmeaRMCData data);
 
     /**
      * @brief Проверяет корректность данных из строки GGA.

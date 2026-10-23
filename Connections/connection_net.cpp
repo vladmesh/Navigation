@@ -1,9 +1,7 @@
 #include "connection_net.h"
-#include "ui_connection_net.h"
 
-Connection_Net::Connection_Net() //: ui(new Ui::Connection_Net)
+Connection_Net::Connection_Net()
 {
-    // ui->setupUi(this);
 }
 
 /**
@@ -39,7 +37,6 @@ Connection_Net::Connection_Net(QString IP, int port, QString filename) :
     socket->connectToHost(QHostAddress(IP), port);
     ui->setWindowTitle(IP + " :" + QString::number(port));
 }
-
 
 
 Connection_Net::~Connection_Net()

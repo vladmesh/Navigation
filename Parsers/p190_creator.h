@@ -11,7 +11,6 @@
 #include <QVector>
 #include <QDir>
 #include <QStandardPaths>
-#include <QRegExp>
 #include <QCoreApplication>
 #include <QRegularExpression>
 
@@ -70,7 +69,6 @@ public:
      * @return Сформированная строка.
      */
 
-    QString createMainRow(FixedItem* item, int pointNumber, int tailBuoy);
 
     /**
      * @brief Создание строки для основного блока (новая версия).
@@ -98,8 +96,6 @@ public:
     QStringList createHeader(int dayNumber);
 
 
-    /// Запись данных блока (коса и все остальное)в файл
-    void writeP190Block();
     /**
      * @brief Запись списка строк в файл.
      * @param data Список строк для записи.
@@ -111,18 +107,10 @@ public:
      */
     void setItemStoragePtr(ItemsStorage* Vault);
     QString createFileName();
-    /**
-     * @brief Преобразование координат.
-     * @param input Входная строка с координатами.
-     * @return Преобразованная строка с координатами.
-     */
-    QString convertCoordinates(const QString &input);
     /// Установка пути для сохранения файлов
     void setPath(const QDir &newPath);
     /// Установка FFID
     void setFFID(int newFFID);
-     /// Получение указателя на хранилище объектов
-    ItemsStorage *getMyVault() const;
     /// Установка хранилища объектов
     void setMyVault(ItemsStorage *newMyVault);
     /// Установка дня опроса

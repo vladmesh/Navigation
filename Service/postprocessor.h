@@ -51,35 +51,8 @@ public:
      */
     void setMyVault(ItemsStorage *newMyVault);
     
-    QDir nmeaStorage; ///< Директория хранения файлов NMEA.
-    QDir segyStorage; ///< Директория хранения файлов SEGY.
-    /**
-     * @brief Устанавливает путь для хранения файлов NMEA.
-     *
-     * @param newNmeaStorage Новый путь.
-     */
-    void setNmeaStorage(const QDir &newNmeaStorage);
-    /**
-     * @brief Устанавливает путь для хранения файлов SEGY.
-     *
-     * @param newSegyStorage Новый путь.
-     */
-    void setSegyStorage(const QDir &newSegyStorage);
 
 
-    /**
-     * @brief Заполняет векторы объектов с подключениями и без подключений.
-     */
-    void fillItemsVectors();
-    int findNmeaFiles();
-
-
-    /**
-     * @brief Устанавливает P190_creator.
-     *
-     * @param newP190 Указатель на объект P190_creator.
-     */
-    void setP190(P190_creator *newP190);
     QVector<SegYReader::SegyData> pairs;
     /**
      * @brief Подготовка данных SEGY, например, добавление интерполированных значений.

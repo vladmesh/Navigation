@@ -176,12 +176,6 @@ void ItemsStorage::deleteAllItems()
     }
 }
 
-void ItemsStorage::cleanVector()
-{
-    ItemsVault.erase(std::remove_if(ItemsVault.begin(), ItemsVault.end(),
-        [](const QPointer<FixedItem>& ptr) { return ptr.isNull(); }),
-        ItemsVault.end());
-}
 
 FixedItem* ItemsStorage::getItem(QString name) {
     for (auto it = ItemsVault.begin(); it != ItemsVault.end(); it++) {

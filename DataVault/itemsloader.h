@@ -71,12 +71,6 @@ public:
      */
     static QJsonObject connectionToJson(Connection *conn);
 
-    /**
-     * @brief Создаёт JSON-документ на основе JSON-объекта.
-     * @param obj JSON-объект.
-     * @return JSON-документ.
-     */
-    static QJsonDocument createJsonDoc(QJsonObject obj);
 
     /**
      * @brief Сохраняет JSON-объект в файл.

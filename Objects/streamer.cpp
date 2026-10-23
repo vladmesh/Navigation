@@ -202,17 +202,6 @@ void Streamer::printChansCoor() //функция для дебага. вывод
     }
 }
 
-void Streamer::printPos()
-{
-    // logmsg(name + "\nHeight " + QString::number(height) +
-    //        "\nUTM East:" + QString::number(x_coor) +
-    //        "\nUTM North:" + QString::number(y_coor) +
-    //        "\nGeo East:" + QString::number(this->longitude) +
-    //        "\nGeo Notrh:" + QString::number(this->latitude) +
-    //        "Azimuth of movement" + QString::number(azimuthOfMovement));
-    printChansCoor();
-}
-
 
 Streamer::Channel* Streamer::getChan(uint number)
 {
@@ -231,15 +220,6 @@ uint Streamer::getChanCount()
     return this->NumChanels;
 }
 
-QVector<double> Streamer::getChans() const
-{
-    return chans;
-}
-
-void Streamer::setTotalLength(double newTotalLength)
-{
-    totalLength = newTotalLength;
-}
 
 void Streamer::setEndBuoy(Buoy *newEndBuoy)
 {
@@ -247,10 +227,6 @@ void Streamer::setEndBuoy(Buoy *newEndBuoy)
     endBuoy = newEndBuoy;
 }
 
-double Streamer::getTotalLength()
-{
-    return totalLength;
-}
 
 void Streamer::calcStreamerDepth()
 {
@@ -279,10 +255,6 @@ void Streamer::calcStreamerDepth()
     }
 }
 
-double Streamer::getDistanceCalcCoef() const
-{
-    return distanceCalcCoef;
-}
 
 Streamer::Channel::Channel(uint myNumber)
 {

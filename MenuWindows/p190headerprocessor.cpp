@@ -49,10 +49,6 @@ void P190HeaderProcessor::insertLine(const QString &line)
     content = lines.join("\n") + '\n';
 }
 
-QString P190HeaderProcessor::getContent() const
-{
-    return content;
-}
 
 int P190HeaderProcessor::getHeaderCode(const QString &line) const
 {

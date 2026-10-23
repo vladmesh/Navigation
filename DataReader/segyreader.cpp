@@ -1,19 +1,5 @@
 #include "segyreader.h"
 
-QDate getDateFromDayOfYear(int dayOfYear) {
-    // Проверяем, что номер дня находится в допустимом диапазоне
-    if (dayOfYear < 1 || dayOfYear > 366) {
-        // qWarning() << "Номер дня должен быть от 1 до 366.";
-        return QDate(); // Возвращаем некорректную дату
-    }
-    int year = QDate::currentDate().year();
-    // Получаем первую дату года
-    QDate firstDayOfYear(year, 1, 1);
-
-    // Возвращаем дату, прибавляя номер дня минус один
-    return firstDayOfYear.addDays(dayOfYear - 1);
-}
-
 
 SegYReader::SegYReader() {}
 
@@ -73,7 +59,6 @@ void SegYReader::readTraceHeader(QFile& file) {
     // Extracting FFID from bytes 9-12 (4 bytes, UI4)
     // uint32_t ffid = (data[12] << 24) | (data[13] << 16) | (data[14] << 8) | data[15];
     uint32_t ffid = data[9] << 16 | data[10] << 8 | data[11];
-
 
 
     uint16_t JulianDay = data[158]<<8 | data[159];

@@ -28,13 +28,6 @@ public:
      */
     int calcCoors();
     /**
-     * @brief Вывод координат элементов.
-     *
-     * Печатает координаты всех элементов в хранилище `Vault`.
-     * @return Статус выполнения: 1 - успех, 0 - ошибка.
-     */
-    int printCoors();
-    /**
      * @brief Связывает фиксированные элементы.
      *
      * Устанавливает связи между фиксированными элементами, у которых нет соединений, и одним из элементов с соединением.
@@ -43,7 +36,6 @@ public:
     bool wireFixedItems();
     ItemsStorage* Vault;
     double commonDummyAzimuth; //if end buoy doesn't send az
-
 
 
 public slots:

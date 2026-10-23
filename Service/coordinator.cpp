@@ -65,23 +65,6 @@ int Coordinator::calcCoors()
     return 1;
 }
 
-int Coordinator::printCoors()
-{
-    try{
-        for (FixedItem* item: Vault->ItemsVault) {
-            QString className = QString(item->metaObject()->className());
-            if (className == "Streamer") {
-                dynamic_cast<Streamer*>(item)->printPos();
-            } else {
-                item->printPos();
-            }
-        }
-    } catch(std::exception& e) {
-        qDebug() << e.what();
-        return 0;
-    }
-    return 1;
-}
 
 bool Coordinator::wireFixedItems()
 {

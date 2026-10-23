@@ -44,7 +44,6 @@ NmeaParser::CoordinateData NmeaParser::parseNmeaGGA(const QString &nmeaSentence)
             QString heightValue = parts[9];
 
 
-
             double latitude = convertToDegrees(latitudeValue, latitudeDirection); //получение географических градусов
             double longitude = convertToDegrees(longitudeValue, longitudeDirection); //в норм формате
 
@@ -56,7 +55,6 @@ NmeaParser::CoordinateData NmeaParser::parseNmeaGGA(const QString &nmeaSentence)
             int milliseconds = timeValue.mid(7, 2).toInt()*10;
             QTime time(hours, minutes, seconds, milliseconds);
             QDateTime dateTime(QDateTime::currentDateTime().date(), time);
-
 
 
             data.coordinate = QGeoCoordinate(latitude, longitude);
@@ -146,30 +144,6 @@ double NmeaParser::convertToDegrees(const QString &nmeaValue, const QString &dir
     return decimalDegrees;
 }
 
-void NmeaParser::printNmeaGGAData(CoordinateData data) {
-    if (data.coordinate.isValid()) {
-        qDebug() << "Широта:" << data.coordinate.latitude();
-        qDebug() << "Долгота:" << data.coordinate.longitude();
-        qDebug() << "Время:" << data.dateTime.toString();
-        qDebug() << "Высота:" << data.height;
-
-        qDebug() << "UTM Восток:" << data.coorUTM.x();
-        qDebug() << "UTM Север:" << data.coorUTM.y();
-        qDebug() << "Высота над уровнем моря"<< data.height;
-    } else {
-        qDebug() << "Некорректная строка NMEA GGA";
-    }
-}
-
-void NmeaParser::printNmeaRMCData(NmeaRMCData data)
-{
-    if (data.azimuth >= 0 && data.azimuth <= 360 && data.speed > 0) {
-        qDebug() << "Скорость" << data.speed;
-        qDebug() << "Направление" << data.azimuth;
-    } else {
-        qDebug() << "Некорректная строка NMEA RMC";
-    }
-}
 
 QPointF NmeaParser::GeoToUTM(const QGeoCoordinate &coordinate) { //перевод географических координат в систему проекции
     double N, T, C, A, M;
@@ -256,12 +230,5 @@ bool NmeaParser::isValid(NmeaRMCData nmeaRMC) {
     if (nmeaRMC.speed < 0 || nmeaRMC.speed > 50) res = 0;
     return res;
 }
-
-
-
-
-
-
-
 
 

@@ -13,7 +13,6 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
-#include <QRegExp>
 #include <QtMath>
 
 class ShipParamsChangerModel : public QObject {
@@ -175,7 +174,6 @@ public:
         return points;
     }
 
-    void setMainDeckHeight(float newMainDeckHeight);
 
     void closeEvent(QCloseEvent* event) override {
         saveContour();
