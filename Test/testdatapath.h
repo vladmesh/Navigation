@@ -9,7 +9,7 @@
 // иначе используется каталог "testdata" рядом с рабочей директорией.
 // Раньше пути были захардкожены под C:/Users/<user>/..., из-за чего тесты
 // нельзя было запустить ни на другой машине, ни в CI.
-inline QString testDataPath(const QString &relative)
+inline QString testDataPath(const QString& relative)
 {
     QString root = qEnvironmentVariable("NAV_TEST_DATA_DIR");
     if (root.isEmpty())

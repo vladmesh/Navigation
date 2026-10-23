@@ -20,7 +20,7 @@ BraceWrapping:
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
-PointerAlignment: Right
+PointerAlignment: Left
 SortIncludes: Never
 IncludeBlocks: Preserve
 BinPackParameters: true

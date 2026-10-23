@@ -31,7 +31,6 @@ jobs:
           target: desktop
           arch: win64_msvc2022_64
           modules: ${{ env.QT_MODULES }}
-          tools: tools_jom
           cache: true
 
       - uses: ilammy/msvc-dev-cmd@v1
@@ -39,8 +38,7 @@ jobs:
       - name: Build Ship (release, /W4 without /WX)
         shell: cmd
         run: |
-          set PATH=%IQTA_TOOLS%\QtCreator\bin\jom;%PATH%
-          where jom >nul 2>nul && (set MAKE=jom) || (set MAKE=nmake)
+          set MAKE=nmake
           mkdir build && cd build
           qmake ..\Ship.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" || exit /b 1
           %MAKE% || exit /b 1
@@ -49,8 +47,7 @@ jobs:
       - name: Build unit tests
         shell: cmd
         run: |
-          set PATH=%IQTA_TOOLS%\QtCreator\bin\jom;%PATH%
-          where jom >nul 2>nul && (set MAKE=jom) || (set MAKE=nmake)
+          set MAKE=nmake
           mkdir build-tests && cd build-tests
           qmake ..\Test\unit\unit.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" || exit /b 1
           %MAKE% || exit /b 1
