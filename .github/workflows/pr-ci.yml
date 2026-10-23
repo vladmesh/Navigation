@@ -1,0 +1,179 @@
+name: PR CI
+
+on:
+  push:
+    branches: [main, "ci/**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QT_VERSION: "6.8.3"
+  # Модули по Ship.pro: network/core/gui/widgets входят в базу,
+  # serialport, location, positioning, core5compat — аддоны.
+  QT_MODULES: "qtserialport qtpositioning qtlocation qt5compat"
+
+jobs:
+  windows-msvc:
+    name: Windows / MSVC build + unit tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: ${{ env.QT_MODULES }}
+          tools: tools_jom
+          cache: true
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build Ship (release, /W4 without /WX)
+        shell: cmd
+        run: |
+          set PATH=%IQTA_TOOLS%\QtCreator\bin\jom;%PATH%
+          where jom >nul 2>nul && (set MAKE=jom) || (set MAKE=nmake)
+          mkdir build && cd build
+          qmake ..\Ship.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" || exit /b 1
+          %MAKE% || exit /b 1
+          dir release\Ship.exe
+
+      - name: Build unit tests
+        shell: cmd
+        run: |
+          set PATH=%IQTA_TOOLS%\QtCreator\bin\jom;%PATH%
+          where jom >nul 2>nul && (set MAKE=jom) || (set MAKE=nmake)
+          mkdir build-tests && cd build-tests
+          qmake ..\Test\unit\unit.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" || exit /b 1
+          %MAKE% || exit /b 1
+
+      - name: Run unit tests
+        shell: cmd
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: build-tests\release\tst_parsers.exe -o -,txt -o tst_parsers.xml,junitxml
+
+      - name: Legacy tests (skipped)
+        shell: bash
+        run: |
+          # Test/test_postprocessing, testppkparser, testitemsloading — это не
+          # автотесты, а сценарии на полевых данных (SEG-Y, NMEA, PPK, JSON),
+          # которых нет в репозитории. Пути переведены на NAV_TEST_DATA_DIR,
+          # но без данных запускать нечего.
+          echo "::notice title=Legacy tests skipped::Test/test_postprocessing, testppkparser, testitemsloading need field data (NAV_TEST_DATA_DIR), not in repo"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results-windows
+          path: tst_parsers.xml
+          if-no-files-found: ignore
+
+  linux-sanitizers:
+    name: Linux / GCC ASan+UBSan(+LSan) unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          modules: ${{ env.QT_MODULES }}
+          cache: true
+
+      - name: Install system deps
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1-mesa-dev libxkbcommon-dev
+
+      - name: Build unit tests with sanitizers
+        run: |
+          mkdir build-asan && cd build-asan
+          qmake ../Test/unit/unit.pro CONFIG+=debug \
+            "QMAKE_CXXFLAGS+=-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined" \
+            "QMAKE_LFLAGS+=-fsanitize=address,undefined"
+          make -j"$(nproc)"
+
+      - name: Run unit tests (ASan + LSan + UBSan)
+        env:
+          QT_QPA_PLATFORM: offscreen
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1:strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ./build-asan/tst_parsers
+
+      - name: Full app compiles on Linux (smoke)
+        run: |
+          mkdir build-app && cd build-app
+          qmake ../Ship.pro CONFIG+=debug
+          make -j"$(nproc)"
+          test -x Ship
+
+  lint:
+    name: clang-format (changed lines) / cppcheck / clang-tidy
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang-format clang-tidy cppcheck \
+            qt6-base-dev qt6-positioning-dev
+
+      - name: clang-format on changed lines only
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE" 2>/dev/null; then
+            BASE="$(git rev-list --max-parents=0 HEAD | tail -1)"
+          fi
+          echo "Diff base: $BASE"
+          git diff -U0 --no-color "$BASE" HEAD -- '*.cpp' '*.h' > changes.diff
+          clang-format-diff -p1 -style=file < changes.diff > format.diff || true
+          if [ -s format.diff ]; then
+            cat format.diff
+            echo "::error::Changed lines are not clang-formatted (see diff above)"
+            exit 1
+          fi
+          echo "clang-format: OK"
+
+      - name: cppcheck (fails on error severity only)
+        run: |
+          cppcheck --version
+          git ls-files '*.cpp' '*.h' > files.txt
+          cppcheck -q --library=qt --std=c++17 --language=c++ --inline-suppr \
+            --enable=warning,portability \
+            --suppress=missingIncludeSystem --suppress=syntaxError \
+            --suppress=preprocessorErrorDirective --suppress=unknownMacro \
+            --template='{file}:{line}: {severity}: {message} [{id}]' \
+            --file-list=files.txt 2> cppcheck.txt || true
+          cat cppcheck.txt
+          if grep -E ': error: ' cppcheck.txt; then
+            echo "::error::cppcheck found errors"
+            exit 1
+          fi
+          echo "::notice title=cppcheck::$(grep -c ': warning: ' cppcheck.txt || true) warnings (not blocking)"
+
+      - name: clang-tidy (parsers + unit tests)
+        run: |
+          Q=$(qmake6 -query QT_INSTALL_HEADERS)
+          clang-tidy --quiet \
+            -checks='-*,bugprone-*,clang-analyzer-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-implicit-widening-of-multiplication-result' \
+            -warnings-as-errors='clang-analyzer-*' \
+            Parsers/nmeaparser.cpp Parsers/ppkparser.cpp -- \
+            -std=c++17 -fPIC -IParsers -I"$Q" -I"$Q/QtCore" -I"$Q/QtGui" -I"$Q/QtWidgets" -I"$Q/QtPositioning"

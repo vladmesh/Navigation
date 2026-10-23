@@ -1,0 +1,54 @@
+name: Release build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version label for the zip (e.g. 1.2.0)"
+        required: false
+        default: ""
+
+jobs:
+  windows-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: "qtserialport qtpositioning qtlocation qt5compat"
+          tools: tools_jom
+          cache: true
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build (release)
+        shell: cmd
+        run: |
+          set PATH=%IQTA_TOOLS%\QtCreator\bin\jom;%PATH%
+          where jom >nul 2>nul && (set MAKE=jom) || (set MAKE=nmake)
+          mkdir build && cd build
+          qmake ..\Ship.pro CONFIG+=release || exit /b 1
+          %MAKE% || exit /b 1
+
+      - name: Package with windeployqt
+        shell: pwsh
+        run: |
+          $ver = "${{ github.event.inputs.version }}"
+          if (-not $ver) { $ver = "${{ github.sha }}".Substring(0, 7) }
+          "PKG_NAME=Navigation-$ver-win64" | Out-File -FilePath $env:GITHUB_ENV -Append
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item build\release\Ship.exe dist\
+          windeployqt --release --compiler-runtime dist\Ship.exe
+          Get-ChildItem dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PKG_NAME }}
+          path: dist/
+          if-no-files-found: error

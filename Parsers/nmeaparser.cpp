@@ -96,7 +96,7 @@ NmeaParser::NmeaRMCData NmeaParser::parseNmeaRMC(const QString &nmeaSentence)
     // qDebug() << "parseNmeaRMC" <<parts;
 
     // Проверяем, что у нас достаточно частей для извлечения данных
-    if (parts.size() < 8) {
+    if (parts.size() < 9) { // используется parts[8]
         qDebug() << "Error: Insufficient data fields in NMEA RMC string.";
         return rmcData;
     }

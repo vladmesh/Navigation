@@ -32,7 +32,7 @@ public:
         QGeoCoordinate coordinate;
         QPointF coorUTM;
         QDateTime dateTime;
-        float height;
+        float height = 0.0f;
     };
     /**
      * @struct NmeaRMCData
