@@ -31,6 +31,6 @@ cppcheck в CI: это не компилируемые единицы.
 | `streamer-checkStreamerCoordinates.cpp.txt` (б12) | `Objects/streamer.cpp` | Проверка координат каналов. | Заглушка, возвращает 666. |
 | `coordinator-source-multilateration.cpp.txt` (б4) | `Service/coordinator.cpp` | `updateSourcePosition` + `calculateError`: позиция источника градиентным спуском по расстояниям до приёмников. | Только алгоритм. Источник расстояний не определён. |
 | `streamerdialog-csv.cpp.txt` (б8) | `Fabric/streamerdialog.cpp` | Импорт и экспорт раскладки косы в CSV. | Высокая, но кнопки не создавались; `saveToCSV` пишет захардкоженные глубины, одна строка с `,` вместо `;`, `readCSV` не читает `Channel spacing`. |
-| `p190-multisource-header.cpp` (б9) | `Parsers/p190_creator.cpp` | Строки P1/90 по каждому источнику, заполнение H0103, `setLineName`. | ~10%. Фильтр по `sourceID` был заменён на `if (true)`, циклы пустые. |
+| `p190-multisource-header.cpp.txt` (б9) | `Parsers/p190_creator.cpp` | Строки P1/90 по каждому источнику, заполнение H0103, `setLineName`. | ~10%. Фильтр по `sourceID` был заменён на `if (true)`, циклы пустые. |
 | `buoydialog-streamer-binding.cpp.txt` (б10) | `Fabric/buoydialog.cpp` | Выбор косы для хвостового буя в диалоге буя. | Закомментировано автором, связь теперь через `Streamer::setEndBuoy`. Скорее отказ от фичи. |
 | `sendersettingsmenu-sending-checkbox.cpp.txt` (б11) | `MenuWindows/sendersettingsmenu.cpp` | Чекбокс «Sending» в настройках отправителя. | Закомментировано автором, вместо него кнопки Start/Stop. |
