@@ -76,19 +76,10 @@ QTime PpkParser::getTimeFromPpkLine(const QString &PpkSentence)
 {
     QDateTime result = QDateTime();
     QStringList parts = PpkSentence.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-    // if (parts.size() == 0) return result.time();
     if (parts.size() != 28) return result.time();
     if (parts[0] == "DIR") return result.time();
     QString timeStr = parts[5]; // Combine date and time
     return QTime::fromString(timeStr, "hh:mm:ss.zz");
-    // return result.time();
 }
-
-
-
-
-
-
-
 
 

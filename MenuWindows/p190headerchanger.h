@@ -40,7 +40,6 @@ private:
     void updateTextEdit();
 
 
-
 signals:
 };
 

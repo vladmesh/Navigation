@@ -34,12 +34,8 @@ void ObjectObserver::hasConnectionChanged(FixedItem *who)
     QString name = who->name;
     for (int row = 0; row < tableWithItems->rowCount(); ++row) {
         QTableWidgetItem *firstItem = tableWithItems->item(row, 0);  // Первый столбец
-        // tableWithItems->cellWidget(row, 0)->
-        // qDebug() << row;
-        // qDebug() << firstItem->text() << name <<__LINE__;
         if (firstItem && firstItem->text() == name) {
             QTableWidgetItem *fourthItem = tableWithItems->item(row, 4);  // Пятый столбец
-            // fourthItem->setText(QString::number(i++));
             if (who->hasConnection) {
                 fourthItem->setBackground(QColor(Qt::green));
                 fourthItem->setText("GOOD");
@@ -53,13 +49,9 @@ void ObjectObserver::hasConnectionChanged(FixedItem *who)
 
 void ObjectObserver::itemAdded(FixedItem *who)
 {
-    // connect(who, )
-    // connect()
     if (who == nullptr) return;
     connect(who, &FixedItem::hasConnectionChanged,this, &ObjectObserver::hasConnectionChanged);
-    // qDebug() << who->name << "signal connected"<<__FUNCTION__;
 }
-
 
 
 void ObjectObserver::setTableWithItems(QTableWidget *newTableWithItems)

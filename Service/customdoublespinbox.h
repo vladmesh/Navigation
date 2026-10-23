@@ -1,7 +1,6 @@
 #ifndef CUSTOMDOUBLESPINBOX_H
 #define CUSTOMDOUBLESPINBOX_H
 
-// #include "qregexp.h"
 #include <QDoubleSpinBox>
 #include <QValidator>
 #include <QRegularExpressionValidator>

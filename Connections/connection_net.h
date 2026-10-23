@@ -1,7 +1,6 @@
 #ifndef CONNECTION_NET_H
 #define CONNECTION_NET_H
 
-// #include "connection.h"
 #include "connectionlogic.h"
 #include <QTcpSocket>
 
@@ -31,7 +30,6 @@ public:
     Connection_Net(QString IP, int port, QString filename);
 
     ~Connection_Net() override;
-    // void recieve_data(QByteArray data);
 
 
     QString filename;
@@ -49,7 +47,6 @@ private:
     QTcpSocket* socket; ///< Сокет для управления TCP-соединением.
     QString IP; ///< IP-адрес для подключения.
     int port; ///< Порт для подключения.
-    // Ui::Connection_Net *ui; ///< Интерфейс пользователя для класса Connection_Net.
 
 private slots:
     /**

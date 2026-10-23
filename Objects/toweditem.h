@@ -20,7 +20,6 @@ private:
     friend class Streamer;
     friend class Buoy;
     friend class Source;
-    friend class MariMag;
     friend class ItemsLoader;
     /**
      * @brief Конструктор с параметрами для создания буксируемого объекта.
@@ -38,16 +37,11 @@ public:
     virtual ~TowedItem();
 
     void updateLayout();
-    // void calcItemCoordinates();
     /**
      * @brief Перегруженный метод вычисления координат объекта, если он не подключен.
      */
     void calcIFNotConnected() override;
 
-    /**
-     * @brief Выводит информацию об объекте.
-     */
-    void printSelfInfo();
 
     /// Поля для буксировки.
     FixedItem* towingPoint = nullptr; ///< Указатель на точку буксировки.
@@ -67,19 +61,11 @@ public:
      */
     QString getLastRMC();
 
-    QVector<FixedItem*> vectorOfConnections; ///< Список подключенных объектов
-    // QString name;
-    // QString itemType;
     /**
      * @brief Устанавливает высоту борта объекта. Больше не используется.
      * @param newBoardHeight Новая высота борта.
      */
     void setBoardHeight(double newBoardHeight);
-
-    /**
-     * @brief Выводит текущие координаты и информацию об объекте.
-     */
-    void printPos();
 
 
     void setWireLength(double newWireLength);

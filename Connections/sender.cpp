@@ -1,7 +1,6 @@
 #include "sender.h"
 
 Sender::Sender() : socket(new QTcpSocket(this)), needSendPackage(false){
-    // connectToHost();
     sendingTimer = new QTimer();
     sendingTimer->start(1000);
     connect(sendingTimer, &QTimer::timeout, this, &Sender::sendPackage);
@@ -51,15 +50,12 @@ QStringList Sender::createPackage()
 
     QJsonDocument doc(rootObject);
     packageList.append(doc.toJson(QJsonDocument::Indented));
-    // packageList = packageList[0].split('\n');
     return packageList;
 }
 
 void Sender::sendPackage()
 {
     if (!needSendPackage) return;
-    // qDebug() << socket->
-    // qDebug() << "Connected to:" << socket->peerAddress().toString() << ":" << socket->peerPort() << __FUNCTION__;
     QStringList package = createPackage();
     socket->write(QString::number(package.size()).toStdString().c_str());
     for (QString i: package) {

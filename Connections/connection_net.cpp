@@ -1,10 +1,6 @@
 #include "connection_net.h"
-#include "ui_connection_net.h"
 
-Connection_Net::Connection_Net() //: ui(new Ui::Connection_Net)
-{
-    // ui->setupUi(this);
-}
+Connection_Net::Connection_Net() {}
 
 /**
  * @brief Конструктор с параметрами для инициализации сетевого соединения и файла записи.
@@ -41,12 +37,10 @@ Connection_Net::Connection_Net(QString IP, int port, QString filename) :
 }
 
 
-
 Connection_Net::~Connection_Net()
 {
     file->close();
     socket->close();
-    // if (ui) delete ui;
     delete socket;
 }
 
@@ -121,10 +115,8 @@ void Connection_Net::ReadyRead()
     if (check_nmea_data(data)) { ///������������ �����������
         recieve_data(data);
         calcQuality(true);
-        // qDebug() << "GOOD DATA "<< data;
     } else {
         calcQuality(false);
-        // qDebug() << "BAD DATA "<< data;
     }
 }
 

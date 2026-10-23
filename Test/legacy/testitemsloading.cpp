@@ -1,4 +1,5 @@
 #include "testitemsloading.h"
+#include "testdatapath.h"
 
 testItemsLoading::testItemsLoading() {
 
@@ -7,35 +8,30 @@ testItemsLoading::testItemsLoading() {
 
 void testItemsLoading::runTests()
 {
-    // itemsToJson();
     jsonToItems();
 }
 
 void testItemsLoading::itemsToJson() ///TODO::добавить в MW в Save configuration
 {
 
-    QString filepath = "C:/Users/sabrahar/Documents/Ship_logs/json/test.json";
+    QString filepath = testDataPath("Documents/Ship_logs/json/test.json");
     QVector<QPointer<FixedItem>> items = createItems2309();
     for (auto i:items) {
         qDebug() << i->name;
     }
 
-    // ItemsLoader::setCreationPriority(items);
-    // return;
     QJsonObject itemsJson = ItemsLoader::writeToJSON(items);
     ItemsLoader::saveJsonObjectToFile(itemsJson, filepath);
-    // qDebug() << QJsonDocument(itemsJson).toJson(QJsonDocument::Indented);
 }
 
 void testItemsLoading::jsonToItems() ///TODO::добавить в MW в Save configuration
 {
-    QString filepath = "C:/Users/sabrahar/Documents/Ship_logs/json/test.json";
-    QString filepathOut = "C:/Users/sabrahar/Documents/Ship_logs/json/test_test.json";
+    QString filepath = testDataPath("Documents/Ship_logs/json/test.json");
+    QString filepathOut = testDataPath("Documents/Ship_logs/json/test_test.json");
     QFile* file = new QFile(filepath);
 
     QVector<QPointer<FixedItem>> itemsfromJson = ItemsLoader::readFromJSON(file);
 
-    // exit(123);
 
     qDebug() << itemsfromJson.size();
     QJsonObject itemsJsonForTest = ItemsLoader::writeToJSON(itemsfromJson);
@@ -82,7 +78,6 @@ QVector<QPointer<FixedItem>> testItemsLoading::createItems2309()
     Connection_com* conEnd = new Connection_com();
     conEnd->filename = "buoy_1.nmea";
     endBuoy->connection = conEnd;
-
 
 
     res.push_back(endBuoy );

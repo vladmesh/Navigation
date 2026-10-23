@@ -32,7 +32,7 @@ public:
         QGeoCoordinate coordinate;
         QPointF coorUTM;
         QDateTime dateTime;
-        float height;
+        float height = 0.0f;
     };
     /**
      * @struct NmeaRMCData
@@ -78,8 +78,6 @@ public:
      */
     QGeoCoordinate UTMtoGeo(const QPointF &coordinate);
 
-    void printNmeaGGAData(CoordinateData data);
-    void printNmeaRMCData(NmeaRMCData data);
 
     /**
      * @brief Проверяет корректность данных из строки GGA.

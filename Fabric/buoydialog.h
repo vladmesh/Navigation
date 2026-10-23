@@ -37,15 +37,12 @@ public:
 
 protected:
     ItemsStorage* MyVault; ///< Хранилище объектов для выбора.
-    QComboBox *comboBox; ///< Выпадающий список для выбора объекта Streamer.
     QDoubleSpinBox *spinBox1; ///< SpinBox для установки высоты антенны.
     QDoubleSpinBox *spinBox2; ///< SpinBox для установки глубины буксировки.
     QLabel *spinBoxLabel1;
     QLabel *spinBoxLabel2;
 private:
-    QString selectedStreamerName = ""; ///< Имя выбранного объекта Streamer.
     bool needConnection; ///< Флаг, указывающий, требуется ли подключение к Streamer.
-    Streamer* selectedStreamer = nullptr; ///< Указатель на выбранный объект Streamer
 
 
 private slots:

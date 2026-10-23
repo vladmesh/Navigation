@@ -1,7 +1,15 @@
- #include "postprocessor.h"
+#include "postprocessor.h"
+
+#include <memory>
+#include <vector>
 
 PostProcessor::PostProcessor() {
     p190Creator = new P190_creator();
+}
+
+PostProcessor::~PostProcessor()
+{
+    delete p190Creator;
 }
 
 int PostProcessor::mainProcess()
@@ -13,40 +21,51 @@ int PostProcessor::mainProcess()
     Coordinator coordinator;
     coordinator.Vault = MyVault;
 
+    // повторный запуск после ошибки не должен дописывать пары к старым
+    pairs.clear();
+    for (const auto& itemFile : pairItemFile) {
+        const QString name = itemFile.first.toLower();
+        if (!name.endsWith(".ppk") && !name.endsWith(".nmea")) {
+            qWarning() << "unsupported navigation file" << itemFile.first;
+            return WrongNavFile;
+        }
+    }
+
     if (!ffidTimeSourceDir.isEmpty()) { //получение ffid-время из segy или .txt
         getDataFromSegy();
     } else if (!ffidTimeSourceTxtFile.isEmpty()) {
         pairs = readFileAndGeneratePairs(ffidTimeSourceTxtFile);
     } else {
         qWarning() << "no ffid source";
-        delete this; //по сути суицид если что-то не нравится
+        return NoFfidSource;
+    }
+    if (pairs.size() < 2) {
+        qWarning() << "not enough FFID records:" << pairs.size();
+        return NotEnoughFfid;
     }
 
     prepareSegyData(pairs); //добавление точек для расчета, но которые в P190 писаться не будут
 
     QVector<int> positions(pairItemFile.size(), 0);
-    QVector<QFile*> files(0, nullptr);
+    std::vector<std::unique_ptr<QFile>> files;
+    files.reserve(pairItemFile.size());
 
     for (int i = 0; i < pairItemFile.size(); i++) {
-        QFile* file = new QFile(pairItemFile[i].first);
-        files.append(file);
+        files.push_back(std::make_unique<QFile>(pairItemFile[i].first));
     }
 
     int currentSuccsess = 0; //for progress bar
 
     for (auto pair: pairs) {
-        // qDebug() << pair.ffid <<pair.time <<__LINE__;
         for (int i = 0; i < pairItemFile.size(); i++) {
             QStringList parts;
             if (files[i]->fileName().toLower().endsWith(".ppk")) {
-               parts = findPpkForSegy(pair, files[i], &positions[i]);
+                parts = findPpkForSegy(pair, files[i].get(), &positions[i]);
             } else if (files[i]->fileName().toLower().endsWith(".nmea")) {
-               parts = findNmeaForSegy(pair, files[i], &positions[i]);
+                parts = findNmeaForSegy(pair, files[i].get(), &positions[i]);
             } else {
-                // qWarning() << __FUNCTION__<<__LINE__;
-                QMessageBox msgBox;
-                msgBox.warning(nullptr, "Warning","Wrong file");
-                return 1;
+                qWarning() << "unsupported navigation file" << files[i]->fileName();
+                return WrongNavFile;
             }
 
             NmeaParser::CoordinateData first;
@@ -59,22 +78,15 @@ int PostProcessor::mainProcess()
                 first = nmeaParser.parseNmeaGGA(parts[0]);
                 second = nmeaParser.parseNmeaGGA(parts[1]);
             } else {
-                QMessageBox msgBox;
-                msgBox.warning(nullptr, "Warning","Wrong file");
-                return 1;
+                qWarning() << "unsupported navigation file" << files[i]->fileName();
+                return WrongNavFile;
             }
             NmeaParser::CoordinateData trueCoor = calcTruePosition(first, second, pair.time, first.dateTime.time(), second.dateTime.time());
-            // qDebug() << trueCoor.coorUTM << trueCoor.dateTime.time() << pair.time;
-            // qDebug() << files[i]->fileName() << MyVault->getItem(pairItemFile[i].second)->name <<__FUNCTION__;
-            // qDebug();
 
             MyVault->getItem(pairItemFile[i].second)->lastGGAData = trueCoor;
         }
-        // qDebug() <<"START";
         for (auto i: MyVault->ItemsVault) {
-            // qDebug() << i->name << i->creationPriority << __LINE__;
             i->calcItemCoordinates();
-            // qDebug();
         }
         p190Creator->createP190File(pair.julianDay);
         p190Creator->setDayOfSurvey(pair.julianDay);
@@ -87,9 +99,8 @@ int PostProcessor::mainProcess()
         }
     }
     p190Creator->setHeaderIsWritten(false);
-    return 0;
+    return Ok;
 }
-
 
 
 void PostProcessor::getDataFromSegy()
@@ -102,34 +113,6 @@ void PostProcessor::getDataFromSegy()
     }
 }
 
-void PostProcessor::setSegyStorage(const QDir &newSegyStorage)
-{
-    segyStorage = newSegyStorage;
-}
-
-void PostProcessor::fillItemsVectors()
-{
-    for (FixedItem* i:MyVault->ItemsVault) {
-        if (i->hasConnection) {
-            if (i->connection) {
-                vectorWithCon.push_front(i);
-            } else {
-                // Logger::instance().logMessage(Logger::LogMessage(Logger::LogLevel::Error, "no connection"));
-            }
-        } else {
-            vectorWithCon.push_front(i);
-        }
-    }
-}
-
-int PostProcessor::findNmeaFiles()
-{
-    for (FixedItem* i: this->vectorWithCon) {
-        QFile* file = i->connection->file;
-        this->NmeaFiles.push_front(file);
-    }
-    return 1;
-}
 
 QStringList PostProcessor::findNmeaForSegy(SegYReader::SegyData pair, QFile* nmeaFile, int* pos) {
     QTime time = pair.time;
@@ -152,7 +135,6 @@ QStringList PostProcessor::findNmeaForSegy(SegYReader::SegyData pair, QFile* nme
 
         if (line.mid(3, 3) == "GGA") {
             nmeaTime = nmeaParser.getTimeFromNmeaGGA(line);
-            // qDebug() << "NMEA Time:" << nmeaTime << "Pair Time:" << time << "Line:" << line;
 
             if (nmeaTime.msecsSinceStartOfDay() < time.msecsSinceStartOfDay()) {
                 lowerNmea = line;  // Обновляем нижнюю NMEA строку
@@ -184,7 +166,6 @@ QStringList PostProcessor::findNmeaForSegy(SegYReader::SegyData pair, QFile* nme
     res.push_back(higherNmea);
     if (!RMCData.isEmpty()) res.push_back(RMCData);
 
-    // qDebug() << lowerNmea << higherNmea << pair.time << __FUNCTION__;
 
     return res;
 }
@@ -220,7 +201,6 @@ QStringList PostProcessor::findPpkForSegy(SegYReader::SegyData pair, QFile *ppkF
                 lowerPpk = line;  // Обновляем нижнюю NMEA строку
                 currentPosition = ppkFile->pos();  // Обновляем текущую позицию
             } else if (ppkTime.msecsSinceStartOfDay() > pairTime.msecsSinceStartOfDay() && higherPpk.isEmpty()) {
-                // qDebug() << "NMEA Time:" << ppkTime << "Pair Time:" << pairTime;
                 higherPpk = line;  // Получаем первую строку с временем больше указанного
                 break;  // Прекращаем поиск после нахождения первой строки с большим временем
             }
@@ -241,9 +221,6 @@ QStringList PostProcessor::findPpkForSegy(SegYReader::SegyData pair, QFile *ppkF
     res.push_back(lowerPpk);
     res.push_back(higherPpk);
 
-    // qDebug() << PpkParser::getTimeFromPpkLine(lowerPpk) << PpkParser::getTimeFromPpkLine(higherPpk) << pair.time << __FUNCTION__;
-    // qDebug();
-    // qDebug();
     return res;
 }
 
@@ -260,7 +237,6 @@ NmeaParser::CoordinateData PostProcessor::calcTruePosition(NmeaParser::Coordinat
               (float)(secondTime.msecsSinceStartOfDay() - firstTime.msecsSinceStartOfDay()));
     c2 = 1-c1;
 
-    // trueTime.setHMS(trueTime.hour(),trueTime.minute(),trueTime.second(), );
     res.dateTime = QDateTime(first.dateTime.date(), trueTime);
     res.height = first.height*c1 + second.height*c2;
     res.coorUTM.rx() = first.coorUTM.rx()*c1 + second.coorUTM.rx()*c2;
@@ -293,30 +269,21 @@ QVector<SegYReader::SegyData> PostProcessor::readFileAndGeneratePairs(const QStr
         if (fields.size() == 6) {
             int ffid = fields[0].toInt();
             int julianDay = fields[1].toInt();
-            // qDebug() <<julianDay << __LINE__;
             int hour = fields[2].toInt();
             int minute = fields[3].toInt();
             int second = fields[4].toInt();
             int microsecond = fields[5].split('.').first().toInt();  // Отбрасываем дробную часть
-            // QDate day = getDateFromDayOfYear(julianDay);
 
             QTime time = QTime(hour, minute, second, microsecond / 1000);  // Микросекунды преобразуем в миллисекунды
 
             SegYReader::SegyData pair(ffid, time, julianDay);
             pairs.push_back(pair);
-            // qDebug() << pairs.at(pairs.size() - 1).dateTime; //<< __FUNCTION__
         }
     }
     file.close();
     return pairs;
 }
 
-
-
-void PostProcessor::setP190(P190_creator *newP190)
-{
-    p190Creator = newP190;
-}
 
 QVector<SegYReader::SegyData> PostProcessor::prepareSegyData(QVector<SegYReader::SegyData> in)
 {
@@ -369,16 +336,9 @@ QVector<SegYReader::SegyData> PostProcessor::prepareSegyData(QVector<SegYReader:
 }
 
 
-
-
 void PostProcessor::setMyVault(ItemsStorage *newMyVault)
 {
     MyVault = newMyVault;
-}
-
-void PostProcessor::setNmeaStorage(const QDir &newNmeaStorage)
-{
-    nmeaStorage = newNmeaStorage;
 }
 
 
