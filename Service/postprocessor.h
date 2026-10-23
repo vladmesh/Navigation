@@ -9,7 +9,6 @@
 #include "DataReader/segyreader.h"
 #include "coordinator.h"
 #include "p190_creator.h"
-// #include "logger.h"
 #include "itemsstorage.h"
 #include "nmeaparser.h"
 #include "itemsloader.h"
@@ -27,15 +26,26 @@
 class PostProcessor
 {
 public:
+    /// Коды возврата mainProcess().
+    enum Result {
+        Ok = 0,
+        WrongNavFile = 1,  ///< файл навигации не .nmea и не .ppk
+        NoFfidSource = 2,  ///< не задан ни каталог SEG-Y, ни txt с FFID
+        NotEnoughFfid = 3, ///< в источнике FFID меньше двух записей
+    };
+
     /**
      * @brief Конструктор. Инициализирует объект.
      */
     PostProcessor();
+    ~PostProcessor();
+    PostProcessor(const PostProcessor&) = delete;
+    PostProcessor& operator=(const PostProcessor&) = delete;
     /**
      * @brief Основной процесс обработки данных.
      *
      * Включает чтение данных, расчет координат и создание файлов P190.
-     * @return Код результата выполнения.
+     * @return Код результата выполнения, см. PostProcessor::Result.
      */
     int mainProcess();
 
@@ -51,35 +61,8 @@ public:
      */
     void setMyVault(ItemsStorage *newMyVault);
     
-    QDir nmeaStorage; ///< Директория хранения файлов NMEA.
-    QDir segyStorage; ///< Директория хранения файлов SEGY.
-    /**
-     * @brief Устанавливает путь для хранения файлов NMEA.
-     *
-     * @param newNmeaStorage Новый путь.
-     */
-    void setNmeaStorage(const QDir &newNmeaStorage);
-    /**
-     * @brief Устанавливает путь для хранения файлов SEGY.
-     *
-     * @param newSegyStorage Новый путь.
-     */
-    void setSegyStorage(const QDir &newSegyStorage);
 
 
-    /**
-     * @brief Заполняет векторы объектов с подключениями и без подключений.
-     */
-    void fillItemsVectors();
-    int findNmeaFiles();
-
-
-    /**
-     * @brief Устанавливает P190_creator.
-     *
-     * @param newP190 Указатель на объект P190_creator.
-     */
-    void setP190(P190_creator *newP190);
     QVector<SegYReader::SegyData> pairs;
     /**
      * @brief Подготовка данных SEGY, например, добавление интерполированных значений.
@@ -138,12 +121,10 @@ public:
 
 
 //взаимодействие с интерфейсом PostProcessorView
-    // ItemsStorage Vault;
     QVector<QPointer<FixedItem>> items; ///< Вектор указателей на объекты.
     int itemsWithConnection = 0;
 
     QFile* jsonSchemeFile;
-    // QVector<QFile*> nmeaFiles;
     QVector<QFile*> NmeaFiles;///< Вектор файлов NMEA для поспроцессинга.
     QVector<QFile*> ppkFiles;///< Вектор файлов PPK для поспроцессинга..
     QString ffidTimeSourceTxtFile; ///< Имя текстового файла с источником времени - FFID.

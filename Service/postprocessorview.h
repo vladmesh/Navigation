@@ -11,6 +11,7 @@
 #include <QHBoxLayout>
 #include <QProgressBar>
 #include <QLabel>
+#include <QMessageBox>
 
 #include "postprocessor.h"
 /**
@@ -45,7 +46,6 @@ public:
     void setupUI();
 private:
     //выбранные юзверем в pprv значения для передачи в ppr
-    QString fileJsonName; ///< Путь к выбранному JSON файлу со схемой.
     QVector<QString> nmeaNames; ///< Пути к NMEA файлам.
     QVector<QString> ppkNames; ///< Пути к PPK файлам.
     QString ffidTimeSourceTxt = ""; ///< Текстовый файл с источником FFID.

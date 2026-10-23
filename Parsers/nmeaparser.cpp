@@ -25,7 +25,6 @@ QTime NmeaParser::getTimeFromNmeaGGA(const QString &nmeaSentence)
             }
         }
     }
-    // qDebug() << time << __FUNCTION__;
     return time;
 }
 
@@ -44,7 +43,6 @@ NmeaParser::CoordinateData NmeaParser::parseNmeaGGA(const QString &nmeaSentence)
             QString heightValue = parts[9];
 
 
-
             double latitude = convertToDegrees(latitudeValue, latitudeDirection); //получение географических градусов
             double longitude = convertToDegrees(longitudeValue, longitudeDirection); //в норм формате
 
@@ -58,11 +56,8 @@ NmeaParser::CoordinateData NmeaParser::parseNmeaGGA(const QString &nmeaSentence)
             QDateTime dateTime(QDateTime::currentDateTime().date(), time);
 
 
-
             data.coordinate = QGeoCoordinate(latitude, longitude);
 
-            // qDebug()<<latitudeValue<<longitudeValue<<"_____________";
-            // qDebug()<<data.coordinate.latitude()<<data.coordinate.longitude()<<"_____________";
 
             QPointF coorUTM= GeoToUTM(data.coordinate);
             data.coorUTM = coorUTM;
@@ -70,7 +65,6 @@ NmeaParser::CoordinateData NmeaParser::parseNmeaGGA(const QString &nmeaSentence)
             data.height = height;
         }
     }
-    // qDebug() << data.coordinate.latitude() << data.coordinate.longitude();
     return data;
 }
 
@@ -78,9 +72,7 @@ NmeaParser::NmeaRMCData NmeaParser::parseNmeaRMC(const QString &nmeaSentence)
 {
     NmeaRMCData rmcData {-1,-1};
     if (nmeaSentence.startsWith("$GPHDT")) {
-        // rmcData.azimuth = nmeaSentence.mid(7,4).toFloat();
         rmcData.azimuth = nmeaSentence.mid(nmeaSentence.indexOf(',')+1).toFloat();
-        // qDebug() << __FUNCTION__ << rmcData.azimuth;
         return rmcData;
     }
 
@@ -93,7 +85,6 @@ NmeaParser::NmeaRMCData NmeaParser::parseNmeaRMC(const QString &nmeaSentence)
 
     // Разбиваем строку по запятым
     QStringList parts = nmeaSentence.split(',');
-    // qDebug() << "parseNmeaRMC" <<parts;
 
     // Проверяем, что у нас достаточно частей для извлечения данных
     if (parts.size() < 9) { // используется parts[8]
@@ -146,30 +137,6 @@ double NmeaParser::convertToDegrees(const QString &nmeaValue, const QString &dir
     return decimalDegrees;
 }
 
-void NmeaParser::printNmeaGGAData(CoordinateData data) {
-    if (data.coordinate.isValid()) {
-        qDebug() << "Широта:" << data.coordinate.latitude();
-        qDebug() << "Долгота:" << data.coordinate.longitude();
-        qDebug() << "Время:" << data.dateTime.toString();
-        qDebug() << "Высота:" << data.height;
-
-        qDebug() << "UTM Восток:" << data.coorUTM.x();
-        qDebug() << "UTM Север:" << data.coorUTM.y();
-        qDebug() << "Высота над уровнем моря"<< data.height;
-    } else {
-        qDebug() << "Некорректная строка NMEA GGA";
-    }
-}
-
-void NmeaParser::printNmeaRMCData(NmeaRMCData data)
-{
-    if (data.azimuth >= 0 && data.azimuth <= 360 && data.speed > 0) {
-        qDebug() << "Скорость" << data.speed;
-        qDebug() << "Направление" << data.azimuth;
-    } else {
-        qDebug() << "Некорректная строка NMEA RMC";
-    }
-}
 
 QPointF NmeaParser::GeoToUTM(const QGeoCoordinate &coordinate) { //перевод географических координат в систему проекции
     double N, T, C, A, M;
@@ -177,7 +144,6 @@ QPointF NmeaParser::GeoToUTM(const QGeoCoordinate &coordinate) { //перево�
     double LongRad = coordinate.longitude() * M_PI / 180.0;
     double LongOriginRad;
     ZoneNumber = std::floor((coordinate.longitude() + 180) / 6) + 1;
-    // qDebug() << "GeoToUTM zone number " << ZoneNumber;
     LongOriginRad = ((ZoneNumber - 1) * 6 - 180 + 3) * M_PI / 180.0;
     N = a / std::sqrt(1 - eccSquared * std::sin(LatRad) * std::sin(LatRad));
     T = std::tan(LatRad) * std::tan(LatRad);
@@ -233,13 +199,6 @@ QGeoCoordinate NmeaParser::UTMtoGeo(const QPointF &coordinate) { //из utm в �
                   + (5 - 2 * c1 + 28 * t1 - 3 * c1 * c1 + 8 * eccPrimeSquared + 24 * t1 * t1) * d * d * d * d * d / 120) / cos(phi1Rad);
     lon = ZoneNumber > 0 ? lon * (180.0 / M_PI) + (ZoneNumber * 6 - 183) : lon * (180.0 / M_PI);
 
-    // qDebug() << "UTMtoGeo";
-    // qDebug() << "Easting:" << easting << "Northing:" << northing;
-    // qDebug() << "Zone:" << ZoneNumber << "isNorth:" << isNorth;
-    // qDebug() << "x:" << x << "y:" << y;
-    // qDebug() << "m:" << m << "mu:" << mu;
-    // qDebug() << "phi1Rad:" << phi1Rad;
-    // qDebug() << "lat:" << lat << "lon:" << lon;
     return QGeoCoordinate(lat, lon);
 }
 
@@ -256,12 +215,5 @@ bool NmeaParser::isValid(NmeaRMCData nmeaRMC) {
     if (nmeaRMC.speed < 0 || nmeaRMC.speed > 50) res = 0;
     return res;
 }
-
-
-
-
-
-
-
 
 

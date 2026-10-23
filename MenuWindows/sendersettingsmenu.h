@@ -28,7 +28,6 @@ private:
 
     QLineEdit *ipLineEdit;
     QSpinBox *portSpinBox;
-    QCheckBox *sendingCheckBox;
 };
 
 #endif // SENDERSETTINGSMENU_H

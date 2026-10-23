@@ -1,19 +1,5 @@
 #include "segyreader.h"
 
-QDate getDateFromDayOfYear(int dayOfYear) {
-    // Проверяем, что номер дня находится в допустимом диапазоне
-    if (dayOfYear < 1 || dayOfYear > 366) {
-        // qWarning() << "Номер дня должен быть от 1 до 366.";
-        return QDate(); // Возвращаем некорректную дату
-    }
-    int year = QDate::currentDate().year();
-    // Получаем первую дату года
-    QDate firstDayOfYear(year, 1, 1);
-
-    // Возвращаем дату, прибавляя номер дня минус один
-    return firstDayOfYear.addDays(dayOfYear - 1);
-}
-
 
 SegYReader::SegYReader() {}
 
@@ -22,7 +8,6 @@ SegYReader::SegYReader(const QString& filePath) : filePath(filePath) {}
 bool SegYReader::readFile() {
     QFile file(filePath);
     if (QFileInfo(file).suffix() != "sgy") {
-        // qDebug() << file.fileName() << " not segy";
         return false;
     }
     if (!file.open(QIODevice::ReadOnly)) {
@@ -40,7 +25,6 @@ bool SegYReader::readFile() {
 void SegYReader::readPathWithSegy(QDir path)
 {
     for (QString i: path.entryList()) {
-        // qDebug() << i;
 
         setFilePath(path.path()+"/"+i);
         readFile();
@@ -71,9 +55,7 @@ void SegYReader::readTraceHeader(QFile& file) {
     const uchar* data = reinterpret_cast<const uchar*>(traceHeaderData.data());
 
     // Extracting FFID from bytes 9-12 (4 bytes, UI4)
-    // uint32_t ffid = (data[12] << 24) | (data[13] << 16) | (data[14] << 8) | data[15];
     uint32_t ffid = data[9] << 16 | data[10] << 8 | data[11];
-
 
 
     uint16_t JulianDay = data[158]<<8 | data[159];

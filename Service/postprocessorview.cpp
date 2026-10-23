@@ -96,14 +96,10 @@ void PostProcessorView::sendValuesToPostProc() //передача парамет
     }
     if (ffidLineEdit->text().endsWith(".txt")) {
         ffidTimeSourceTxt = ffidLineEdit->text();
-        // qDebug() <<ffidTimeSourceTxt <<__FUNCTION__;
     } else {
         ffidTimeSourceDir = ffidLineEdit->text();
-        // qDebug() <<ffidTimeSourceDir <<__FUNCTION__;;
     }
 
-    // pairItemFile.append(pair);
-    // qDebug() << pair.first << pair.second <<__FUNCTION__ << nmeaPpkLineEdit->text();
 
     postProc.pairItemFile.clear();
     for (int i = 0; i < nmeaPpkLineEdits.size(); i++) {
@@ -111,7 +107,6 @@ void PostProcessorView::sendValuesToPostProc() //передача парамет
         itemName = itemName.mid(itemName.indexOf("\"")).remove("\""); //вах какой костыль (ну а по-другому особо никак)
 
         QPair<QString,QString> pairNames(nmeaPpkLineEdits[i]->text(), itemName);
-        // qDebug() << pair<<__FUNCTION__;
         postProc.pairItemFile.append(pairNames);
     }
 
@@ -128,7 +123,6 @@ void PostProcessorView::sendValuesToPostProc() //передача парамет
 
 void PostProcessorView::chooseScheme() { //выбор съемы и парсинг json файла
     QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    // QString fileName = QFileDialog::getOpenFileName(this, "Choose scheme", documentsPath + "/Ship_logs/json", "*.json");
     QString fileName = QFileDialog::getOpenFileName(this, "Layout", documentsPath, "*.json");
     if (!fileName.isEmpty()) {
         schemeLineEdit->setText(fileName);
@@ -139,7 +133,12 @@ void PostProcessorView::chooseScheme() { //выбор съемы и парсин
         }
         postProc.items.clear();
 
-        postProc.items = ItemsLoader::readFromJSON(postProc.jsonSchemeFile);
+        QStringList loadErrors;
+        postProc.items = ItemsLoader::readFromJSON(postProc.jsonSchemeFile, &loadErrors);
+        if (!loadErrors.isEmpty()) {
+            QMessageBox::warning(this, "Broken layout",
+                                 "Some objects of the layout were not loaded:\n" + loadErrors.join("\n"));
+        }
         postProc.MyVault = new ItemsStorage(); //не особо нужно
 
         //заполняем поля postproc (не помню зачем, но хуже не будет)
@@ -153,14 +152,11 @@ void PostProcessorView::chooseScheme() { //выбор съемы и парсин
                 i->connection->ui->hide();///мать вашу какой костыль
                 i->connection->stopTimer();
 
-                // delete i->connection;
 
                 postProc.vectorWithCon.append(i);
                 postProc.itemsWithConnection++;
-                // qDebug() << __FUNCTION__ << i->name;
             } else {
                 postProc.vectorNoCon.append(i);
-                // qDebug() << __FUNCTION__ << i->name;
             }
         }
 
@@ -188,7 +184,6 @@ void PostProcessorView::createConnectionButtons() {
     for (auto i: postProc.vectorWithCon){
         if (i->hasConnection) {
             namesOfItemsWithConnection.append(i->name);
-            // qDebug() << i->name << __FUNCTION__;
         }
     }
     for (int i = 0; i < namesOfItemsWithConnection.size(); ++i) {
@@ -206,7 +201,6 @@ void PostProcessorView::createConnectionButtons() {
 
 
         connect(nmeaPpkButton, &QPushButton::clicked, this, [this, nmeaPpkLineEdit]() {
-            // QString navFilesPath = QDir("C:/Users/sabrahar/Desktop/FINAL/PPK GNSS data/test").absolutePath(); ///TODO: потом заменить на норм место
             QString navFilesPath =  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
             QString fileName = QFileDialog::getOpenFileName(this, "NMEA or PPK file", navFilesPath, "*.nmea *.ppk");
             if (!fileName.isEmpty()) {
@@ -222,7 +216,6 @@ void PostProcessorView::createConnectionButtons() {
 
 void PostProcessorView::chooseFfidSource() {
     if (segyRadioButton->isChecked()) {
-        // QString dirName = QFileDialog::getExistingDirectory(this, "Choose SEGY directory", QString("C:/Users/sabrahar/Desktop/FINAL/"));
         QString dirName = QFileDialog::getExistingDirectory(this, "SEGY directory", QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
        ;
         if (!dirName.isEmpty()) {
@@ -230,7 +223,6 @@ void PostProcessorView::chooseFfidSource() {
         }
     } else if (txtRadioButton->isChecked()) {
         QString fileName = QFileDialog::getOpenFileName(this, "TXT file",  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), "*.txt");
-        // QString fileName = QFileDialog::getOpenFileName(this, "Choose TXT file", QString("C:/Users/sabrahar/Desktop/FINAL/"), "*.txt");
         if (!fileName.isEmpty()) {
             ffidLineEdit->setText(fileName);
         }
@@ -256,9 +248,29 @@ void PostProcessorView::onRunButtonClicked() {
     progressBar->setValue(1);
     progressBar->setVisible(true);
     sendValuesToPostProc();
-    postProc.mainProcess();
+    const int result = postProc.mainProcess();
     progressBar->setValue(0);
     postProc.percentageP190Creation = 0;
+    if (result != PostProcessor::Ok) {
+        progressBar->setVisible(false);
+        QString text;
+        switch (result) {
+        case PostProcessor::WrongNavFile:
+            text = "Wrong file: navigation data must be .nmea or .ppk";
+            break;
+        case PostProcessor::NoFfidSource:
+            text = "No FFID source: choose a SEG-Y directory or a TXT file";
+            break;
+        case PostProcessor::NotEnoughFfid:
+            text = "FFID source has fewer than two records or cannot be read";
+            break;
+        default:
+            text = QString("Postprocessing failed, code %1").arg(result);
+            break;
+        }
+        QMessageBox::warning(this, "Warning", text);
+        return;
+    }
     hide();
 }
 
@@ -266,11 +278,5 @@ void PostProcessorView::dropEvent(QDropEvent *event)
 {
     qDebug() << event->mimeData();
 }
-
-
-
-
-
-
 
 

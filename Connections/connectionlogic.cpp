@@ -7,7 +7,6 @@ Connection::Connection(QObject *parent)
 {
     ui->hide();
     packetsRecieved.reserve(calcWindow);
-    iter = packetsRecieved.end();
     timer = new QTimer(this);
     timer->setInterval(5000);
     connect(timer, &QTimer::timeout, this, &Connection::onTimeout);
@@ -148,28 +147,25 @@ int Connection::check_double_package(QByteArray nmea_data)
 
 float Connection::calcQuality(bool recieved)
 {
+    // Скользящее окно из calcWindow последних пакетов: пока окно не заполнено,
+    // дописываем в конец; дальше перезаписываем самый старый элемент по кругу.
     if (packetsRecieved.size() < calcWindow) {
-        packetsRecieved.push_front(recieved);
+        packetsRecieved.push_back(recieved);
         if (recieved) {
             currentQuality += (1.0 / calcWindow);
         }
-        if (packetsRecieved.size() == 20) iter = packetsRecieved.begin();
         return currentQuality * packetsRecieved.size() / calcWindow;
     }
 
-    if (*iter) {
+    if (packetsRecieved[oldestPacket]) {
         currentQuality -= (1.0 / calcWindow);
     }
     if (recieved) {
         currentQuality += (1.0 / calcWindow);
     }
 
-    *iter = recieved;
-    if (iter == packetsRecieved.end()) {
-        iter = packetsRecieved.begin();
-    } else {
-        iter++;
-    }
+    packetsRecieved[oldestPacket] = recieved;
+    oldestPacket = (oldestPacket + 1) % calcWindow;
 
     showSignalQuality(currentQuality);
     return currentQuality;

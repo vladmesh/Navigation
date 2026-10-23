@@ -13,7 +13,8 @@ concurrency:
 env:
   QT_VERSION: "6.8.3"
   # Модули по Ship.pro: network/core/gui/widgets входят в базу,
-  # serialport, location, positioning, core5compat — аддоны.
+  # serialport, location, positioning — аддоны. core5compat из Ship.pro
+  # убран, qt5compat оставлен в установке на случай старых веток.
   QT_MODULES: "qtserialport qtpositioning qtlocation qt5compat"
 
 jobs:
@@ -58,6 +59,17 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: build-tests\release\tst_parsers.exe -o -,txt -o tst_parsers.xml,junitxml
 
+      - name: Build and run C1-C3 tests (tst_critical)
+        shell: cmd
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          set MAKE=nmake
+          mkdir build-critical && cd build-critical
+          qmake ..\Test\unit\critical\critical.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" "QMAKE_CXXFLAGS+=/MP" || exit /b 1
+          %MAKE% || exit /b 1
+          release\tst_critical.exe -o -,txt -o ..\tst_critical.xml,junitxml
+
       - name: Legacy tests (skipped)
         shell: bash
         run: |
@@ -71,7 +83,9 @@ jobs:
         if: always()
         with:
           name: unit-test-results-windows
-          path: tst_parsers.xml
+          path: |
+            tst_parsers.xml
+            tst_critical.xml
           if-no-files-found: ignore
 
   windows-mingw-smoke:
@@ -177,6 +191,23 @@ jobs:
           ASAN_OPTIONS: detect_leaks=1:abort_on_error=1:strict_string_checks=1
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: ./build-asan/tst_parsers
+
+      - name: Build C1-C3 tests with sanitizers (tst_critical)
+        run: |
+          mkdir build-critical && cd build-critical
+          qmake ../Test/unit/critical/critical.pro CONFIG+=debug \
+            "QMAKE_CXXFLAGS+=-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined" \
+            "QMAKE_LFLAGS+=-fsanitize=address,undefined"
+          make -j"$(nproc)"
+
+      - name: Run C1-C3 tests (ASan + UBSan, leaks off)
+        env:
+          QT_QPA_PLATFORM: offscreen
+          # Leak detection is off: the app code under test leaks by design
+          # (raw new without owners, M5 in the audit), not in this PR's scope.
+          ASAN_OPTIONS: detect_leaks=0:abort_on_error=1:strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ./build-critical/tst_critical
 
       - name: Full app compiles on Linux (smoke)
         run: |

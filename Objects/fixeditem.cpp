@@ -10,7 +10,6 @@ FixedItem::FixedItem(double x,double y,double z, QString name) :
 {
     itemType = "Fixed";
     qDebug() <<itemType<< " Item Created "<<x<<y<<name;
-    // logmsg(itemType+" Item Created");
     CircularBuffer& buffer = FixedItem::sharedCircularBuffer;
 
     this->creationPriority = 0;
@@ -21,14 +20,12 @@ FixedItem::~FixedItem() {
     if (connection != nullptr) {
         delete connection;
     }
-    // logmsg(itemType +" Item Deleted " + name);
     deletingWires();
 }
 
 void FixedItem::calcItemCoordinates()
 {
     if (hasConnection && connection == nullptr) {
-        // hasConnection = false;
         qDebug() << "needCalculate = false";
         needCalculate = false;
     }
@@ -60,11 +57,9 @@ void FixedItem::calcIfConnected()
 
     if ((amIItemForCalculating && itemType == "Fixed") || ItemForCalculations == this) {
         sharedCircularBuffer.add(lastGGAData.coordinate);
-        // qDebug() << name << "I added to CircBuffer" << lastGGAData.coordinate;
     }
 
     azimuthOfMovement = sharedCircularBuffer.calculateAzimuth();
-    // qDebug() << this->name <<"azimuthOfMovement"<<qRadiansToDegrees(azimuthOfMovement);
 }
 
 void FixedItem::calcIFNotConnected()
@@ -88,40 +83,13 @@ void FixedItem::calcIFNotConnected()
              (x-ItemForCalculations->x)*qCos(azRad);
 
 
-
-
     QGeoCoordinate curGeoCoordinate = nmeaParser.UTMtoGeo(QPointF(x_coor, y_coor));
-    // qDebug() << x_coor << QString::number(y_coor) << name;
-    // qDebug() << ItemForCalculations->x_coor << QString::number(ItemForCalculations->y_coor) << ItemForCalculations->name;
-    // qDebug() << curGeoCoordinate.azimuthTo(ItemForCalculations->lastGGAData.coordinate) << curGeoCoordinate.distanceTo(ItemForCalculations->lastGGAData.coordinate)<< "dist and az by Geo";
-    // qDebug() << (M_PI/2 - qAtan2(dy, dx))* (180.0 / M_PI) << qSqrt(dx * dx + dy * dy) << "dist and az by UTM";
-    // qDebug() <<"_______________";
-    // qDebug() << x_coor << y_coor <<"FixedItem::calcIFNotConnected()";
 
     latitude = curGeoCoordinate.latitude();
     longitude = curGeoCoordinate.longitude();
     height = ItemForCalculations->height - (z - ItemForCalculations->z);
 }
 
-void FixedItem::printPos()
-{
-    qDebug() <<"-----------------------FixedItem::printPos()";
-    qDebug() <<name;
-    qDebug() << "Height:" << qSetRealNumberPrecision(3) << height  ;
-    qDebug() << "UTM East:" << qSetRealNumberPrecision(10)<< x_coor ;
-    qDebug() << "UTM North:" << qSetRealNumberPrecision(10) << y_coor;
-    qDebug() << "Geo East:" << longitude;
-    qDebug() << "Geo Notrh:" << latitude;
-    qDebug() << "Azimuth of movement" << azimuthOfMovement;
-    // logmsg(name + "\nHeight " + QString::number(height) +
-    //        "\nUTM East:" + QString::number(x_coor) +
-    //        "\nUTM North:" + QString::number(y_coor) +
-    //        "\nGeo East:" + QString::number(this->longitude) +
-    //        "\nGeo Notrh:" + QString::number(this->latitude) +
-    //        "Azimuth of movement" + QString::number(azimuthOfMovement));
-
-
-}
 
 void FixedItem::deletingWires() {
     if (vectorOfConnected.isEmpty()) return;
@@ -148,8 +116,6 @@ QString FixedItem::getLastGGA()
     if (connection != nullptr && hasConnection) {
         newGGA = connection->lastRecievedGGA;
         lastGGAData = nmeaParser.parseNmeaGGA(newGGA);
-        // connection->lastRecievedGGA = "empty GGA";
-        // parser.printNmeaGGAData(lastGGAData);
     }
     return newGGA;
 }
@@ -160,19 +126,11 @@ QString FixedItem::getLastRMC()
     if (connection != nullptr && hasConnection) {
         newRMC = connection->lastRecievedRMC;
         lastRMCData = nmeaParser.parseNmeaRMC(newRMC);
-        // connection->lastRecievedRMC = "empty RMC";
-        // parser.printNmeaRMCData(lastRMCData);
     }
     return newRMC;
 }
 
 
-
-// void FixedItem::newNmeaArrived(QString msg) //
-// {
-//     // NmeaParser::NmeaGGAData data = parser.parseNmeaGGA(msg);
-//     // parser.printNmeaGGAData(data);
-// }
 
 void FixedItem::setItemForCalculations(FixedItem *newItemForCalculations)
 {
@@ -187,7 +145,6 @@ bool FixedItem::showAzDistToObj(FixedItem *to)
     QPointF pOther(to->x_coor, to->y_coor);
     QPointF pMy(x_coor, y_coor);
     double dist = pow(((pMy.x() - pOther.x()) * (pMy.x() - pOther.x()) + ((pMy.y() - pOther.y()) * (pMy.y() - pOther.y()))),0.5);
-    // if (dist > 190 && dist < 205) return false;
     double deltaX = pMy.x() - pOther.x();
     double deltaY = pMy.y() - pOther.y();
     double azimuthDegrees = (M_PI + qAtan2(deltaX, deltaY)) * 180 / M_PI;
@@ -207,7 +164,6 @@ void FixedItem::hasConnectionArrived(bool newHasConnection)
 
         if (amIItemForCalculating) {
             qDebug();
-            // qWarning() << __FUNCTION__;
             qWarning() << name<< " не имеет соединения" << __FUNCTION__;
             hasConnection = newHasConnection;
         } else {

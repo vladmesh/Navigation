@@ -1,7 +1,6 @@
 #include "p190_creator.h"
 
 
-
 QDir P190_creator::path = QDir();
 
 P190_creator::P190_creator(QObject *parent)
@@ -12,8 +11,10 @@ P190_creator::P190_creator(QObject *parent)
 
 P190_creator::~P190_creator()
 {
-    outputFile->close();
-    outputStream->flush();
+    if (outputFile) {
+        outputFile->close();
+        delete outputFile;
+    }
 }
 
 QStringList P190_creator::createShotBlock()
@@ -24,12 +25,6 @@ QStringList P190_creator::createShotBlock()
     QStringList mainBlock = createMainInfoBlock(this->FFID);
     QStringList streamerBlock = createStreamerBlock();
 
-    // for (QString l: mainBlock) {
-    //     // qDebug() << l;
-    // }
-    // for (QString l: streamerBlock) {
-    //     // qDebug() << l;
-    // }
 
     res.append(mainBlock);
     res.append(streamerBlock);
@@ -38,28 +33,12 @@ QStringList P190_creator::createShotBlock()
 }
 
 
-
-
 QStringList P190_creator::createHeader(int dayNumber) {
-    // initializeHeaderFile(); // Проверяем/копируем файл при запуске
     QString filePath = "./ModifiedSurveyInfo.txt";
     QFile file(filePath);
     QStringList header = initializeHeaderFile();
 
-    // if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    //     QTextStream in(&file);
 
-    //     // Читаем строки из файла и добавляем их в QStringList
-    //     while (!in.atEnd()) {
-    //         QString line = in.readLine();
-    //         header << line;
-    //     }
-
-    //     file.close();
-    // } else {
-    //     // Обработка ошибки, если файл не удалось открыть
-    //     qWarning("Cannot open file for reading: %s", qPrintable(file.errorString()));
-    // }
     for (int i = 0; i < header.size(); i++) {
         if (header[i].contains("H0200 DATE OF SURVEY")) {
             header[i] = replaceDates(header[i]);
@@ -72,25 +51,8 @@ QStringList P190_creator::createHeader(int dayNumber) {
 }
 
 QStringList P190_creator::createHeader() {
-    // QString filePath = ":/Data/SurveyInfo.txt";
-    // QFile file(filePath);
     QStringList header = initializeHeaderFile();
 
-    // if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    //     QTextStream in(&file);
-
-    //     // Читаем строки из файла и добавляем их в QStringList
-    //     while (!in.atEnd()) {
-    //         QString line = in.readLine();
-    //         line = line.remove('"');
-    //         header << line;
-    //     }
-
-    //     file.close();
-    // } else {
-    //     // Обработка ошибки, если файл не удалось открыть
-    //     qWarning("Cannot open file for reading: %s", qPrintable(file.errorString()));
-    // }
     for (int i = 0; i < header.size(); i++) {
         if (header[i].contains("H0200 DATE OF SURVEY")) {
             header[i] = replaceDates(header[i]);
@@ -103,13 +65,13 @@ QStringList P190_creator::createHeader() {
 };
 
 
-
 void P190_creator::createP190File() {
     if (headerIsWritten || dayOfSurvey == -1) {
         return;
     }
     QDir dir = path; //setted in MainWindow
     fileName = createFileName();
+    delete outputFile;
     outputFile = new QFile(dir.absolutePath() + "/" + fileName);
     outputFile->open(QIODevice::Append);
     QStringList list = createHeader();
@@ -134,15 +96,11 @@ void P190_creator::createP190File(int dayNumber)
 }
 
 
-
-
 void P190_creator::writeToFile(QStringList data) {
     if (outputFile->open(QIODevice::Append)){
         for (QString str: data) {
             if (str.isEmpty() || str.length() < 20) continue;
             outputFile->write(QByteArray(str.toUtf8()) + "\n");
-            // logmsg(str);
-                // outputFile->write("\n");
         }
         outputFile->close();
     }
@@ -188,7 +146,6 @@ QStringList P190_creator::createMainInfoBlock(int ffid) {
     currentSourceNumber = 0;
     QStringList res;
     QString tmp;
-    // int pointNumber = ffid;
     for (FixedItem* item: MyVault->ItemsVault) {
         if (QString(item->metaObject()->className()) == "Streamer") {
             continue;
@@ -198,7 +155,6 @@ QStringList P190_creator::createMainInfoBlock(int ffid) {
         if (QString(item->metaObject()->className()) == "Buoy") {
             currentBuoyNumber++;
         }
-        // currentSourceNumber++;
         if (tmp.isEmpty()) continue;
         res.append(tmp);
     }
@@ -206,42 +162,6 @@ QStringList P190_creator::createMainInfoBlock(int ffid) {
     return res;
 }
 
-QStringList P190_creator::createMainInfoBlock(int ffid, int sourceID)
-{
-    QStringList res = {};
-    // int sourceFlag = -1;
-    // for (FixedItem* item: MyVault->ItemsVault) {
-    //     if (item->itemType == "Source") {
-    //         if (dynamic_cast<Source*>(item)->curSourceNum == sourceID) {
-    //             sourceFlag = sourceID;
-    //             break;
-    //         }
-    //     }
-    // }
-    // if (sourceFlag+1) {
-    if (true) {
-        QString tmp;
-        // int pointNumber = ffid;
-        for (FixedItem* item: MyVault->ItemsVault) {
-            if (QString(item->metaObject()->className()) == "Streamer") {
-                continue;
-            }
-            // if (item->itemType == "Source") {
-            //     if (dynamic_cast<Source*>(item)->curSourceNum != sourceID) {
-            //         continue;
-            //     }
-            // }
-            tmp = createMainRow__new(item, ffid, -1);
-            // if (QString(item->metaObject()->className()) == "Buoy") {
-            //     currentBuoyNumber++;
-            // }
-            // currentSourceNumber++;
-            if (tmp.isEmpty()) continue;
-            res.append(tmp);
-        }
-    }
-    return res;
-}
 
 QString P190_creator::createMainRow__new(FixedItem *item, int pointNumber, int tailBuoy)
 {
@@ -270,10 +190,8 @@ QString P190_creator::createMainRow__new(FixedItem *item, int pointNumber, int t
             TailBuoyID = ' ';
         }
 
-        // TailBuoyID = '1';
     } else if (QString(item->metaObject()->className()) == "Source") {
         type = 'S';
-        // TailBuoyID = '1';
         if (dynamic_cast<Source*>(item)->sourceID != -1) {
             SourceID = QString::number(dynamic_cast<Source*>(item)->sourceID).at(0);
         } else {
@@ -293,7 +211,6 @@ QString P190_creator::createMainRow__new(FixedItem *item, int pointNumber, int t
     res.replace(16, 1, VesselID);
     res.replace(17, 1, SourceID);
     res.replace(18, 1, TailBuoyID);
-    // qDebug() <<"-"<<VesselID<<"-"<<SourceID<<"-"<<TailBuoyID<<"-"<<item->name;
     res.replace(19, 6, QString(6-QString::number(pointNumber).length(), ' ') + QString::number(pointNumber));
     res.replace(25, 21, QGeoCoordinate(item->latitude, item->longitude).
         toString(QGeoCoordinate::CoordinateFormat::DegreesWithHemisphere).remove("°").remove(' '));
@@ -323,10 +240,6 @@ void P190_creator::setFFID(int newFFID)
     FFID = newFFID;
 }
 
-ItemsStorage *P190_creator::getMyVault() const
-{
-    return MyVault;
-}
 
 void P190_creator::setMyVault(ItemsStorage *newMyVault)
 {
@@ -410,10 +323,6 @@ void P190_creator::setItemStoragePtr(ItemsStorage *Vault)
     this->MyVault = Vault;
 }
 
-void P190_creator::setLineName(const QString &newLineName)
-{
-    lineName = newLineName;
-}
 
 QString P190_creator::createFileName()
 {
@@ -425,27 +334,6 @@ QString P190_creator::createFileName()
                            .arg(currentDateTime.time().minute(), 2, 10, QChar('0'));  // Добавляем ведущий ноль для минут
     this->fileName = fileName;
     return fileName;
-}
-
-QString P190_creator::convertCoordinates(const QString &input)
-{
-    QRegExp rx("([0-9]+)° ([0-9]+)' ([0-9]+\\.[0-9]+)\" ([NSEW]), ([0-9]+)° ([0-9]+)' ([0-9]+\\.[0-9]+)\" ([NSEW])");
-    QString result;
-
-    if (rx.indexIn(input) != -1) {
-        QString latDeg = rx.cap(1);
-        QString latMin = rx.cap(2);
-        QString latSec = rx.cap(3);
-        QString latDir = rx.cap(4);
-        QString lonDeg = rx.cap(5);
-        QString lonMin = rx.cap(6);
-        QString lonSec = rx.cap(7);
-        QString lonDir = rx.cap(8);
-
-        result = latDeg + latMin + latSec + latDir + lonDeg + lonMin + lonSec + lonDir;
-    }
-
-    return result;
 }
 
 
@@ -469,16 +357,4 @@ QString P190_creator::replaceDates(QString& input) {
     return modifiedInput;
 }
 
-void P190_creator::fillSourceInfoInHeader(QStringList &header)
-{
-    calcItemsCount();
-    for (auto i: MyVault->ItemsVault) {
-
-    }
-    for (int i = 0; i < header.size(); i++) {
-        if (header[i].startsWith("H0103") || header[i].startsWith("\"H0103")) {
-
-        }
-    }
-}
 
