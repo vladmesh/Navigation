@@ -69,14 +69,6 @@ public:
      * @param tailBuoy Номер хвостового буя.
      * @return Сформированная строка.
      */
-    QStringList createMainInfoBlock(int ffid, int sourceID);
-    /**
-     * @brief Создание строки для основного блока.
-     * @param item Указатель на фиксированный элемент.
-     * @param pointNumber Номер точки.
-     * @param tailBuoy Номер хвостового буя.
-     * @return Сформированная строка.
-     */
 
     QString createMainRow(FixedItem* item, int pointNumber, int tailBuoy);
 
@@ -118,11 +110,6 @@ public:
      * @param Vault Указатель на хранилище объектов.
      */
     void setItemStoragePtr(ItemsStorage* Vault);
-    /**
-     * @brief Установка имени линии.
-     * @param newLineName Новое имя линии.
-     */
-    void setLineName(const QString &newLineName);
     QString createFileName();
     /**
      * @brief Преобразование координат.
@@ -179,8 +166,6 @@ private:
 
     ///working with HEADER and LINE
     QString lineName = "AA10AA0707077"; // len = 13
-
-    void fillSourceInfoInHeader(QStringList& header); //not done
 
 
 signals:

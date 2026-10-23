@@ -24,15 +24,12 @@ INCLUDEPATH += ./Drawing \
 
 
 SOURCES += \
-    # Connections/connection_udp.cpp \
     Connections/connectionlogic.cpp \
     Connections/connectionui.cpp \
-    # Connections/depthsensors.cpp \
     Connections/sender.cpp \
     DataVault/itemsloader.cpp \
     DataVault/itemsstorage.cpp \
     # Drawing/lordofgraphic.cpp \
-    # Drawing/sidegraphicview.cpp \
     Drawing/uberpainter.cpp \
     Fabric/buoydialog.cpp \
     Fabric/fabric.cpp \
@@ -42,21 +39,17 @@ SOURCES += \
     MenuWindows/sendersettingsmenu.cpp \
     Objects/buoy.cpp \
     Objects/fixeditem.cpp \
-    Objects/marimag.cpp \
     Objects/source.cpp \
     Objects/streamer.cpp \
     Objects/toweditem.cpp \
     DataReader/segyreader.cpp \
     Observervation/objectobserver.cpp \
     Observervation/virtualobserver.cpp \
-    Parsers/marimagparser.cpp \
     Parsers/ppkparser.cpp \
     Service/coordinator.cpp \
-    Service/logger.cpp \
     MenuWindows/p190headerchanger.cpp \
     Service/postprocessor.cpp \
     Service/postprocessorview.cpp \
-    Test/marimagparsertest.cpp \
     Test/test_postprocessing.cpp \
     Test/testdragging.cpp \
     Test/testitemsloading.cpp \
@@ -64,7 +57,6 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     Drawing/mygraphicview.cpp \
-    # Connections/connection.cpp \
     Connections/connection_com.cpp \
     Connections/connection_net.cpp \
     Parsers/nmeaparser.cpp \
@@ -72,10 +64,8 @@ SOURCES += \
     ConnectionCreator/connection_creator.cpp
 
 HEADERS += \
-    # Connections/connection_udp.h \
     Connections/connectionlogic.h \
     Connections/connectionui.h \
-    # Connections/depthsensors.h \
     Connections/sender.h \
     DataVault/CircularBuffer.h \
     DataVault/itemsloader.h \
@@ -83,7 +73,6 @@ HEADERS += \
     DataVault/structures.h \
     Drawing/hoverpaintingrpoint.h \
     # Drawing/lordofgraphic.h \
-    # Drawing/sidegraphicview.h \
     Drawing/uberpainter.h \
     Fabric/buoydialog.h \
     Fabric/fabric.h \
@@ -95,30 +84,25 @@ HEADERS += \
     MenuWindows/shipparamschanger.h \
     Objects/buoy.h \
     Objects/fixeditem.h \
-    Objects/marimag.h \
     Objects/source.h \
     Objects/streamer.h \
     Objects/toweditem.h \
     DataReader/segyreader.h \
     Observervation/objectobserver.h \
     Observervation/virtualobserver.h \
-    Parsers/marimagparser.h \
     Parsers/ppkparser.h \
     Service/coordinator.h \
     Service/customdoublespinbox.h \
     Service/functions.h \
-    Service/logger.h \
     MenuWindows/p190headerchanger.h \
     Service/postprocessor.h \
     Service/postprocessorview.h \
-    Test/marimagparsertest.h \
     Test/test_postprocessing.h \
     Test/testdragging.h \
     Test/testitemsloading.h \
     Test/testppkparser.h \
     mainwindow.h \
     Drawing/mygraphicview.h \
-    # Connections/connection.h \
     ConnectionCreator/connection_creator.h \
     Connections/connection_com.h \
     Connections/connection_net.h \
@@ -129,7 +113,6 @@ FORMS += \
     Connections/connectionui.ui \
     mainwindow.ui \
     ConnectionCreator/connection_creator.ui \
-    # Connections/connection.ui \
     Connections/connection_com.ui \
     Connections/connection_net.ui
 

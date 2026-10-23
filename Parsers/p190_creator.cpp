@@ -1,7 +1,6 @@
 #include "p190_creator.h"
 
 
-
 QDir P190_creator::path = QDir();
 
 P190_creator::P190_creator(QObject *parent)
@@ -36,8 +35,6 @@ QStringList P190_creator::createShotBlock()
     writeToFile(res);
     return res;
 }
-
-
 
 
 QStringList P190_creator::createHeader(int dayNumber) {
@@ -103,7 +100,6 @@ QStringList P190_creator::createHeader() {
 };
 
 
-
 void P190_creator::createP190File() {
     if (headerIsWritten || dayOfSurvey == -1) {
         return;
@@ -132,8 +128,6 @@ void P190_creator::createP190File(int dayNumber)
         return;
     }
 }
-
-
 
 
 void P190_creator::writeToFile(QStringList data) {
@@ -206,42 +200,6 @@ QStringList P190_creator::createMainInfoBlock(int ffid) {
     return res;
 }
 
-QStringList P190_creator::createMainInfoBlock(int ffid, int sourceID)
-{
-    QStringList res = {};
-    // int sourceFlag = -1;
-    // for (FixedItem* item: MyVault->ItemsVault) {
-    //     if (item->itemType == "Source") {
-    //         if (dynamic_cast<Source*>(item)->curSourceNum == sourceID) {
-    //             sourceFlag = sourceID;
-    //             break;
-    //         }
-    //     }
-    // }
-    // if (sourceFlag+1) {
-    if (true) {
-        QString tmp;
-        // int pointNumber = ffid;
-        for (FixedItem* item: MyVault->ItemsVault) {
-            if (QString(item->metaObject()->className()) == "Streamer") {
-                continue;
-            }
-            // if (item->itemType == "Source") {
-            //     if (dynamic_cast<Source*>(item)->curSourceNum != sourceID) {
-            //         continue;
-            //     }
-            // }
-            tmp = createMainRow__new(item, ffid, -1);
-            // if (QString(item->metaObject()->className()) == "Buoy") {
-            //     currentBuoyNumber++;
-            // }
-            // currentSourceNumber++;
-            if (tmp.isEmpty()) continue;
-            res.append(tmp);
-        }
-    }
-    return res;
-}
 
 QString P190_creator::createMainRow__new(FixedItem *item, int pointNumber, int tailBuoy)
 {
@@ -410,10 +368,6 @@ void P190_creator::setItemStoragePtr(ItemsStorage *Vault)
     this->MyVault = Vault;
 }
 
-void P190_creator::setLineName(const QString &newLineName)
-{
-    lineName = newLineName;
-}
 
 QString P190_creator::createFileName()
 {
@@ -469,16 +423,4 @@ QString P190_creator::replaceDates(QString& input) {
     return modifiedInput;
 }
 
-void P190_creator::fillSourceInfoInHeader(QStringList &header)
-{
-    calcItemsCount();
-    for (auto i: MyVault->ItemsVault) {
-
-    }
-    for (int i = 0; i < header.size(); i++) {
-        if (header[i].startsWith("H0103") || header[i].startsWith("\"H0103")) {
-
-        }
-    }
-}
 

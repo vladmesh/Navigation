@@ -50,17 +50,12 @@ public:
      /// @brief Вычисляет координаты каналов, если конечный буй отсутствует.
     void calcChansCoorsNoEndBuoy();
 
-    /// @brief Вычисляет координаты каналов алгоритмом цепи.
-    void calcChansByChainAlgorithm();
-
     void calcChansStreamerIsStrict();
 
     /// @brief Печатает координаты каналов. Для отладки.
     void printChansCoor();
     /// @brief Печатает позицию косы. Для отладки.
     void printPos();
-    /// @brief Проверяет корректность координат косы.
-    int checkStreamerCoordinates();
 
     /// @brief Возвращает указатель на канал по его номеру.
     Channel* getChan(uint number);
@@ -104,9 +99,6 @@ public:
 
 
     QVector<double> chans; ///< Относительные позиции каналов.
-protected:
-    double findA();
-    double calculateAzimuth() const;
 private:
     uint NumChanels; ///< Количество каналов в косе.
     QVector<Channel*> ChannelsVector; ///< Вектор каналов (объектов Channel).

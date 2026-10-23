@@ -45,24 +45,6 @@ public:
     double commonDummyAzimuth; //if end buoy doesn't send az
 
 
-    /**
-     * @brief Обновление позиции источника. Пока не используется
-     * Использует градиентный спуск для вычисления положения источника на основе позиций приемников и их расстояний.
-     * @param sCoor Начальное положение источника.
-     * @param rCoors Координаты приемников.
-     * @param dist Расстояния до источника.
-     * @return Обновленные координаты источника.
-     */
-    QPointF updateSourcePosition(QPointF sCoor, QVector<QPointF> rCoors, QVector<double> dist);
-    /**
-     * @brief Вычисление ошибки между расчетными и заданными расстояниями.
-     * Пока не используется
-     * @param source Координаты источника.
-     * @param receivers Координаты приемников.
-     * @param distances Расстояния до источника.
-     * @return Общая ошибка.
-     */
-    double calculateError(const QPointF &source, const QVector<QPointF> &receivers, const QVector<double> &distances);
 
 public slots:
     /**

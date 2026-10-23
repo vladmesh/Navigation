@@ -20,7 +20,6 @@ private:
     friend class Streamer;
     friend class Buoy;
     friend class Source;
-    friend class MariMag;
     friend class ItemsLoader;
     /**
      * @brief Конструктор с параметрами для создания буксируемого объекта.

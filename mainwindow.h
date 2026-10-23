@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "sidegraphicview.h"
+#include "mygraphicview.h"
 #include "fabric.h"
 #include "itemsstorage.h"
 #include "itemsloader.h"

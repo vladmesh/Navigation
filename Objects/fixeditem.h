@@ -29,7 +29,6 @@ private:
     friend class Fabric;
     // friend class Coordinator;
     friend class ItemsLoader;
-    friend class MariMag;
     /**
      * @brief Конструктор с параметрами для создания фиксированного объекта.
      * @param x Начальная координата X на схеме.

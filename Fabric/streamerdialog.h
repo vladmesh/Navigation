@@ -21,7 +21,7 @@
  *
  * Этот класс предоставляет интерфейс для выбора и настройки параметров косы,
  * таких как количество каналов и расстояние между ними.
- * Также поддерживает сохранение и загрузку параметров косы в/из файла CSV, но этот функционал пока недоступен
+ * Импорт/экспорт CSV перенесён в archive/snippets/streamerdialog-csv.cpp.
  */
 class StreamerDialog : public QDialog
 {
@@ -41,19 +41,11 @@ public:
     double totalLength; ///< Общая длина стримера.
     double leadingDamperLength; ///< не используется
     double endDamperLength; ///<не используется
-    /**
-     * @brief Сохраняет параметры стримера в файл CSV. пока не используется
-     */
-    void saveToCSV();
-
     QString dChString; ///< Строка с информацией о расстоянии между каналами.
     QString singleChannelType; ///< Тип одиночного канала стримера.
 
 private:
-    QDoubleSpinBox *elasticSectionLengthSpinBox = nullptr; ///< SpinBox для выбора длины эластичного участка.<не используется
     QPushButton *finishButton = nullptr; ///< Кнопка завершения настройки стримера.
-    QPushButton* loadCSVButton = nullptr; ///< Кнопка загрузки CSV.<не используется
-    QPushButton* saveCSVButton = nullptr; ///< Кнопка сохранения CSV.<не используется
     QTabWidget *tabWidget = nullptr; ///< Вкладки для выбора режима настройки (одно/много - канальная коса).
     QWidget *singleChannelTab = nullptr; ///< Вкладка для настройки одноканальной косы
     QWidget *multiChannelTab = nullptr; ///< Вкладка для настройки многоканальной косы.
@@ -68,9 +60,6 @@ private:
     QLabel* statusLabel;
 
 private slots:
-    void loadCSVFile();
-    void readCSV(const QString& filePath);
-
     /**
      * @brief Слот для завершения настройки и сохранения значений.
      */
