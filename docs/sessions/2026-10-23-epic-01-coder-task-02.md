@@ -68,3 +68,10 @@ Issue [#11](https://github.com/vladmesh/Navigation/issues/11), PR в `release/ep
 
 Ниты разрешено чинить без нового раунда, но правка заметная (новый обработчик и фикс UAF), поэтому
 запрошен раунд 2.
+
+Раунд 2: GREEN-WITH-NITS (`docs/sessions/2026-10-23-epic-01-reviewer-task-02-round-2.md`). Цикл ревью
+остановлен. Finding 1 (до 4 перестроений сетки на одно движение мыши; предложено схлопывать через
+`QTimer::singleShot(0)`) не исправлялся: это меняет схему блокировок без нового ревью; передан
+architect-revision как риск «лаг при пане» для проверки тестером. Findings 2–4 — architect-revision.
+
+Итог по таску: PR-CI run 1 красный (линковка tst_critical), run 2 и run 3 зелёные 4/4; ревью 2 раунда.
