@@ -40,8 +40,7 @@ double niceStep(double span, int maxLines)
 
     // log10 может ошибиться на единицу у точных степеней десяти, поэтому начинаем на
     // порядок ниже и перебираем кандидатов по возрастанию: первый подходящий — наименьший.
-    const int startExponent =
-        static_cast<int>(std::floor(std::log10(span / maxLines))) - 1;
+    const int startExponent = static_cast<int>(std::floor(std::log10(span / maxLines))) - 1;
     static const int mantissas[] = {1, 2, 5};
 
     for (int exponent = startExponent; exponent <= startExponent + 3; ++exponent) {

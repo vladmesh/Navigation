@@ -70,6 +70,17 @@ jobs:
           %MAKE% || exit /b 1
           release\tst_critical.exe -o -,txt -o ..\tst_critical.xml,junitxml
 
+      - name: Build and run GridMath tests (tst_gridmath, ADR 0001 Task 01)
+        shell: cmd
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          set MAKE=nmake
+          mkdir build-gridmath && cd build-gridmath
+          qmake ..\Test\unit\gridmath\tst_gridmath.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" "QMAKE_CXXFLAGS+=/MP" || exit /b 1
+          %MAKE% || exit /b 1
+          release\tst_gridmath.exe -o -,txt -o ..\tst_gridmath.xml,junitxml
+
       - name: Legacy tests (skipped)
         shell: bash
         run: |
@@ -86,6 +97,7 @@ jobs:
           path: |
             tst_parsers.xml
             tst_critical.xml
+            tst_gridmath.xml
           if-no-files-found: ignore
 
   windows-mingw-smoke:
@@ -208,6 +220,21 @@ jobs:
           ASAN_OPTIONS: detect_leaks=0:abort_on_error=1:strict_string_checks=1
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: ./build-critical/tst_critical
+
+      - name: Build GridMath tests with sanitizers (tst_gridmath)
+        run: |
+          mkdir build-gridmath && cd build-gridmath
+          qmake ../Test/unit/gridmath/tst_gridmath.pro CONFIG+=debug \
+            "QMAKE_CXXFLAGS+=-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined" \
+            "QMAKE_LFLAGS+=-fsanitize=address,undefined"
+          make -j"$(nproc)"
+
+      - name: Run GridMath tests (ASan + LSan + UBSan)
+        env:
+          QT_QPA_PLATFORM: offscreen
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1:strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ./build-gridmath/tst_gridmath
 
       - name: Full app compiles on Linux (smoke)
         run: |

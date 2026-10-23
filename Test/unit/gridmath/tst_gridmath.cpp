@@ -47,7 +47,7 @@ double previousCanonicalStep(double step)
     return 0.0;
 }
 
-QByteArray describe(const std::vector<double> &values)
+QByteArray describe(const std::vector<double>& values)
 {
     QByteArray out = "{";
     for (size_t i = 0; i < values.size(); ++i) {
@@ -61,22 +61,20 @@ QByteArray describe(const std::vector<double> &values)
 } // namespace
 
 // Точное сравнение double: QCOMPARE для double сравнивает нечётко (qFuzzyCompare).
-#define COMPARE_EXACT(actual, expected)                                                    \
-    do {                                                                                   \
-        const double a_ = (actual);                                                        \
-        const double e_ = (expected);                                                      \
-        QVERIFY2(a_ == e_, QByteArray(#actual " = " + QByteArray::number(a_, 'g', 17)      \
-                                      + ", expected " + QByteArray::number(e_, 'g', 17))   \
-                               .constData());                                              \
+#define COMPARE_EXACT(actual, expected)                                                                                \
+    do {                                                                                                               \
+        const double a_ = (actual);                                                                                    \
+        const double e_ = (expected);                                                                                  \
+        QVERIFY2(a_ == e_, QByteArray(#actual " = " + QByteArray::number(a_, 'g', 17) + ", expected " +                \
+                                      QByteArray::number(e_, 'g', 17))                                                 \
+                               .constData());                                                                          \
     } while (0)
 
-#define COMPARE_LINES(actual, expected)                                                    \
-    do {                                                                                   \
-        const std::vector<double> a_ = (actual);                                           \
-        const std::vector<double> e_ = (expected);                                         \
-        QVERIFY2(a_ == e_, QByteArray(#actual " = " + describe(a_) + ", expected "         \
-                                      + describe(e_))                                      \
-                               .constData());                                              \
+#define COMPARE_LINES(actual, expected)                                                                                \
+    do {                                                                                                               \
+        const std::vector<double> a_ = (actual);                                                                       \
+        const std::vector<double> e_ = (expected);                                                                     \
+        QVERIFY2(a_ == e_, QByteArray(#actual " = " + describe(a_) + ", expected " + describe(e_)).constData());       \
     } while (0)
 
 class TestGridMath : public QObject
@@ -155,20 +153,17 @@ void TestGridMath::niceStep_property()
         const double step = GridMath::niceStep(span, 10);
         const double ratio = span / step;
         QVERIFY2(ratio > 4.0 && ratio <= 10.0,
-                 QByteArray("span " + QByteArray::number(span, 'g', 17) + " step "
-                            + QByteArray::number(step, 'g', 17) + " ratio "
-                            + QByteArray::number(ratio, 'g', 17))
+                 QByteArray("span " + QByteArray::number(span, 'g', 17) + " step " + QByteArray::number(step, 'g', 17) +
+                            " ratio " + QByteArray::number(ratio, 'g', 17))
                      .constData());
         QVERIFY2(isCanonicalStep(step),
-                 QByteArray("non-canonical step " + QByteArray::number(step, 'g', 17))
-                     .constData());
+                 QByteArray("non-canonical step " + QByteArray::number(step, 'g', 17)).constData());
         // Наименьший: предыдущее значение ряда (×0.5 после 1 и 2, ×0.4 после 5) уже даёт
         // больше 10 интервалов.
         const double previous = previousCanonicalStep(step);
         QVERIFY2(span / previous > 10.0,
-                 QByteArray("step " + QByteArray::number(step, 'g', 17)
-                            + " is not the smallest for span "
-                            + QByteArray::number(span, 'g', 17))
+                 QByteArray("step " + QByteArray::number(step, 'g', 17) + " is not the smallest for span " +
+                            QByteArray::number(span, 'g', 17))
                      .constData());
     }
 }
@@ -184,27 +179,22 @@ void TestGridMath::gridLines_boundaries()
     // Кратные шагу границы включаются.
     COMPARE_LINES(GridMath::gridLines(5123600.0, 5124200.0, 200),
                   (std::vector<double>{5123600, 5123800, 5124000, 5124200}));
-    COMPARE_LINES(GridMath::gridLines(-200.0, 200.0, 100),
-                  (std::vector<double>{-200, -100, 0, 100, 200}));
+    COMPARE_LINES(GridMath::gridLines(-200.0, 200.0, 100), (std::vector<double>{-200, -100, 0, 100, 200}));
     // min == max на линии — одна линия, между линиями — ни одной.
     COMPARE_LINES(GridMath::gridLines(400.0, 400.0, 200), (std::vector<double>{400}));
     COMPARE_LINES(GridMath::gridLines(401.0, 599.0, 200), (std::vector<double>{}));
     // Граница в пределах допуска 1e-9 шага считается кратной.
-    COMPARE_LINES(GridMath::gridLines(400.0 + 1e-8, 800.0 - 1e-8, 200),
-                  (std::vector<double>{400, 600, 800}));
+    COMPARE_LINES(GridMath::gridLines(400.0 + 1e-8, 800.0 - 1e-8, 200), (std::vector<double>{400, 600, 800}));
 }
 
 void TestGridMath::gridLines_fractionalStep()
 {
-    COMPARE_LINES(GridMath::gridLines(0.0, 0.5, 0.1),
-                  (std::vector<double>{0.0, 0.1, 0.2, 0.3, 0.4, 0.5}));
+    COMPARE_LINES(GridMath::gridLines(0.0, 0.5, 0.1), (std::vector<double>{0.0, 0.1, 0.2, 0.3, 0.4, 0.5}));
     // Большие UTM-значения с мелким шагом: без хвостов вида 5123400.0000001.
     COMPARE_LINES(GridMath::gridLines(5123400.0, 5123400.05, 0.01),
-                  (std::vector<double>{5123400.0, 5123400.01, 5123400.02, 5123400.03,
-                                       5123400.04, 5123400.05}));
+                  (std::vector<double>{5123400.0, 5123400.01, 5123400.02, 5123400.03, 5123400.04, 5123400.05}));
     COMPARE_LINES(GridMath::gridLines(-0.25, 0.25, 0.05),
-                  (std::vector<double>{-0.25, -0.2, -0.15, -0.1, -0.05, 0.0, 0.05, 0.1,
-                                       0.15, 0.2, 0.25}));
+                  (std::vector<double>{-0.25, -0.2, -0.15, -0.1, -0.05, 0.0, 0.05, 0.1, 0.15, 0.2, 0.25}));
 }
 
 void TestGridMath::gridLines_invalidInput()
