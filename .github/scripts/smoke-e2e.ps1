@@ -41,10 +41,12 @@ function New-TestDir([string]$dir, [string]$skip) {
 }
 
 function Invoke-Smoke([string]$dir, [string]$platform) {
-    $saved = @{ PATH = $env:PATH; QT_QPA_PLATFORM = $env:QT_QPA_PLATFORM; QT_PLUGIN_PATH = $env:QT_PLUGIN_PATH }
+    $saved = @{ PATH = $env:PATH; QT_QPA_PLATFORM = $env:QT_QPA_PLATFORM; QT_PLUGIN_PATH = $env:QT_PLUGIN_PATH; QT_QPA_FONTDIR = $env:QT_QPA_FONTDIR }
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
     $env:QT_QPA_PLATFORM = $platform
     $env:QT_PLUGIN_PATH = $null
+    # offscreen does not use the Windows font API; point it at the system fonts.
+    $env:QT_QPA_FONTDIR = "$env:SystemRoot\Fonts"
     $env:QT_FORCE_STDERR_LOGGING = "1"
     $err = Join-Path $dir "stderr.txt"
     $out = Join-Path $dir "stdout.txt"
@@ -55,7 +57,8 @@ function Invoke-Smoke([string]$dir, [string]$platform) {
         $modules = @{}
         $sw = [Diagnostics.Stopwatch]::StartNew()
         while (-not $p.HasExited -and $sw.Elapsed.TotalSeconds -lt $TimeoutSec) {
-            try { foreach ($m in $p.Modules) { $modules[$m.FileName.ToLower()] = $true } } catch {}
+            # Process.Modules is cached by .NET; Refresh() re-reads the module list.
+            try { $p.Refresh(); foreach ($m in $p.Modules) { $modules[$m.FileName.ToLower()] = $true } } catch {}
             Start-Sleep -Milliseconds 150
         }
         $timedOut = -not $p.HasExited
@@ -84,7 +87,7 @@ foreach ($platform in @("offscreen", "windows")) {
     $ok = $true
     if ($r.TimedOut -or $r.Code -ne 0) { Write-Host "::error::[$platform] Ship.exe exit code $($r.Code)"; $ok = $false }
     if ($r.Log -notmatch "SMOKE OK") { Write-Host "::error::[$platform] no 'SMOKE OK' in log"; $ok = $false }
-    $bad = ($r.Log -split "`n") | Where-Object { $_ -match "(?i)could not (load|find)|cannot load|failed to load|not found|no Qt platform plugin" }
+    $bad = ($r.Log -split "`n") | Where-Object { $_ -match "(?i)could not (load|find)|cannot (load|find)|failed to load|not found|no Qt platform plugin" }
     if ($bad) { Write-Host "::error::[$platform] load errors in log:"; $bad | ForEach-Object { Write-Host "  $_" }; $ok = $false }
 
     $qtMods = $r.Modules | Where-Object { $_ -match '\\(qt6[a-z0-9]+|libgcc_s_seh-1|libstdc\+\+-6|libwinpthread-1|q[a-z0-9]+)\.dll$' -and $_ -notmatch '\\windows\\' }
@@ -107,7 +110,8 @@ if (-not $SkipMinimality) {
         $dir = New-TestDir "$Work-without" $rel
         $r = Invoke-Smoke $dir $platform
         $broken = $r.TimedOut -or $r.Code -ne 0 -or ($r.Log -notmatch "SMOKE OK")
-        $first = (($r.Log -split "`n") | Where-Object { $_ -match "\S" } | Select-Object -First 1)
+        $first = (($r.Log -split "`n") | Where-Object { $_ -match "SMOKE |qt\.qpa|(?i)cannot|could not" } | Select-Object -First 1)
+        if (-not $first -and $r.Code -eq 0xC0000135) { $first = "STATUS_DLL_NOT_FOUND" }
         $line = "without {0,-28} [{1,-9}] exit=0x{2:X8} -> {3}  {4}" -f $rel, $platform, $r.Code, $(if ($broken) { "fails (required)" } else { "STILL RUNS" }), $first
         Write-Host $line
         if (-not $broken) { Write-Host "::error::$rel is not required for the smoke run"; $failures++ }
