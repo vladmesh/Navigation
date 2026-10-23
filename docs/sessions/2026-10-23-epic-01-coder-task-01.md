@@ -51,7 +51,12 @@ Issue [#4](https://github.com/vladmesh/Navigation/issues/4), PR [#5](https://git
 ## Коммиты
 
 - `49a3fbf` epic-01/task-01: add GridMath (niceStep, gridLines, labelDecimals) and tst_gridmath
-- следующий коммит: этот отчёт и STATUS.md
+- `8e7bd4b` этот отчёт и STATUS.md
+- `bdf5811`, `e23d364` merge `release/epic-01` (там теперь `main` с PR-CI, PR #10); конфликт в
+  `Ship.pro` (закомментированные `lordofgraphic`/`sidegraphicview` удалены в main) решён:
+  оставлен только `Drawing/gridmath.cpp`
+- `6730f63` шаги `tst_gridmath` в PR-CI (Windows MSVC /W4 и Linux ASan+UBSan+LSan), как
+  разрешает Task 01; clang-format новых строк (`.clang-format` из main)
 
 ## Ревью
 
@@ -62,3 +67,11 @@ Issue [#4](https://github.com/vladmesh/Navigation/issues/4), PR [#5](https://git
 - Когда `ci/minimal` появится в release-ветке, `tst_gridmath` нужно добавить в PR-CI
   (ADR это разрешает в Task 01, сейчас workflow нет).
 - Два регистрозависимых include выше ломают сборку на Linux-раннере, если CI будет на Linux.
+
+## Обновление 2026-10-23 (после синка с main)
+
+- В release-ветке появился PR-CI. `tst_gridmath` добавлен в jobs `Windows / MSVC` и
+  `Linux / GCC ASan+UBSan(+LSan)`, JUnit-отчёт в артефакте `unit-test-results-windows`.
+- Локально после синка: `tst_gridmath` 27/27, `Ship.pro` собирается (Qt 6.8.3 gcc_64),
+  clang-format-diff по изменённым строкам чистый. Шимы include больше не нужны (починено в main).
+- PR-CI прогоны по таску: см. `ci_runs` в STATUS.md и checks в PR #5.
