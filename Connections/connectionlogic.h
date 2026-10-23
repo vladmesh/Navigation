@@ -53,11 +53,11 @@ private:
     bool signalTimerAlert = false;
     QTimer* timer = nullptr;
 
-    uint calcWindow = 20;
+    qsizetype calcWindow = 20; ///< размер окна для подсчёта качества, пакетов
     double border = 0.85;
     QVector<bool> packetsRecieved;
     float currentQuality = 0;
-    QVector<bool>::iterator iter;
+    qsizetype oldestPacket = 0; ///< индекс самого старого пакета в заполненном окне
 
     QTextStream* datastream = nullptr;
 
