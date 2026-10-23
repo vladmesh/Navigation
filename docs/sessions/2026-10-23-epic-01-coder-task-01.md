@@ -60,7 +60,9 @@ Issue [#4](https://github.com/vladmesh/Navigation/issues/4), PR [#5](https://git
 
 ## Ревью
 
-Раунды ревью: 0. Ревьюер запускается следующим шагом пайплайна по PR #5. Открытых нитов нет.
+Раунд 1: RED (`docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-1.md`). Раунд 2: GREEN-WITH-NITS
+(`docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-2.md`). Оба нита раунда 2 исправлены без нового
+раунда (см. ниже). Открытых нитов нет.
 
 ## Заметки для следующих тасков
 
@@ -90,3 +92,10 @@ Issue [#4](https://github.com/vladmesh/Navigation/issues/4), PR [#5](https://git
   вместо него `gridLines(0, 1e12, 1)`.
 - Локально: `tst_gridmath` под ASan+UBSan с `-fsanitize=float-cast-overflow` и
   `-fno-sanitize-recover=all` — 27/27, без диагностик; clang-format-diff чистый.
+
+## Ниты раунда 2 (исправлены без нового раунда, как разрешает coder)
+
+- [minor] `stepDecimals` для не десятичного шага (1/3, 1/7) находил d=15 и округлял: теперь при допуске
+  от 0.5 возвращает -1, значения не округляются. Тест: `gridLines(0, 1, 1.0/3)` ровно `i * step`.
+- [nit] `gridmath.h`: свойство `(maxLines/2.5, maxLines]` сформулировано для ненулевого результата.
+- PR-CI: run 1 (`18edd2f`) и run 2 (`d166ee1`) зелёные 4/4; run 3 на этом коммите.

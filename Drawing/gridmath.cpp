@@ -42,7 +42,11 @@ int stepDecimals(double step)
         const double scaled = step * scale;
         if (!std::isfinite(scaled))
             return -1;
-        if (std::fabs(scaled - std::round(scaled)) <= 8.0 * std::numeric_limits<double>::epsilon() * scaled)
+        const double tolerance = 8.0 * std::numeric_limits<double>::epsilon() * scaled;
+        // При допуске от 0.5 проверка на целое проходит всегда: шаг не десятичный (1/3, 1/7).
+        if (tolerance >= 0.5)
+            return -1;
+        if (std::fabs(scaled - std::round(scaled)) <= tolerance)
             return d;
     }
     return -1;

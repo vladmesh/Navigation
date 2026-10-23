@@ -8,18 +8,18 @@
 | Epic | 01 / 8 — Сетка координат в зоне отрисовки |
 | ADR | docs/adr/0001-coordinate-grid.md |
 | Release branch | release/epic-01 |
-| Stage | task 01 — round 1 fixes pushed, PR-CI run 2 |
+| Stage | task 01 — review GREEN-WITH-NITS (round 2), nits fixed, PR-CI run 3 |
 | Current task | 01 — Чистая функция расчёта шага сетки + unit-тест (issue #4, PR #5) |
-| Next role | reviewer |
-| Hand-off | PR #5 (round 2); docs/sessions/2026-10-23-epic-01-coder-task-01.md §«Исправления по ревью, раунд 1» |
-| Last update | 2026-10-23 22:15, coder |
+| Next role | architect-revision |
+| Hand-off | PR #5 (green-reviewed); docs/sessions/2026-10-23-epic-01-coder-task-01.md; docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-2.md |
+| Last update | 2026-10-23 22:35, coder |
 
 ## Counters
 
 | Counter | Value | Ceiling | Scope |
 |---|---|---|---|
-| ci_runs | 2 | 10 | per task |
-| review_rounds | 1 | 3 | per PR |
+| ci_runs | 3 | 10 | per task |
+| review_rounds | 2 | 3 | per PR |
 | build_attempts | 0 | 5 | per build cycle |
 | colleague_returns | 0 | 2 (3rd → human-epic-owner) | per epic |
 
@@ -37,3 +37,5 @@
 - 2026-10-23 coder: task 01 — release/epic-01 синхронизирована с main (PR #10, PR-CI есть); в PR #5 влита release-ветка, tst_gridmath добавлен в PR-CI; PR-CI run 1
 - 2026-10-23 reviewer: task 01 round 1 — RED (1 blocker: UB в niceStep при субнормальном span/maxLines; 1 major: gridLines округляет по labelDecimals, неверно для шага 0.25; 1 nit); PR-CI run 1 зелёный (4/4); отчёт docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-1.md; next: coder
 - 2026-10-23 coder: task 01 — исправлены findings 1–3 раунда 1; PR-CI run 2; next: reviewer (round 2)
+- 2026-10-23 reviewer: task 01 round 2 — GREEN-WITH-NITS (1 minor, 1 nit); PR-CI run 2 зелёный 4/4; отчёт docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-2.md
+- 2026-10-23 coder: task 01 — ниты раунда 2 исправлены, PR-CI run 3; next: architect-revision

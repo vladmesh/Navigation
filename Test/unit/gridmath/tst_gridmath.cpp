@@ -207,6 +207,9 @@ void TestGridMath::gridLines_fractionalStep()
     COMPARE_LINES(GridMath::gridLines(0.0, 0.1, 0.025), (std::vector<double>{0.0, 0.025, 0.05, 0.075, 0.1}));
     COMPARE_LINES(GridMath::gridLines(5123400.0, 5123401.0, 0.25),
                   (std::vector<double>{5123400.0, 5123400.25, 5123400.5, 5123400.75, 5123401.0}));
+    // Не десятичный шаг не округляется: значения ровно i * step.
+    const double third = 1.0 / 3.0;
+    COMPARE_LINES(GridMath::gridLines(0.0, 1.0, third), (std::vector<double>{0.0, third, 2 * third, 3 * third}));
 }
 
 void TestGridMath::gridLines_invalidInput()
