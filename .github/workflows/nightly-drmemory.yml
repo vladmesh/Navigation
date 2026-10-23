@@ -2,7 +2,8 @@ name: Nightly Dr. Memory (Windows)
 
 # Dr. Memory (утечки, неинициализированная память, выход за границы кучи)
 # на автономных юнит-тестах парсеров. Падение запуска = красный прогон.
-# Ложные срабатывания внутри Qt/системных DLL — в .github/drmemory.supp.
+# Ложные срабатывания внутри Qt/системных DLL — в .github/drmemory.supp,
+# каждое по конкретным именам функций (PDB Qt ставятся из debug_info).
 on:
   schedule:
     - cron: "30 2 * * *"
@@ -12,6 +13,11 @@ on:
         description: "Runner image"
         required: false
         default: "windows-2022"
+      use_suppressions:
+        description: "Apply .github/drmemory.supp (false = raw audit run, expected to fail)"
+        type: boolean
+        required: false
+        default: true
 
 jobs:
   drmemory:
@@ -29,6 +35,18 @@ jobs:
           modules: "qtpositioning"
           cache: true
 
+      # Отладочные символы qtbase и qtpositioning (Qt6Cored.pdb, Qt6Positioningd.pdb, ...), чтобы в стеках
+      # Dr. Memory были имена функций Qt, а подавления — по конкретным функциям.
+      - name: Install Qt debug symbols (debug_info)
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check -q "aqtinstall==3.3.0"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $out = (Resolve-Path "$env:QT_ROOT_DIR\..\..").Path
+          python -m aqt install-qt windows desktop 6.8.3 win64_msvc2022_64 --modules debug_info qtpositioning.debug_information --archives qtbase qtpositioning -O $out
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if (-not (Test-Path "$env:QT_ROOT_DIR\bin\Qt6Cored.pdb")) { Write-Host "::error::Qt6Cored.pdb not installed"; exit 1 }
+
       - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Build unit tests (debug)
@@ -38,13 +56,17 @@ jobs:
           qmake ..\Test\unit\unit.pro CONFIG+=debug "QMAKE_CXXFLAGS+=/MP /FS" || exit /b 1
           nmake || exit /b 1
 
-      - name: Deploy Qt next to the test exe
+      - name: Deploy Qt (with PDBs) next to the test exe
         shell: pwsh
         run: |
-          windeployqt --debug --no-translations --no-compiler-runtime build-tests\debug\tst_parsers.exe
+          windeployqt --debug --pdb --no-translations --no-compiler-runtime build-tests\debug\tst_parsers.exe
           if ($LASTEXITCODE -ne 0) { exit 1 }
           New-Item -ItemType Directory -Force build-tests\debug\platforms | Out-Null
           Copy-Item "$env:QT_ROOT_DIR\plugins\platforms\qoffscreend.dll" build-tests\debug\platforms\
+          Copy-Item "$env:QT_ROOT_DIR\plugins\platforms\qoffscreend.pdb" build-tests\debug\platforms\ -ErrorAction SilentlyContinue
+          # Каждой Qt DLL рядом с exe — свой PDB, иначе Dr. Memory не развернёт стек.
+          $missing = Get-ChildItem build-tests\debug -Recurse -Filter "Qt6*d.dll" | Where-Object { -not (Test-Path ($_.FullName -replace '\.dll$', '.pdb')) }
+          if ($missing) { Write-Host "::error::PDB missing for: $($missing.Name -join ', ')"; exit 1 }
 
       - name: Sanity run without Dr. Memory
         shell: cmd
@@ -59,14 +81,29 @@ jobs:
         shell: pwsh
         env:
           QT_QPA_PLATFORM: offscreen
+          USE_SUPP: ${{ github.event.inputs.use_suppressions || 'true' }}
         run: |
           $dr = Get-ChildItem "C:\Program Files (x86)\Dr. Memory\bin64\drmemory.exe","C:\Program Files\Dr. Memory\bin64\drmemory.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $dr) { Write-Host "::error::drmemory.exe not found"; exit 1 }
           New-Item -ItemType Directory -Force drmemory-logs | Out-Null
-          & $dr.FullName -batch -exit_code_if_errors 3 -suppress .github\drmemory.supp -logdir drmemory-logs -- build-tests\debug\tst_parsers.exe
+          $supp = @()
+          if ($env:USE_SUPP -eq 'true') { $supp = @('-suppress', '.github\drmemory.supp') } else { Write-Host "::warning::Audit run: .github\drmemory.supp NOT applied" }
+          $testlog = "drmemory-logs\tst_parsers.txt"
+          & $dr.FullName -batch -exit_code_if_errors 3 -callstack_max_frames 30 @supp -logdir drmemory-logs -- build-tests\debug\tst_parsers.exe -o "$testlog,txt" -o "-,txt"
           $rc = $LASTEXITCODE
-          Get-ChildItem drmemory-logs -Recurse -Filter results.txt | ForEach-Object { Get-Content $_.FullName -TotalCount 200 }
+          $results = Get-ChildItem drmemory-logs -Recurse -Filter results.txt
+          $results | ForEach-Object { Get-Content $_.FullName -TotalCount 400 }
+          Write-Host "---- Dr. Memory summary ----"
+          $results | ForEach-Object { Select-String -Path $_.FullName -Pattern '^(NO ERRORS FOUND|ERRORS FOUND:|\s+\d+ unique,)' | ForEach-Object { $_.Line } }
           if ($rc -ne 0) { Write-Host "::error::Dr. Memory exit code $rc (3 = memory errors found, other = tool/test failure)"; exit 1 }
+          # Тесты должны реально пройти под Dr. Memory, а не просто не упасть.
+          Write-Host "---- QtTest log under Dr. Memory ----"
+          if (Test-Path $testlog) { Get-Content $testlog }
+          $totals = Select-String -Path $testlog -Pattern '^Totals: (\d+) passed, (\d+) failed' | Select-Object -Last 1
+          if (-not $totals) { Write-Host "::error::no QtTest Totals line under Dr. Memory"; exit 1 }
+          Write-Host "Under Dr. Memory: $($totals.Line)"
+          if ([int]$totals.Matches[0].Groups[1].Value -lt 1 -or [int]$totals.Matches[0].Groups[2].Value -ne 0) { Write-Host "::error::tests did not pass under Dr. Memory"; exit 1 }
+          if (-not ($results | Select-String -Pattern '^NO ERRORS FOUND' -Quiet)) { Write-Host "::error::results.txt has no 'NO ERRORS FOUND'"; exit 1 }
 
       - uses: actions/upload-artifact@v4
         if: always()
