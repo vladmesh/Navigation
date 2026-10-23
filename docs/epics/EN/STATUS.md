@@ -8,11 +8,11 @@
 | Epic | 01 / 8 — Сетка координат в зоне отрисовки |
 | ADR | docs/adr/0001-coordinate-grid.md |
 | Release branch | release/epic-01 |
-| Stage | planning — done |
-| Current task | 01 — Чистая функция расчёта шага сетки + unit-тест (issue —, PR —) |
+| Stage | task 01 done, task 02 — coder |
+| Current task | 02 — Адаптивная сетка и подписи в UberPainter |
 | Next role | coder |
-| Hand-off | docs/adr/0001-coordinate-grid.md, Task 01 |
-| Last update | 2026-10-23 18:55, architect-plan |
+| Hand-off | ADR 0001 Task 02 |
+| Last update | 2026-10-23 22:50, architect-revision |
 
 ## Counters
 
@@ -27,9 +27,16 @@
 
 | # | Task | Status | Issue | PR |
 |---|---|---|---|---|
-| 01 | Чистая функция расчёта шага сетки (GridMath) + unit-тест | todo | | |
+| 01 | Чистая функция расчёта шага сетки (GridMath) + unit-тест | done | #4 | #5 |
 | 02 | Адаптивная сетка и подписи в UberPainter (фикс границ, удаление updateCoordinates) | todo | | |
 
 ## Log
 
 - 2026-10-23 architect-plan: plan done — ADR 0001 accepted, 2 таска, ветка release/epic-01 создана; конспект docs/sessions/2026-10-23-epic-01-architect-plan.md
+- 2026-10-23 coder: task 01 — issue #4, PR #5 в release/epic-01; PR-CI: no workflow yet (ci_runs 0); локально tst_gridmath 27/27 pass (Qt 6.8.3 Linux), Ship.pro собирается; отчёт docs/sessions/2026-10-23-epic-01-coder-task-01.md; next: reviewer
+- 2026-10-23 coder: task 01 — release/epic-01 синхронизирована с main (PR #10, PR-CI есть); в PR #5 влита release-ветка, tst_gridmath добавлен в PR-CI; PR-CI run 1
+- 2026-10-23 reviewer: task 01 round 1 — RED (1 blocker: UB в niceStep при субнормальном span/maxLines; 1 major: gridLines округляет по labelDecimals, неверно для шага 0.25; 1 nit); PR-CI run 1 зелёный (4/4); отчёт docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-1.md; next: coder
+- 2026-10-23 coder: task 01 — исправлены findings 1–3 раунда 1; PR-CI run 2; next: reviewer (round 2)
+- 2026-10-23 reviewer: task 01 round 2 — GREEN-WITH-NITS (1 minor, 1 nit); PR-CI run 2 зелёный 4/4; отчёт docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-2.md
+- 2026-10-23 coder: task 01 — ниты раунда 2 исправлены, PR-CI run 3; next: architect-revision
+- 2026-10-23 architect-revision: task 01 принят — PR-CI run 3 (8d06b21) зелёный 4/4 (tst_gridmath 27/0 на MSVC и ASan), ревью раунд 2 GREEN-WITH-NITS, ниты исправлены; итог по таску: ci_runs 3 (+1 docs-коммит этой передачи), review_rounds 2; PR #5 влит merge-коммитом; ADR Task 01 → done; счётчики сброшены; next: coder (task 02)

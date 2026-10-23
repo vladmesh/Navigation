@@ -134,6 +134,7 @@ int labelDecimals(double step);
 - В `main` нет `Test/unit/` и PR-CI (они в `ci/minimal`). Митигация: таск 01 создаёт
   свой тестовый `.pro`, не конфликтующий с `Test/unit/unit.pro`; когда `ci/minimal`
   будет влита в `main`, `architect-revision` подтягивает `main` в `release/epic-01`.
+  Закрыт 2026-10-23: `main` влит в `release/epic-01` через PR #10, `tst_gridmath` добавлен в PR-CI.
 
 ## Tasks
 
@@ -141,7 +142,7 @@ Each task = one issue, one branch `epic-01/task-MM-<slug>`, one PR into the rele
 
 ### Task 01: Чистая функция расчёта шага сетки + unit-тест
 
-- Status: todo
+- Status: done (PR #5, merged into release/epic-01 by architect-revision 2026-10-23)
 - Scope: новые `Drawing/gridmath.h`, `Drawing/gridmath.cpp` (добавить в `SOURCES`/`HEADERS`
   `Ship.pro`); новый тестовый проект `Test/unit/gridmath/tst_gridmath.pro` +
   `tst_gridmath.cpp` (QtTest, `QT = core testlib`, без `gui`/`widgets`, компилирует
@@ -150,22 +151,25 @@ Each task = one issue, one branch `epic-01/task-MM-<slug>`, one PR into the rele
   запуска `tst_gridmath` (по образцу существующих unit-шагов); иначе `.github/` не трогать.
   `UberPainter` не меняется.
 - Acceptance criteria:
-  - [ ] `gridmath.h/.cpp` не включают ни одного заголовка Qt; API ровно как в Decision §1.
-  - [ ] `niceStep`: 1000→100, 999→100, 1001→200, 50→5, 12345→2000, 2.5→0.5, 7→1,
+  - [x] `gridmath.h/.cpp` не включают ни одного заголовка Qt; API ровно как в Decision §1.
+  - [x] `niceStep`: 1000→100, 999→100, 1001→200, 50→5, 12345→2000, 2.5→0.5, 7→1,
         0.07→0.01, 1e7→1e6; результат всегда вида {1,2,5}×10ⁿ без float-хвостов.
-  - [ ] `niceStep` для 0, отрицательного, NaN, ±inf, `maxLines<1` возвращает 0.
-  - [ ] Свойство: для ≥1000 значений span в диапазоне 1e-2..1e8 (логарифмическая
+  - [x] `niceStep` для 0, отрицательного, NaN, ±inf, `maxLines<1` возвращает 0.
+  - [x] Свойство: для ≥1000 значений span в диапазоне 1e-2..1e8 (логарифмическая
         развёртка) `span/step` ∈ (4, 10].
-  - [ ] `gridLines(5123401.3, 5124399.0, 200)` = {5123600, 5123800, 5124000, 5124200}
+  - [x] `gridLines(5123401.3, 5124399.0, 200)` = {5123600, 5123800, 5124000, 5124200}
         точно (сравнение `==` после округления, без хвостов); `gridLines` на границах
         включает кратные min/max; некорректный ввод и превышение `maxCount` → пусто.
-  - [ ] `labelDecimals`: 100→0, 1→0, 0.5→1, 0.01→2.
-  - [ ] `Ship.pro` собирается (qmake + make) с новыми файлами; `tst_gridmath` собирается и
+  - [x] `labelDecimals`: 100→0, 1→0, 0.5→1, 0.01→2.
+  - [x] `Ship.pro` собирается (qmake + make) с новыми файлами; `tst_gridmath` собирается и
         проходит под `QT_QPA_PLATFORM=offscreen`.
 - Verification: `tst_gridmath` (PR-CI шаг, если workflow есть; иначе локально
   `qmake Test/unit/gridmath/tst_gridmath.pro && make && ./tst_gridmath` и в отчёте
   «no workflow yet»); ревьюер — по коду и тестам.
-- Issue / PR: —, —
+- Issue / PR: #4, #5
+- Leftovers: GCC `-fsanitize=undefined` в PR-CI не включает `float-cast-overflow`; ветка
+  субнормального span закрыта явными тестами (ревью раунд 2, Not reviewed). Точность `niceStep`
+  вне ~1e-21..1e23 (fallback на `std::pow`) не проверена, вне диапазона UTM.
 
 ### Task 02: Адаптивная сетка и подписи в UberPainter
 
@@ -214,3 +218,5 @@ Each task = one issue, one branch `epic-01/task-MM-<slug>`, one PR into the rele
 - 2026-10-23 architect-plan: шаг по короткой стороне видимой области, квадратные ячейки;
   подписи через `ItemIgnoresTransformations`; сетка по видимой области, а не по bbox объектов;
   2 таска.
+- 2026-10-23 architect-revision: Task 01 принят (ревью раунд 2 GREEN-WITH-NITS, ниты исправлены,
+  PR-CI run 3 зелёный 4/4), PR #5 влит в release/epic-01; следующий — Task 02.

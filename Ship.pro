@@ -31,6 +31,7 @@ SOURCES += \
     Connections/sender.cpp \
     DataVault/itemsloader.cpp \
     DataVault/itemsstorage.cpp \
+    Drawing/gridmath.cpp \
     Drawing/uberpainter.cpp \
     Fabric/buoydialog.cpp \
     Fabric/fabric.cpp \
@@ -68,6 +69,7 @@ HEADERS += \
     DataVault/itemsloader.h \
     DataVault/itemsstorage.h \
     DataVault/structures.h \
+    Drawing/gridmath.h \
     Drawing/hoverpaintingrpoint.h \
     Drawing/uberpainter.h \
     Fabric/buoydialog.h \
