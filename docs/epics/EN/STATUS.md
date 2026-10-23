@@ -8,11 +8,11 @@
 | Epic | 01 / 8 — Сетка координат в зоне отрисовки |
 | ADR | docs/adr/0001-coordinate-grid.md |
 | Release branch | release/epic-01 |
-| Stage | build + docs ready — testing |
+| Stage | tested (CI + offscreen; no Windows host) — awaiting colleagues |
 | Current task | — (01, 02 done) |
-| Next role | tester |
-| Hand-off | artifact Ship-epic-01-rc1 (run 40017826744); docs PR #13; ADR 0001 acceptance criteria |
-| Last update | 2026-10-23 22:35, documentator |
+| Next role | colleagues |
+| Hand-off | artifact Ship-epic-01-rc1 (release-build run 40017826744); docs/sessions/2026-10-23-epic-01-tester.md; PR release/epic-01 → main (open, not merged) |
+| Last update | 2026-10-23 22:35, tester |
 
 ## Counters
 
@@ -48,3 +48,4 @@
 - 2026-10-23 architect-revision: task 02 принят — итог ci_runs 3 (+1 docs-коммит передачи), review_rounds 2; PR #12 влит merge-коммитом; ADR: Decision §2 и критерий строк уточнены, leftovers записаны; все таски done; счётчики сброшены; next: builder
 - 2026-10-23 builder: release-build (workflow_dispatch, run 40017826744) зелёный с 1-й попытки; артефакт Ship-epic-01-rc1, smoke-старт на раннере OK; отчёт docs/sessions/2026-10-23-epic-01-builder.md; next: documentator
 - 2026-10-23 documentator: README (раздел «Карта», tst_gridmath), ADR Documentation impact отмечен; docs PR #13; отчёт docs/sessions/2026-10-23-epic-01-documentator.md; next: tester
+- 2026-10-23 tester: критерии Task 01–02 проходят на CI (Windows MSVC/MinGW, release smoke) и в offscreen-стенде под ASan; ручной/агентный проход на Windows не выполнен (нет хоста, computer-use — заглушка); новых багов нет; отчёт docs/sessions/2026-10-23-epic-01-tester.md; next: colleagues (люди)
