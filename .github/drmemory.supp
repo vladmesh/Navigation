@@ -1,0 +1,4 @@
+# Dr. Memory suppressions for nightly-drmemory.yml.
+# Only add entries for reports whose whole stack is inside Qt / Windows system
+# DLLs (Qt6*.dll, ntdll, KERNELBASE, ucrtbase...). Reports that touch Parsers/
+# or Test/ code are real findings and must be fixed, not suppressed.

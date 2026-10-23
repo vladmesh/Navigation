@@ -40,7 +40,7 @@ jobs:
         run: |
           set MAKE=nmake
           mkdir build && cd build
-          qmake ..\Ship.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" || exit /b 1
+          qmake ..\Ship.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" "QMAKE_CXXFLAGS+=/MP" || exit /b 1
           %MAKE% || exit /b 1
           dir release\Ship.exe
 
@@ -49,7 +49,7 @@ jobs:
         run: |
           set MAKE=nmake
           mkdir build-tests && cd build-tests
-          qmake ..\Test\unit\unit.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" || exit /b 1
+          qmake ..\Test\unit\unit.pro CONFIG+=release "QMAKE_CXXFLAGS_WARN_ON=/W4" "QMAKE_CXXFLAGS+=/MP" || exit /b 1
           %MAKE% || exit /b 1
 
       - name: Run unit tests

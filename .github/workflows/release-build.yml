@@ -4,9 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version label for the zip (e.g. 1.2.0)"
+        description: "Version label for the zip (e.g. 1.2.0); empty = short sha"
         required: false
         default: ""
+  push:
+    branches: ["release/**"]
+    tags: ["v*"]
 
 jobs:
   windows-release:
@@ -31,22 +34,72 @@ jobs:
         run: |
           set MAKE=nmake
           mkdir build && cd build
-          qmake ..\Ship.pro CONFIG+=release || exit /b 1
+          qmake ..\Ship.pro CONFIG+=release "QMAKE_CXXFLAGS+=/MP" || exit /b 1
           %MAKE% || exit /b 1
 
-      - name: Package with windeployqt
+      - name: Package (windeployqt + app-local MSVC runtime)
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           $ver = "${{ github.event.inputs.version }}"
+          if (-not $ver -and "${{ github.ref_type }}" -eq "tag") { $ver = "${{ github.ref_name }}" -replace '^v', '' }
           if (-not $ver) { $ver = "${{ github.sha }}".Substring(0, 7) }
-          "PKG_NAME=Navigation-$ver-win64" | Out-File -FilePath $env:GITHUB_ENV -Append
+          $name = "Ship-$ver"
+          "PKG_NAME=$name" | Out-File -FilePath $env:GITHUB_ENV -Append
+
           New-Item -ItemType Directory -Force dist | Out-Null
           Copy-Item build\release\Ship.exe dist\
-          windeployqt --release --compiler-runtime dist\Ship.exe
-          Get-ChildItem dist
+          windeployqt --release --no-compiler-runtime dist\Ship.exe
+          if ($LASTEXITCODE -ne 0) { throw "windeployqt failed" }
+
+          # MSVC runtime рядом с exe (app-local), чтобы zip запускался на
+          # чистой Windows без установки vc_redist.
+          $crt = Get-ChildItem "$env:VCToolsRedistDir\x64" -Directory -Filter "Microsoft.VC*.CRT" | Select-Object -First 1
+          if (-not $crt) { throw "MSVC CRT redist dir not found under $env:VCToolsRedistDir\x64" }
+          Write-Host "CRT from $($crt.FullName)"
+          Copy-Item "$($crt.FullName)\*.dll" dist\
+          foreach ($need in 'msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll','concrt140.dll') {
+            if (-not (Test-Path "dist\$need")) { throw "runtime DLL $need missing in package" }
+          }
+
+          Get-ChildItem dist -Recurse -Include *.pdb,*.obj,*.ilk,*.lib,*.exp,vc_redist*.exe | Remove-Item -Force
+
+          # Каждая зависимость Qt/MSVC-runtime у exe/dll должна лежать в пакете.
+          $missing = @()
+          Get-ChildItem dist -Recurse -Include *.exe,*.dll | ForEach-Object {
+            $deps = dumpbin /nologo /dependents $_.FullName | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '\.dll$' }
+            foreach ($d in $deps) {
+              if ($d -match '^(Qt6|msvcp|vcruntime|concrt)' -and -not (Test-Path "dist\$d")) { $missing += "$($_.Name) -> $d" }
+            }
+          }
+          if ($missing) { $missing | ForEach-Object { Write-Host "::error::missing dependency $_" }; throw "package is not self-contained" }
+
+          Compress-Archive -Path dist\* -DestinationPath "$name.zip"
+          Get-ChildItem dist -Recurse | Select-Object -ExpandProperty FullName
+
+      - name: Smoke start from clean folder (no Qt on PATH)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dir = Join-Path $env:RUNNER_TEMP "ship-smoke"
+          Expand-Archive "$env:PKG_NAME.zip" -DestinationPath $dir -Force
+          # Убираем всё, что могло бы подсунуть Qt/DLL не из пакета.
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -and $_ -notmatch '(?i)qt' }) -join ';'
+          foreach ($v in 'QT_PLUGIN_PATH','QML2_IMPORT_PATH','QT_ROOT_DIR','Qt6_DIR','QT_QPA_PLATFORM','QT_QPA_PLATFORM_PLUGIN_PATH') {
+            Remove-Item "Env:$v" -ErrorAction SilentlyContinue
+          }
+          if (Get-Command Qt6Core.dll -ErrorAction SilentlyContinue) { throw "Qt still reachable via PATH" }
+          $p = Start-Process -FilePath (Join-Path $dir "Ship.exe") -WorkingDirectory $dir -PassThru
+          Start-Sleep -Seconds 15
+          if ($p.HasExited) {
+            throw ("Ship.exe exited within 15 s, exit code 0x{0:X8}" -f $p.ExitCode)
+          }
+          Write-Host "Ship.exe alive after 15 s (pid $($p.Id)), stopping"
+          Stop-Process -Id $p.Id -Force
 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PKG_NAME }}
-          path: dist/
+          path: ${{ env.PKG_NAME }}.zip
           if-no-files-found: error
+          retention-days: 90
