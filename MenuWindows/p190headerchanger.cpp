@@ -92,8 +92,6 @@ void P190HeaderChanger::insertLine(QString line)
 
 
 void P190HeaderChanger::loadFile(const QString &fileName) {
-
-
     if (headerProcessor.loadFile(fileName).isEmpty()) {
         QMessageBox::warning(this, "Error", "Cannot open file for reading.\nReload programm");
     } else {

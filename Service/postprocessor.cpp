@@ -20,6 +20,16 @@ int PostProcessor::mainProcess()
     Coordinator coordinator;
     coordinator.Vault = MyVault;
 
+    //повторный запуск после ошибки не должен дописывать пары к старым
+    pairs.clear();
+    for (const auto &itemFile : pairItemFile) {
+        const QString name = itemFile.first.toLower();
+        if (!name.endsWith(".ppk") && !name.endsWith(".nmea")) {
+            qWarning() << "unsupported navigation file" << itemFile.first;
+            return WrongNavFile;
+        }
+    }
+
     if (!ffidTimeSourceDir.isEmpty()) { //получение ffid-время из segy или .txt
         getDataFromSegy();
     } else if (!ffidTimeSourceTxtFile.isEmpty()) {

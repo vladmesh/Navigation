@@ -201,7 +201,6 @@ void PostProcessorView::createConnectionButtons() {
 
 
         connect(nmeaPpkButton, &QPushButton::clicked, this, [this, nmeaPpkLineEdit]() {
-            // QString navFilesPath = QDir("C:/Users/sabrahar/Desktop/FINAL/PPK GNSS data/test").absolutePath(); ///TODO: потом заменить на норм место
             QString navFilesPath =  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
             QString fileName = QFileDialog::getOpenFileName(this, "NMEA or PPK file", navFilesPath, "*.nmea *.ppk");
             if (!fileName.isEmpty()) {

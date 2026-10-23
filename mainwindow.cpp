@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent)
     objObserver = new ObjectObserver(Vault);
     objObserver->setTableWithItems(tableWithItems);
 
-
+    //set analyzer which analyze the vault;
     P190HeaderAnalyzer.setVault(Vault);
     packageSender->setMyVault(Vault);
 }
