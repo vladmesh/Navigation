@@ -24,6 +24,7 @@ SOURCES += \
     $$NAV_ROOT/Connections/sender.cpp \
     $$NAV_ROOT/DataVault/itemsloader.cpp \
     $$NAV_ROOT/DataVault/itemsstorage.cpp \
+    $$NAV_ROOT/Drawing/gridmath.cpp \
     $$NAV_ROOT/Drawing/uberpainter.cpp \
     $$NAV_ROOT/Fabric/buoydialog.cpp \
     $$NAV_ROOT/Fabric/fabric.cpp \
@@ -60,6 +61,7 @@ HEADERS += \
     $$NAV_ROOT/DataVault/itemsstorage.h \
     $$NAV_ROOT/DataVault/structures.h \
     $$NAV_ROOT/Drawing/hoverpaintingrpoint.h \
+    $$NAV_ROOT/Drawing/gridmath.h \
     $$NAV_ROOT/Drawing/uberpainter.h \
     $$NAV_ROOT/Fabric/buoydialog.h \
     $$NAV_ROOT/Fabric/fabric.h \
