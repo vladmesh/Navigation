@@ -135,7 +135,6 @@ private:
     static QDir path; ///< Путь для сохранения файлов.
     QString fileName; ///< Имя выходного файла.
     QFile* outputFile = nullptr; ///< Указатель на файл вывода.
-    QTextStream* outputStream = nullptr; ///< Поток записи в файл.
     ItemsStorage* MyVault = nullptr; ///< Указатель на хранилище объектов.
 
     QChar tailBuoy; //ну и костыль. руки бы оторвать разрабу

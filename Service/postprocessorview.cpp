@@ -244,9 +244,29 @@ void PostProcessorView::onRunButtonClicked() {
     progressBar->setValue(1);
     progressBar->setVisible(true);
     sendValuesToPostProc();
-    postProc.mainProcess();
+    const int result = postProc.mainProcess();
     progressBar->setValue(0);
     postProc.percentageP190Creation = 0;
+    if (result != PostProcessor::Ok) {
+        progressBar->setVisible(false);
+        QString text;
+        switch (result) {
+        case PostProcessor::WrongNavFile:
+            text = "Wrong file: navigation data must be .nmea or .ppk";
+            break;
+        case PostProcessor::NoFfidSource:
+            text = "No FFID source: choose a SEG-Y directory or a TXT file";
+            break;
+        case PostProcessor::NotEnoughFfid:
+            text = "FFID source has fewer than two records or cannot be read";
+            break;
+        default:
+            text = QString("Postprocessing failed, code %1").arg(result);
+            break;
+        }
+        QMessageBox::warning(this, "Warning", text);
+        return;
+    }
     hide();
 }
 

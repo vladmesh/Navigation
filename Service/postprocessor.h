@@ -26,15 +26,26 @@
 class PostProcessor
 {
 public:
+    /// Коды возврата mainProcess().
+    enum Result {
+        Ok = 0,
+        WrongNavFile = 1,   ///< файл навигации не .nmea и не .ppk
+        NoFfidSource = 2,   ///< не задан ни каталог SEG-Y, ни txt с FFID
+        NotEnoughFfid = 3,  ///< в источнике FFID меньше двух записей
+    };
+
     /**
      * @brief Конструктор. Инициализирует объект.
      */
     PostProcessor();
+    ~PostProcessor();
+    PostProcessor(const PostProcessor&) = delete;
+    PostProcessor& operator=(const PostProcessor&) = delete;
     /**
      * @brief Основной процесс обработки данных.
      *
      * Включает чтение данных, расчет координат и создание файлов P190.
-     * @return Код результата выполнения.
+     * @return Код результата выполнения, см. PostProcessor::Result.
      */
     int mainProcess();
 

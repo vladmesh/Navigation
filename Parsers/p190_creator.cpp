@@ -11,8 +11,10 @@ P190_creator::P190_creator(QObject *parent)
 
 P190_creator::~P190_creator()
 {
-    outputFile->close();
-    outputStream->flush();
+    if (outputFile) {
+        outputFile->close();
+        delete outputFile;
+    }
 }
 
 QStringList P190_creator::createShotBlock()
@@ -70,6 +72,7 @@ void P190_creator::createP190File() {
     }
     QDir dir = path; //setted in MainWindow
     fileName = createFileName();
+    delete outputFile;
     outputFile = new QFile(dir.absolutePath() + "/" + fileName);
     outputFile->open(QIODevice::Append);
     QStringList list = createHeader();

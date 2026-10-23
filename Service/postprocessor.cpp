@@ -1,7 +1,14 @@
- #include "postprocessor.h"
+#include "postprocessor.h"
+
+#include <memory>
+#include <vector>
 
 PostProcessor::PostProcessor() {
     p190Creator = new P190_creator();
+}
+
+PostProcessor::~PostProcessor() {
+    delete p190Creator;
 }
 
 int PostProcessor::mainProcess()
@@ -19,17 +26,21 @@ int PostProcessor::mainProcess()
         pairs = readFileAndGeneratePairs(ffidTimeSourceTxtFile);
     } else {
         qWarning() << "no ffid source";
-        delete this; //по сути суицид если что-то не нравится
+        return NoFfidSource;
+    }
+    if (pairs.size() < 2) {
+        qWarning() << "not enough FFID records:" << pairs.size();
+        return NotEnoughFfid;
     }
 
     prepareSegyData(pairs); //добавление точек для расчета, но которые в P190 писаться не будут
 
     QVector<int> positions(pairItemFile.size(), 0);
-    QVector<QFile*> files(0, nullptr);
+    std::vector<std::unique_ptr<QFile>> files;
+    files.reserve(pairItemFile.size());
 
     for (int i = 0; i < pairItemFile.size(); i++) {
-        QFile* file = new QFile(pairItemFile[i].first);
-        files.append(file);
+        files.push_back(std::make_unique<QFile>(pairItemFile[i].first));
     }
 
     int currentSuccsess = 0; //for progress bar
@@ -38,13 +49,12 @@ int PostProcessor::mainProcess()
         for (int i = 0; i < pairItemFile.size(); i++) {
             QStringList parts;
             if (files[i]->fileName().toLower().endsWith(".ppk")) {
-               parts = findPpkForSegy(pair, files[i], &positions[i]);
+               parts = findPpkForSegy(pair, files[i].get(), &positions[i]);
             } else if (files[i]->fileName().toLower().endsWith(".nmea")) {
-               parts = findNmeaForSegy(pair, files[i], &positions[i]);
+               parts = findNmeaForSegy(pair, files[i].get(), &positions[i]);
             } else {
-                QMessageBox msgBox;
-                msgBox.warning(nullptr, "Warning","Wrong file");
-                return 1;
+                qWarning() << "unsupported navigation file" << files[i]->fileName();
+                return WrongNavFile;
             }
 
             NmeaParser::CoordinateData first;
@@ -57,9 +67,8 @@ int PostProcessor::mainProcess()
                 first = nmeaParser.parseNmeaGGA(parts[0]);
                 second = nmeaParser.parseNmeaGGA(parts[1]);
             } else {
-                QMessageBox msgBox;
-                msgBox.warning(nullptr, "Warning","Wrong file");
-                return 1;
+                qWarning() << "unsupported navigation file" << files[i]->fileName();
+                return WrongNavFile;
             }
             NmeaParser::CoordinateData trueCoor = calcTruePosition(first, second, pair.time, first.dateTime.time(), second.dateTime.time());
 
@@ -79,7 +88,7 @@ int PostProcessor::mainProcess()
         }
     }
     p190Creator->setHeaderIsWritten(false);
-    return 0;
+    return Ok;
 }
 
 

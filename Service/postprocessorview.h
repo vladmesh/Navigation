@@ -11,6 +11,7 @@
 #include <QHBoxLayout>
 #include <QProgressBar>
 #include <QLabel>
+#include <QMessageBox>
 
 #include "postprocessor.h"
 /**
