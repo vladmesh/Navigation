@@ -133,7 +133,12 @@ void PostProcessorView::chooseScheme() { //выбор съемы и парсин
         }
         postProc.items.clear();
 
-        postProc.items = ItemsLoader::readFromJSON(postProc.jsonSchemeFile);
+        QStringList loadErrors;
+        postProc.items = ItemsLoader::readFromJSON(postProc.jsonSchemeFile, &loadErrors);
+        if (!loadErrors.isEmpty()) {
+            QMessageBox::warning(this, "Broken layout",
+                                 "Some objects of the layout were not loaded:\n" + loadErrors.join("\n"));
+        }
         postProc.MyVault = new ItemsStorage(); //не особо нужно
 
         //заполняем поля postproc (не помню зачем, но хуже не будет)

@@ -470,7 +470,12 @@ void MainWindow::loadLayout(QFile* jsonFile)
     destroyAllTheObjects();
 
     ItemsLoader::dirpath = pathForAllFiles;
-    QVector<QPointer<FixedItem>> items = ItemsLoader::readFromJSON(jsonFile);
+    QStringList loadErrors;
+    QVector<QPointer<FixedItem>> items = ItemsLoader::readFromJSON(jsonFile, &loadErrors);
+    if (!loadErrors.isEmpty()) {
+        QMessageBox::warning(this, "Broken layout",
+                             "Some objects of the layout were not loaded:\n" + loadErrors.join("\n"));
+    }
     Vault->deleteAllItems();
     for (QPointer<FixedItem> p:items) {
         addItemToObjectsList(p); //в таблицу

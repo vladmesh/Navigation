@@ -45,7 +45,7 @@ public:
      * @param file Указатель на объект файла JSON.
      * @return Вектор указателей на загруженные объекты `FixedItem`.
      */
-    static QVector<QPointer<FixedItem>> readFromJSON(QFile* file);
+    static QVector<QPointer<FixedItem>> readFromJSON(QFile* file, QStringList* errors = nullptr);
 
 
     /**
@@ -90,6 +90,8 @@ public:
     static QDir dirpath;
 
     static ItemsStorage vault;
+    /// Ошибки последнего readFromJSON: пропущенные объекты и соединения.
+    static QStringList loadErrors;
 signals:
          // Определите здесь сигналы, если необходимо
 };
