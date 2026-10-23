@@ -17,6 +17,10 @@ UberPainter::UberPainter(ItemsStorage *storage, QWidget *parent) :
 
 UberPainter::~UberPainter() ///some comments
 {
+    // Сначала отвязать сцену: деструктор сцены удаляет gridGroup и сам зовёт setScene(nullptr),
+    // а пересчёт полос прокрутки дёргает scrollContentsBy → drawGrid с висячим gridGroup.
+    setScene(nullptr);
+    gridGroup = nullptr; // группой по-прежнему владеет сцена
     delete graphicsScene;
 }
 
@@ -29,6 +33,9 @@ void UberPainter::run() //срабатывает по таймеру
 
 void UberPainter::drawGrid()
 {
+    if (graphicsScene == nullptr || scene() != graphicsScene)
+        return; // сцена отвязана (деструктор)
+
     delete gridGroup; // дети (линии и подписи) удаляются вместе с группой
     gridGroup = nullptr;
 
@@ -70,9 +77,20 @@ void UberPainter::drawGrid()
         label->setBrush(QColor(90, 90, 90));
         label->setFlag(QGraphicsItem::ItemIgnoresTransformations);
         label->setPos(anchor);
-        const qreal h = label->boundingRect().height();
+        const QRectF box = label->boundingRect();
         // X: справа от линии над нижним краем; Y: над линией правее левого края.
-        label->setTransform(QTransform::fromTranslate(marginPx, alongBottom ? -h - marginPx : -h));
+        const QPointF offset(marginPx, alongBottom ? -box.height() - marginPx : -box.height());
+        label->setTransform(QTransform::fromTranslate(offset.x(), offset.y()));
+
+        // Обрезанная краем подпись читается как другое число, а Y-подпись у нижнего края
+        // наезжает на ряд X-подписей: такие не показываем (линия остаётся).
+        const QPointF topLeft = QPointF(mapFromScene(anchor)) + offset;
+        const bool clipped = topLeft.x() < 0 || topLeft.y() < 0 || topLeft.x() + box.width() > viewRect.width() ||
+                             topLeft.y() + box.height() > viewRect.height();
+        const bool overXRow =
+            !alongBottom && topLeft.y() + box.height() > viewRect.height() - box.height() - 2 * marginPx;
+        if (clipped || overXRow)
+            delete label;
     };
     for (double x : xs) {
         if (x >= visible.left() && x <= visible.right())
@@ -169,12 +187,7 @@ void UberPainter::mouseMoveEvent(QMouseEvent *event)
             startPoint.y(), mapToScene(event->pos()).x(), mapToScene(event->pos()).y(), QPen(QColor(165, 42, 42))); //mr brown
     }
 
-    QGraphicsView::mouseMoveEvent(event); // ScrollHandDrag тоже сдвигает вид, сетку — после
-
-    if (isPanning && (event->buttons() & Qt::LeftButton)) {
-        QMutexLocker locker(&sceneMutex);
-        drawGrid();
-    }
+    QGraphicsView::mouseMoveEvent(event); // сетку при пане перестраивает scrollContentsBy
 }
 
 void UberPainter::mouseReleaseEvent(QMouseEvent *event)
@@ -214,6 +227,17 @@ void UberPainter::wheelEvent(QWheelEvent *event)
 
     QMutexLocker locker(&sceneMutex);
     drawGrid(); // шаг меняется сразу, без ожидания таймера
+}
+
+void UberPainter::scrollContentsBy(int dx, int dy)
+{
+    QGraphicsView::scrollContentsBy(dx, dy);
+    // Любой сдвиг вида: пан мышью, полосы прокрутки, клавиши. Внутри updateView()
+    // setSceneRect/centerOn могут прокрутить вид синхронно под захваченным sceneMutex —
+    // тогда пропускаем, updateView() рисует сетку сам.
+    std::unique_lock<QMutex> lock(sceneMutex, std::try_to_lock);
+    if (lock.owns_lock())
+        drawGrid();
 }
 
 void UberPainter::resizeEvent(QResizeEvent* event)

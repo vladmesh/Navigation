@@ -138,6 +138,13 @@ private:
      */
     void resizeEvent(QResizeEvent* event) override;
 
+    /**
+     * @brief Перестраивает сетку при любом сдвиге вида (пан, полосы прокрутки, клавиши).
+     * @param dx Сдвиг по X в пикселях.
+     * @param dy Сдвиг по Y в пикселях.
+     */
+    void scrollContentsBy(int dx, int dy) override;
+
     bool isPanning = false; ///< Флаг, указывающий на режим панорамирования.
     QPoint lastMousePos; ///< Последняя позиция мыши.
     QPointF startPoint; ///< Начальная точка для измерения расстояния.
