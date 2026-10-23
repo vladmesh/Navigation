@@ -8,11 +8,11 @@
 | Epic | 01 / 8 — Сетка координат в зоне отрисовки |
 | ADR | docs/adr/0001-coordinate-grid.md |
 | Release branch | release/epic-01 |
-| Stage | all tasks merged into release/epic-01 — release build |
+| Stage | release build green (epic-01-rc1) — docs reconciliation |
 | Current task | — (01, 02 done) |
-| Next role | builder |
-| Hand-off | release/epic-01 (after PR #12 merge); ADR 0001 |
-| Last update | 2026-10-23 23:59, architect-revision |
+| Next role | documentator |
+| Hand-off | release-build run 40017826744, artifact Ship-epic-01-rc1 (sha256 d896720e…2b2dda); docs/sessions/2026-10-23-epic-01-builder.md |
+| Last update | 2026-10-23 22:20, builder |
 
 ## Counters
 
@@ -20,7 +20,7 @@
 |---|---|---|---|
 | ci_runs | 0 | 10 | per task |
 | review_rounds | 0 | 3 | per PR |
-| build_attempts | 0 | 5 | per build cycle |
+| build_attempts | 1 | 5 | per build cycle |
 | colleague_returns | 0 | 2 (3rd → human-epic-owner) | per epic |
 
 ## Tasks
@@ -46,3 +46,4 @@
 - 2026-10-23 coder: task 02 — findings 1–2 исправлены (+ фикс UAF в деструкторе, найден стендом под ASan), 3–4 оставлены architect-revision; PR-CI run 3; next: reviewer (round 2)
 - 2026-10-23 reviewer: task 02 round 2 — GREEN-WITH-NITS (1 minor perf, 2 перенесённых minor, 1 nit по ADR); отчёт docs/sessions/2026-10-23-epic-01-reviewer-task-02-round-2.md
 - 2026-10-23 architect-revision: task 02 принят — итог ci_runs 3 (+1 docs-коммит передачи), review_rounds 2; PR #12 влит merge-коммитом; ADR: Decision §2 и критерий строк уточнены, leftovers записаны; все таски done; счётчики сброшены; next: builder
+- 2026-10-23 builder: release-build (workflow_dispatch, run 40017826744) зелёный с 1-й попытки; артефакт Ship-epic-01-rc1, smoke-старт на раннере OK; отчёт docs/sessions/2026-10-23-epic-01-builder.md; next: documentator
