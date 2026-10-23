@@ -8,17 +8,17 @@
 | Epic | 01 / 8 — Сетка координат в зоне отрисовки |
 | ADR | docs/adr/0001-coordinate-grid.md |
 | Release branch | release/epic-01 |
-| Stage | task 01 done, task 02 — coder |
+| Stage | task 02 — PR open, PR-CI run 1 |
 | Current task | 02 — Адаптивная сетка и подписи в UberPainter |
-| Next role | coder |
-| Hand-off | ADR 0001 Task 02 |
-| Last update | 2026-10-23 22:50, architect-revision |
+| Next role | reviewer |
+| Hand-off | PR #12 (epic-01/task-02-grid-uberpainter → release/epic-01); docs/sessions/2026-10-23-epic-01-coder-task-02.md |
+| Last update | 2026-10-23 23:10, coder |
 
 ## Counters
 
 | Counter | Value | Ceiling | Scope |
 |---|---|---|---|
-| ci_runs | 0 | 10 | per task |
+| ci_runs | 1 | 10 | per task |
 | review_rounds | 0 | 3 | per PR |
 | build_attempts | 0 | 5 | per build cycle |
 | colleague_returns | 0 | 2 (3rd → human-epic-owner) | per epic |
@@ -28,7 +28,7 @@
 | # | Task | Status | Issue | PR |
 |---|---|---|---|---|
 | 01 | Чистая функция расчёта шага сетки (GridMath) + unit-тест | done | #4 | #5 |
-| 02 | Адаптивная сетка и подписи в UberPainter (фикс границ, удаление updateCoordinates) | todo | | |
+| 02 | Адаптивная сетка и подписи в UberPainter (фикс границ, удаление updateCoordinates) | in review | #11 | #12 |
 
 ## Log
 
@@ -40,3 +40,4 @@
 - 2026-10-23 reviewer: task 01 round 2 — GREEN-WITH-NITS (1 minor, 1 nit); PR-CI run 2 зелёный 4/4; отчёт docs/sessions/2026-10-23-epic-01-reviewer-task-01-round-2.md
 - 2026-10-23 coder: task 01 — ниты раунда 2 исправлены, PR-CI run 3; next: architect-revision
 - 2026-10-23 architect-revision: task 01 принят — PR-CI run 3 (8d06b21) зелёный 4/4 (tst_gridmath 27/0 на MSVC и ASan), ревью раунд 2 GREEN-WITH-NITS, ниты исправлены; итог по таску: ci_runs 3 (+1 docs-коммит этой передачи), review_rounds 2; PR #5 влит merge-коммитом; ADR Task 01 → done; счётчики сброшены; next: coder (task 02)
+- 2026-10-23 coder: task 02 — issue #11, PR #12; локально Ship.pro собирается, offscreen-стенд FAILURES 0; PR-CI run 1; next: reviewer
